@@ -99,23 +99,25 @@ bool k_lib_ipAddressIsReachable(const char *address, int port)
 
 //struct to pass arguments from thread to function
 struct k_lib_reachability_params{
-	char *address;
+	const char *address;
 	int port;
 	int seconds_to_sleep;
-	int (*callback)(bool isReachable);
+	int (*callback)(bool isReachable, void *user_data);
+	void *user_data;
 };
 
 void *k_lib_checkAddressIsReachable(void *param) 
 {
 	struct k_lib_reachability_params *reachability_params = param;
 
-	char *address = reachability_params -> address; 
+	const char *address = reachability_params -> address; 
 	int port = reachability_params -> port;
+	void *user_data = reachability_params->user_data;
 	int seconds_to_sleep = reachability_params -> seconds_to_sleep; 
-	int (*callback)(bool isReachable) = reachability_params -> callback;
+	int (*callback)(bool isReachable, void *user_data) = reachability_params -> callback;
 	
 	while (1) {
-		if (callback(k_lib_ipAddressIsReachable(address, port))) {
+		if (callback(k_lib_ipAddressIsReachable(address, port), user_data)) {
 			//stop function if callback returned not zero
 			perror("Reachability function stoped as callback returned non zero");
 			break;
@@ -129,7 +131,7 @@ void *k_lib_checkAddressIsReachable(void *param)
 }
 
 
-void k_lib_reachability(const char *address, int port, int seconds_to_sleep, int (*callback)(bool isReachable)){
+void k_lib_reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(bool isReachable, void *user_data)){
 	int err;
 
 	pthread_t tid; //идентификатор потока
@@ -148,6 +150,7 @@ void k_lib_reachability(const char *address, int port, int seconds_to_sleep, int
 	reachability_params.port = port;
 	reachability_params.seconds_to_sleep = seconds_to_sleep;
 	reachability_params.callback = callback;
+	reachability_params.user_data = user_data;
 
 	//создаем новый поток
 	err = pthread_create(&tid, &attr, k_lib_checkAddressIsReachable, &reachability_params);

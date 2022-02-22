@@ -23,7 +23,7 @@ extern bool k_lib_ipAddressIsReachable(const char *address, int port);
 //function starts in additional THREAD, checks reachability of adress and port every seconds_to_sleep
 //seconds and executes callback function
 //to stop reachability function and close THREAD - retun no zero in callback
-extern void k_lib_reachability(const char *address, int port, int seconds_to_sleep, int (*callback)(bool isReachable));
+extern void k_lib_reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(bool isReachable, void *user_data));
 
 #ifdef __cplusplus
 }
