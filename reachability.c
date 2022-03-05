@@ -2,7 +2,7 @@
  * File              : reachability.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 15.09.2021
- * Last Modified Date: 22.02.2022
+ * Last Modified Date: 23.02.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "reachability.h"
@@ -126,6 +126,7 @@ void *k_lib_checkAddressIsReachable(void *param)
 	}
 
 	free(reachability_params);
+	reachability_params=NULL;
 
 	pthread_exit(0);
 }

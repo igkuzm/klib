@@ -2,7 +2,7 @@
  * File              : alloc.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 22.02.2022
+ * Last Modified Date: 23.02.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,6 +13,8 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+#include <stdlib.h>
 
 // memory allocation helpers
 #define ALLOC(size)	\
