@@ -2,12 +2,11 @@
  * File              : cp.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 22.02.2022
+ * Last Modified Date: 06.03.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef k_lib_cp_h__
 #define k_lib_cp_h__
-#endif
 
 #ifdef __cplusplus
 extern "C"{
@@ -28,3 +27,4 @@ int k_lib_cp(const char *from, const char *to);
 }
 #endif
 
+#endif //k_lib_cp_h__
