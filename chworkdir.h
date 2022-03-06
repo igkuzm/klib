@@ -17,9 +17,9 @@ extern "C"{
 
 int k_lib_chWorkDir(char *argv[]);
 
-#define cp(from, to)	\
+#define changeWorkDir(argv)	\
 ({	\
-	int ___c = changeWorkDir(argv);\
+	int ___c = k_lib_chWorkDir(argv);\
 	___c;	\
 })
 
