@@ -2,13 +2,12 @@
  * File              : ls.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 22.02.2022
+ * Last Modified Date: 07.03.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
 #ifndef k_lib_ls_h__
 #define k_lib_ls_h__
-#endif
 
 #ifdef __cplusplus
 extern "C"{
@@ -32,12 +31,16 @@ typedef struct k_lib_file_t {
 //run callback for every file in dir. to stop execution - return non zero from callback
 int k_lib_ls(const char *dir, void *user_data, int (*callback)(KLibFile *file, void *user_data));
 
+#ifndef ls
 #define ls(dir, user_data, callback)	\
 ({	\
 	int ___c = k_lib_ls(dir, user_data, callback);\
 	___c;	\
 })
+#endif
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif //k_lib_ls_h__

@@ -1,13 +1,14 @@
 /**
- * File              : chworkdir.h
+ * File              : translit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
- * Date              : 21.02.2022
+ * Date              : 07.03.2022
  * Last Modified Date: 07.03.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef k_lib_chworkdir_h__
-#define k_lib_chworkdir_h__
+
+#ifndef k_lib_translit_h__
+#define k_lib_translit_h__
 
 #ifdef __cplusplus
 extern "C"{
@@ -15,18 +16,19 @@ extern "C"{
 
 #include <stdio.h>
 
-int k_lib_chWorkDir(char *argv[]);
+char* k_lib_translit(const char* string);
 
-#ifndef changeWorkDir 
-#define changeWorkDir(argv)	\
+#ifndef translit
+#define translit(string)	\
 ({	\
-	int ___c = k_lib_chWorkDir(argv);\
+	char* ___c = k_lib_translit(string);\
 	___c;	\
 })
 #endif
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //k_lib_chworkdir_h__
+#endif //k_lib_translit_h__
