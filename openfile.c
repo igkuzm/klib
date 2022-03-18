@@ -16,9 +16,13 @@ int k_lib_openfile(const char *filename){
 	char open_file_command[BUFSIZ];
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
-	#if TARGET_OS_MAC
+	#if TARGET_IPHONE_SIMULATOR
+	#elif TARGET_OS_MACCATALYST
+	#elif TARGET_OS_IPHONE
+	#elif TARGET_OS_MAC
 		sprintf(open_file_command, "open %s", filename);	
 		system(open_file_command);
+	#else
 	#endif
 #elif defined _WIN32 || defined _WIN64
 	ShellExecute(NULL, "open", filename, NULL, NULL, SW_SHOWDEFAULT);
