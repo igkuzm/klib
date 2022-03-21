@@ -2,7 +2,7 @@
  * File              : alloc.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 20.03.2022
+ * Last Modified Date: 21.03.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -16,25 +16,30 @@ extern "C"{
 #include <stdlib.h>
 
 // memory allocation helpers
+#define ALLOC_SIZE(ptr) ((size_t*)ptr)[-1]
+
 #define ALLOC(size)	\
 ({	\
-	void* const ___p = malloc(size);	\
-	if(!___p) {perror("Malloc"); exit(EXIT_FAILURE);}	\
-	___p;	\
+	size_t* ret = malloc(sizeof(size_t) + size); \
+	if(!ret) {perror("Malloc"); exit(EXIT_FAILURE);} \
+	*ret = size; \
+	void* const ___p = &ret[1]; \
+	___p;\
 })
 
 #define REALLOC(ptr, size)	\
 ({	\
-	void* const ___s = (ptr);	\
-	void* const ___p = realloc(___s, (size));	\
-	if(!___p) { perror("Realloc"); exit(EXIT_FAILURE); }	\
-	___p;	\
+	size_t* ret = realloc((size_t *)ptr -1, sizeof(size_t) + size);	\
+	if(!ret) { perror("Realloc"); exit(EXIT_FAILURE); }	\
+	*ret = size; \
+	void* const ___p = &ret[1]; \
+	___p;\
 })
 
 #define FREE(ptr) \
 ({\
 	if (ptr)\
-		free(ptr);\
+		free((size_t *)ptr -1);\
 	ptr = NULL;\
 })
 
