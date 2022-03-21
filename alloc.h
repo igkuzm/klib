@@ -20,7 +20,7 @@ extern "C"{
 
 #define ALLOC(size)	\
 ({	\
-	size_t* ret = malloc(sizeof(size_t) + size); \
+	size_t* const ret = malloc(sizeof(size_t) + size); \
 	if(!ret) {perror("Malloc"); exit(EXIT_FAILURE);} \
 	*ret = size; \
 	void* const ___p = &ret[1]; \
@@ -29,7 +29,7 @@ extern "C"{
 
 #define REALLOC(ptr, size)	\
 ({	\
-	size_t* ret = realloc((size_t *)ptr -1, sizeof(size_t) + size);	\
+	size_t* const ret = realloc((size_t *)ptr -1, sizeof(size_t) + size);	\
 	if(!ret) { perror("Realloc"); exit(EXIT_FAILURE); }	\
 	*ret = size; \
 	void* const ___p = &ret[1]; \
@@ -44,7 +44,6 @@ extern "C"{
 })
 
 #define NEW(T) ((T*)ALLOC(sizeof(T)))
-
 
 #ifdef __cplusplus
 }
