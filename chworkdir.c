@@ -2,7 +2,7 @@
  * File              : chworkdir.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 05.03.2022
+ * Last Modified Date: 22.03.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -15,6 +15,7 @@
 #ifdef __APPLE__
 #elif defined _WIN32 || defined _WIN64
 #include <Windows.h>
+#elif __ANDROID__
 #else
 #include <dirent.h>
 #include <sys/types.h>
@@ -26,6 +27,7 @@
 
 #ifdef __APPLE__
 #elif defined _WIN32 || defined _WIN64
+#elif __ANDROID__
 #else
 int cp(const char *from, const char *to)
 {
@@ -123,6 +125,7 @@ int copy_recursive(const char *source, const char *destination, int depth){
 
 #endif
 
+#ifndef __ANDROID__
 int k_lib_chWorkDir(char *argv[]){
 	char *executable=dirname((char *)argv[0]);
 	char workDir[BUFSIZ];
@@ -130,6 +133,7 @@ int k_lib_chWorkDir(char *argv[]){
 		sprintf(workDir, "%s%s", executable, "/../Resources"); //workdir for Apple is BUNDLE/../Resources
 #elif defined _WIN32 || defined _WIN64
 		sprintf(workDir, "%s", executable); //workdir for Windows is executable dir
+#elif __ANDROID__
 #else
 		//for Unix systems
 		//find homedir and create new dir
@@ -166,4 +170,5 @@ int k_lib_chWorkDir(char *argv[]){
 	printf("Workdir changed to:%s\n", workDir);
 	return 0;
 }
+#endif
 
