@@ -34,7 +34,7 @@ extern "C"{
 #define FREE(ptr) \
 ({\
 	if (ptr)\
-		free((ptr);\
+		free(ptr);\
 	ptr = NULL;\
 })
 

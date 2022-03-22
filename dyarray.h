@@ -1,5 +1,5 @@
 /**
- * File              : alloc.h
+ * File              : dyarray.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
  * Last Modified Date: 23.03.2022
@@ -23,10 +23,10 @@ extern "C"{
 
 #define DYARRAY_ALLOC(size)	\
 ({	\
-	size_t* const ret = malloc(sizeof(size_t) + size); \
-	if(!ret) {perror("Malloc"); exit(EXIT_FAILURE);} \
-	*ret = size; \
-	void* const ___p = &ret[1]; \
+	size_t* const ___ret = malloc(sizeof(size_t) + size); \
+	if(!___ret) {perror("Malloc"); exit(EXIT_FAILURE);} \
+	*___ret = size; \
+	void* const ___p = &___ret[1]; \
 	___p;\
 })
 
@@ -40,16 +40,16 @@ extern "C"{
 
 #define DYARRAY_REALLOC(array, size)	\
 ({	\
-	size_t* const ret = realloc(DYARRAY_POINTER(array), sizeof(size_t) + size);	\
-	if(!ret) { perror("Realloc"); exit(EXIT_FAILURE); }	\
-	*ret = size; \
-	void* const ___p = &ret[1]; \
+	size_t* const ___ret = realloc(DYARRAY_POINTER(array), sizeof(size_t) + size);	\
+	if(!___ret) { perror("Realloc"); exit(EXIT_FAILURE); }	\
+	*___ret = size; \
+	void* const ___p = &___ret[1]; \
 	___p;\
 })
 
 #define DYARRAY_RESIZE(type, array, count) DYARRAY_REALLOC(array, DYARRAY_ALLOCATED_SIZE(array) + sizeof(type) * count);
 
-#define DYARRAY_INCREASE(type, ptr) RESIZE_ARRAY(type, ptr, 1);
+#define DYARRAY_INCREASE(type, array) RESIZE_ARRAY(type, array, 1);
 
 #define DYARRAY_APPEND(array, type, item) \
 ({ \
