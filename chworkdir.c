@@ -125,8 +125,8 @@ int copy_recursive(const char *source, const char *destination, int depth){
 
 #endif
 
-#ifndef __ANDROID__
 int k_lib_chWorkDir(char *argv[]){
+#ifndef __ANDROID__
 	char *executable=dirname((char *)argv[0]);
 	char workDir[BUFSIZ];
 #ifdef __APPLE__
@@ -168,7 +168,7 @@ int k_lib_chWorkDir(char *argv[]){
 #endif
 	chdir(workDir); //change workdir
 	printf("Workdir changed to:%s\n", workDir);
+#endif
 	return 0;
 }
-#endif
 
