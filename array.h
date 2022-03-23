@@ -21,8 +21,8 @@ extern "C"{
 //char* word = "hello";
 //for (int i = 0, i < strlen(word), i++)
 //    array = ARRAY_APPEND(array, char, word[i]);
-//array = ARRAY_APPEND(array, char, '');
-//array = ARRAY_APPEND_ITEMS(array, char, 'w', 'o', 'r', 'l', 'd', '!');
+//ARRAY_APPEND(array, char, '');
+//ARRAY_APPEND_ITEMS(array, char, 'w', 'o', 'r', 'l', 'd', '!');
 //for EACH_IN_ARRAY(char, c, array)
 //    printf("%c\n", c);
 

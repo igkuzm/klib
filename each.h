@@ -1,13 +1,13 @@
 /**
- * File              : macros.h
+ * File              : each.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.03.2022
- * Last Modified Date: 21.03.2022
+ * Last Modified Date: 23.03.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef k_lib_macros_h__
-#define k_lib_macros_h__
+#ifndef k_lib_each_h__
+#define k_lib_each_h__
 
 #ifdef __cplusplus
 extern "C"{
@@ -29,6 +29,6 @@ extern "C"{
 }
 #endif
 
-#endif //k_lib_macros_h__
+#endif //k_lib_each_h__
 
 

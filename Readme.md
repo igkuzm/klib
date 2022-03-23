@@ -9,4 +9,6 @@
 6. openfile - open file for Windows/MacOS/Linux
 7. reachability - check reachability of ip address
 8. translit - convert KYRILIC utf8 string to transliteral LATIN ANSI string
-9. dyarray - dynamic array support
+9. array - dynamic array support
+10. list - list support
+11. each - for each(){} macros
