@@ -18,8 +18,8 @@ extern "C"{
 //Dynamyc array
 //to use: 
 //int* array = DYARRAY_NEW(int);
-//DYARRAY_APPEND(array, int, 10)
-//DYARRAY_APPEND(array, int, 12)
+//array = DYARRAY_APPEND(array, int, 10)
+//array = DYARRAY_APPEND(array, int, 12)
 
 #define DYARRAY_ALLOC(size)	\
 ({	\
@@ -36,7 +36,7 @@ extern "C"{
 
 #define DYARRAY_ALLOCATED_SIZE(array) ((size_t*)array)[-1]
 
-#define DYARRAY_SIZE(array, type) DYARRAY_ALLOCATED_SIZE(array)/sizeof(type)
+#define DYARRAY_SIZE(array, type) ({DYARRAY_ALLOCATED_SIZE(array)/sizeof(type) - 1;})
 
 #define DYARRAY_REALLOC(array, size)	\
 ({	\
@@ -47,14 +47,14 @@ extern "C"{
 	___p;\
 })
 
-#define DYARRAY_RESIZE(type, array, count) DYARRAY_REALLOC(array, DYARRAY_ALLOCATED_SIZE(array) + sizeof(type) * count);
+#define DYARRAY_RESIZE(type, array, count) DYARRAY_REALLOC(array, DYARRAY_ALLOCATED_SIZE(array) + sizeof(type) * count)
 
-#define DYARRAY_INCREASE(type, array) RESIZE_ARRAY(type, array, 1);
+#define DYARRAY_INCREASE(type, array) DYARRAY_RESIZE(type, array, 1)
 
 #define DYARRAY_APPEND(array, type, item) \
 ({ \
-	array[DYARRAY_SIZE(array, type) - 1] = item; \
-	DYARRAY_INCREASE(type, array) \
+	array[DYARRAY_SIZE(array, type)] = item; \
+	DYARRAY_INCREASE(type, array); \
 })
 
 #define DYARRAY_FREE(array) \
