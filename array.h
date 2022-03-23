@@ -52,7 +52,7 @@ extern "C"{
 	___p;\
 })
 
-#define ARRAY_APPEND(array, type, item) \
+#define ARRAY_APPEND_ITEM(array, type, item) \
 ({ \
 	size_t ___size = ARRAY_SIZE(array, type); \
 	size_t ___new_size = ARRAY_ALLOCATED_SIZE(array) + sizeof(type); \
@@ -60,7 +60,7 @@ extern "C"{
 	array = ARRAY_REALLOC(array, ___new_size); \
 })
 
-#define ARRAY_APPEND_ITEMS(array, type, ...) \
+#define ARRAY_APPEND(array, type, ...) \
 ({ \
 	int ___count = sizeof((int[]){__VA_ARGS__})/sizeof(int); \
 	size_t ___size = ARRAY_SIZE(array, type); \
@@ -68,8 +68,8 @@ extern "C"{
 	array = ARRAY_REALLOC(array, ___new_size); \
 	int ___i; \
 	for (___i = 0; ___i < ___count; ++___i) { \
-		type item = (type[]){__VA_ARGS__}[___i]; \
-		array[___size + ___i] = item; \
+		type const ___item = (type[]){__VA_ARGS__}[___i]; \
+		array[___size + ___i] = ___item; \
 	} \
 	array; \
 })
@@ -81,9 +81,9 @@ extern "C"{
 
 #define ARRAY_FREE(array) \
 ({\
-	if (ptr)\
+	if (array)\
 		free(ARRAY_POINTER(array));\
-	ptr = NULL;\
+	array = NULL;\
 })
 
 #ifdef __cplusplus
