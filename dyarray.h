@@ -54,7 +54,7 @@ extern "C"{
 #define DYARRAY_APPEND(array, type, item) \
 ({ \
 	array[DYARRAY_SIZE(array, type) - 1] = item; \
-	INCREASE(type, array) \
+	DYARRAY_INCREASE(type, array) \
 })
 
 #define DYARRAY_FREE(array) \
