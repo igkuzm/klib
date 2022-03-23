@@ -2,7 +2,7 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 23.03.2022
+ * Last Modified Date: 24.03.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -84,6 +84,19 @@ extern "C"{
 	if (array)\
 		free(ARRAY_POINTER(array));\
 	array = NULL;\
+})
+
+#define ARRAY_TO_C_ARRAY(array, type, carrayptr) \
+({ \
+	size_t ___size = ARRAY_SIZE(array, type); \
+	type* ___ret = malloc(sizeof(type) * ___size); \
+	if(!___ret) {perror("Malloc"); exit(EXIT_FAILURE);} \
+	*carrayptr = ___ret; \
+	int ___i; \
+	for (___i = 0; ___i < ___size; ++___i)\
+		___ret[___i] = array[___i]; \
+	ARRAY_FREE(array); \
+	(int)___size; \
 })
 
 #ifdef __cplusplus
