@@ -8,9 +8,10 @@
 
 #include "rgb2hsv.h"
 
-hsv rgb2hsv(rgb in)
+
+struct hsv rgb2hsv(struct rgb in)
 {
-    hsv         out;
+    struct hsv  out;
     double      min, max, delta;
 
     min = in.r < in.g ? in.r : in.g;
@@ -53,11 +54,11 @@ hsv rgb2hsv(rgb in)
 }
 
 
-rgb hsv2rgb(hsv in)
+struct rgb hsv2rgb(struct hsv in)
 {
     double      hh, p, q, t, ff;
     long        i;
-    rgb         out;
+    struct rgb  out;
 
     if(in.s <= 0.0) {       // < is bogus, just shuts up warnings
         out.r = in.v;

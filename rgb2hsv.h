@@ -15,20 +15,20 @@ extern "C"{
 #include <stdio.h>
 #include <math.h>
 
-typedef struct {
+struct rgb {
     double r;       // a fraction between 0 and 1
     double g;       // a fraction between 0 and 1
     double b;       // a fraction between 0 and 1
-} rgb;
+};
 
-typedef struct {
+struct hsv {
     double h;       // angle in degrees
     double s;       // a fraction between 0 and 1
     double v;       // a fraction between 0 and 1
-} hsv;
+};
 
-static hsv   rgb2hsv(rgb in);
-static rgb   hsv2rgb(hsv in);
+static struct hsv   rgb2hsv(struct rgb in);
+static struct rgb   hsv2rgb(struct hsv in);
 
 #ifdef __cplusplus
 }
