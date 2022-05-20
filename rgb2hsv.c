@@ -50,6 +50,8 @@ struct hsv rgb2hsv(struct rgb in)
     if( out.h < 0.0 )
         out.h += 360.0;
 
+	out.a = in.a;
+
     return out;
 }
 
@@ -109,5 +111,8 @@ struct rgb hsv2rgb(struct hsv in)
         out.b = q;
         break;
     }
-    return out;     
+	
+	out.a = in.a;
+    
+	return out;     
 }
