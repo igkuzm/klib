@@ -2,23 +2,10 @@
  * File              : rgb2hsv.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.05.2022
- * Last Modified Date: 20.05.2022
+ * Last Modified Date: 24.05.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
-/**
 
-OUTLINE
- * Date              : 20.05.2022
- * Last Modified Date: 20.05.2022
- * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
- */
-/**
-
-OUTLINE
- * Date              : 20.05.2022
- * Last Modified Date: 20.05.2022
- * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
- */
 #ifndef k_lib_rgb2hsv_h__
 #define k_lib_rgb2hsv_h__
 
@@ -27,6 +14,7 @@ extern "C"{
 #endif
 
 #include <stdio.h>
+#include <stdint.h>
 
 struct rgb
 {
@@ -44,9 +32,40 @@ struct hsv
     unsigned char a;
 };
 
-
+static struct rgb   pixel2rgb(uint32_t *pixel);
+static uint32_t     rgb2pixel(struct rgb rgb);
 static struct hsv   rgb2hsv(struct rgb in);
 static struct rgb   hsv2rgb(struct hsv in);
+
+
+struct rgb
+pixel2rgb(
+		uint32_t *pixel
+		)
+{
+	struct rgb rgb;
+	
+	rgb.r =  *pixel        & 0xff;
+	rgb.g = (*pixel >> 8)  & 0xff;
+	rgb.b = (*pixel >> 16) & 0xff;
+	rgb.a = (*pixel >> 24) & 0xff;	
+
+	return rgb;
+}
+
+uint32_t
+rgb2pixel(
+		struct rgb rgb
+		)
+{
+	uint32_t pixel;
+	pixel += rgb.r;
+	pixel += rgb.g << 8;
+	pixel += rgb.b << 16;
+	pixel  = rgb.a << 24;
+
+	return pixel;
+}
 
 struct rgb hsv2rgb(struct hsv hsv)
 {
