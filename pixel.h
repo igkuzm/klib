@@ -16,60 +16,61 @@ extern "C"{
 #include <stdio.h>
 #include <stdint.h>
 
-typedef struct k_lib_rgb_t
+typedef uint32_t pixel_t;
+
+struct rgb
 {
     unsigned char r;
     unsigned char g;
     unsigned char b;
     unsigned char a;
-} rgb;
+};
 
-typedef struct k_lib_hsv_t
+struct hsv
 {
     unsigned char h;
     unsigned char s;
     unsigned char v;
     unsigned char a;
-} hsv;
+};
 
-static rgb		pixel2rgb(uint32_t *pixel);
-static uint32_t rgb2pixel(rgb in);
-static hsv		rgb2hsv(rgb in);
-static rgb		hsv2rgb(hsv in);
+static struct rgb	pixel2rgb(pixel_t pixel);
+static pixel_t		rgb2pixel(struct rgb rgb);
+static struct hsv	rgb2hsv(struct rgb rgb);
+static struct rgb	hsv2rgb(struct hsv hsv);
 
-
-rgb
+struct rgb
 pixel2rgb(
-		uint32_t *pixel
+		pixel_t pixel
 		)
 {
-	rgb rgb;
+	struct rgb rgb;
 	
-	rgb.r =  *pixel        & 0xff;
-	rgb.g = (*pixel >> 8)  & 0xff;
-	rgb.b = (*pixel >> 16) & 0xff;
-	rgb.a = (*pixel >> 24) & 0xff;	
+	rgb.r =  pixel        & 0xff;
+	rgb.g = (pixel >> 8)  & 0xff;
+	rgb.b = (pixel >> 16) & 0xff;
+	rgb.a = (pixel >> 24) & 0xff;	
 
 	return rgb;
 }
 
-uint32_t
+pixel_t
 rgb2pixel(
-		rgb rgb
+		struct rgb rgb
 		)
 {
-	uint32_t pixel;
+	pixel_t pixel = 0;
 	pixel += rgb.r;
 	pixel += rgb.g << 8;
 	pixel += rgb.b << 16;
-	pixel  = rgb.a << 24;
+	pixel += rgb.a << 24;
 
 	return pixel;
 }
 
-rgb hsv2rgb(hsv hsv)
+struct rgb hsv2rgb(struct hsv hsv)
 {
-    rgb rgb;
+    struct rgb rgb;
 	rgb.a = hsv.a;
     unsigned char region, remainder, p, q, t;
 
@@ -113,9 +114,9 @@ rgb hsv2rgb(hsv hsv)
 	return rgb;
 }
 
-hsv rgb2hsv(rgb rgb)
+struct hsv rgb2hsv(struct rgb rgb)
 {
-    hsv hsv;
+    struct hsv hsv;
 	hsv.a = rgb.a;
     unsigned char rgbMin, rgbMax;
 
