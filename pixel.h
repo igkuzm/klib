@@ -1,13 +1,13 @@
 /**
- * File              : rgb2hsv.h
+ * File              : pixel.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.05.2022
  * Last Modified Date: 24.05.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef k_lib_rgb2hsv_h__
-#define k_lib_rgb2hsv_h__
+#ifndef k_lib_pixel_h__
+#define k_lib_pixel_h__
 
 #ifdef __cplusplus
 extern "C"{
@@ -16,34 +16,34 @@ extern "C"{
 #include <stdio.h>
 #include <stdint.h>
 
-struct rgb
+typedef struct k_lib_rgb_t
 {
     unsigned char r;
     unsigned char g;
     unsigned char b;
     unsigned char a;
-};
+} rgb;
 
-struct hsv
+typedef struct k_lib_hsv_t
 {
     unsigned char h;
     unsigned char s;
     unsigned char v;
     unsigned char a;
-};
+} hsv;
 
-static struct rgb   pixel2rgb(uint32_t *pixel);
-static uint32_t     rgb2pixel(struct rgb rgb);
-static struct hsv   rgb2hsv(struct rgb in);
-static struct rgb   hsv2rgb(struct hsv in);
+static rgb		pixel2rgb(uint32_t *pixel);
+static uint32_t rgb2pixel(rgb in);
+static hsv		rgb2hsv(rgb in);
+static rgb		hsv2rgb(hsv in);
 
 
-struct rgb
+rgb
 pixel2rgb(
 		uint32_t *pixel
 		)
 {
-	struct rgb rgb;
+	rgb rgb;
 	
 	rgb.r =  *pixel        & 0xff;
 	rgb.g = (*pixel >> 8)  & 0xff;
@@ -55,7 +55,7 @@ pixel2rgb(
 
 uint32_t
 rgb2pixel(
-		struct rgb rgb
+		rgb rgb
 		)
 {
 	uint32_t pixel;
@@ -67,9 +67,9 @@ rgb2pixel(
 	return pixel;
 }
 
-struct rgb hsv2rgb(struct hsv hsv)
+rgb hsv2rgb(hsv hsv)
 {
-    struct rgb rgb;
+    rgb rgb;
 	rgb.a = hsv.a;
     unsigned char region, remainder, p, q, t;
 
@@ -113,9 +113,9 @@ struct rgb hsv2rgb(struct hsv hsv)
 	return rgb;
 }
 
-struct hsv rgb2hsv(struct rgb rgb)
+hsv rgb2hsv(rgb rgb)
 {
-    struct hsv hsv;
+    hsv hsv;
 	hsv.a = rgb.a;
     unsigned char rgbMin, rgbMax;
 
@@ -151,4 +151,4 @@ struct hsv rgb2hsv(struct rgb rgb)
 }
 #endif
 
-#endif //k_lib_rgb2hsv_h__
+#endif //k_lib_pixel_h__
