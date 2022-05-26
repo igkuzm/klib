@@ -31,14 +31,13 @@ extern "C"{
 //find needle in haystack and return its position 
 static size_t strfind(const char * haystack, const char * needle);
 
-//return count of matches of needle in haystack
+//return count of  needle matches in haystack
 static int strcnt(const char * haystack, const char * needle);
 
-//return new allocated string with contents of haystack replaced from position to position+len with replace string  
+//return new allocated string with contents of haystack replaced from position to position+len by replace string  
 static char * strrep(const char * haystack, size_t pos, size_t len, const char * replace);
 
-//return new allocated string with contents of haystack with all matches of needle replaced with
-//replace string
+//return new allocated string with contents of haystack replaced all needle matches by replace string
 static char * strarep(const char * haystack, const char * needle, const char * replace);
 
 /**
