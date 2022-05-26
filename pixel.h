@@ -41,29 +41,10 @@ struct hsv
     unsigned char a; //alfa
 };
 
-struct hsi
-{
-    unsigned char h; //hue
-    unsigned char s; //saturation
-    unsigned char i; //intensity
-    unsigned char a; //alfa
-};
-
-struct hsl
-{
-    unsigned char h; //hue
-    unsigned char s; //saturation
-    unsigned char l; //lightness
-    unsigned char a; //alfa
-};
-
 static    pixel_t	rgb2pixel(struct rgb rgb); //convert pixel (int32) to rgb struct
 static struct rgb	pixel2rgb(pixel_t  pixel); //convert rgb struct to pixel 
 static struct rgb	hsv2rgb  (struct hsv hsv); //convert hsv to rbg
-static struct rgb	hsi2rgb  (struct hsi hsi); //convert hsi to rgb
 static struct hsv	rgb2hsv  (struct rgb rgb); //convert rgb to hsv
-static struct hsi	rgb2hsi  (struct rgb rgb); //convert rgb to hsi
-static struct hsl	rgb2hsl  (struct rgb rgb); //convert rgb to hsl
 
 static  pixel_t * filter_median(			   //make median filter to image
 		pixel_t * image,					   //pointer to image bitmap 
@@ -86,15 +67,6 @@ static pixel_t * filter_hsv(				   //make filter for hsv image represantation
 		void * user_data,					   //image data to path through filter
 		int (*filter)(						   //filter function
 			struct hsv * hsv, void * user_data
-		)
-);
-
-static pixel_t * filter_hsi(				   //make filter for hsi image represantation
-		pixel_t * image,					   //pointer to image bitmap
-		int w, int h,						   //image width, height
-		void * user_data,					   //image data to path through filter
-		int (*filter)(						   //filter function
-			struct hsi * hsi, void * user_data
 		)
 );
 
@@ -312,46 +284,6 @@ filter_hsv(
 	return out;
 }
 
-pixel_t *
-filter_hsi(
-		pixel_t * image,
-		int w, int h,
-		void * user_data,
-		int (*filter)(struct hsi * hsi, void * user_data)
-		)
-{
-	pixel_t * out = malloc(w * h * sizeof(pixel_t));
-	if (!out) {
-		perror("output image malloc");
-		exit(EXIT_FAILURE);
-	}
-
-	for(int x = 0; x < w; x++)
-		for(int y = 0; y < h; y++)
-		{
-			pixel_t pixel = image[y * w + x]; 
-			struct hsi hsi = rgb2hsi(pixel2rgb(pixel));
-
-			//make magic
-			if (filter) {
-				int c = filter(&hsi, user_data);
-				if (c) {
-					free(out);
-					return NULL;
-				}
-			}
-
-			//convert back to rgb
-			struct rgb rgb = hsi2rgb(hsi);
-
-			//convert rgb to pixel
-			pixel_t new = rgb2pixel(rgb); 
-
-			out[y * w + x] = new;
-		}
-	return out;
-}
-
 struct rgb pixel2rgb(pixel_t pixel)
 {
 	struct rgb rgb = {
@@ -422,52 +354,6 @@ struct rgb hsv2rgb(struct hsv hsv)
 	return rgb;
 }
 
-struct rgb hsi2rgb(struct hsi hsi)
-{
-    struct rgb rgb;
-	rgb.a = hsi.a;
-
-	double hue = (double)hsi.h / 255 * 360;
-
-	if (hue == 0){
-		rgb.r = (int) 255 * (hsi.i + (2 * hsi.i * hsi.s));
-		rgb.g = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-		rgb.b = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-	}
-
-	else if ((0 < hue) && (hue < 120)) {
-		rgb.r = (int) 255 * (hsi.i + (hsi.i * hsi.s) * cos(hue) / cos(60 - hue));
-		rgb.g = (int) 255 * (hsi.i + (hsi.i * hsi.s) * (1 - cos(hue) / cos(60-hue)));
-		rgb.b = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-	}
-
-	else if ( hue == 120 ){
-		rgb.r = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-		rgb.g = (int) 255 * (hsi.i + (2 * hsi.i * hsi.s));
-		rgb.b = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-	}
-
-	else if ((120 < hue) && (hue < 240)) {
-		rgb.r = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-		rgb.g = (int) 255 * (hsi.i + (hsi.i * hsi.s) * cos(hue-120) / cos(180-hue));
-		rgb.b = (int) 255 * (hsi.i + (hsi.i * hsi.s) * (1 - cos(hue-120) / cos(180-hue)));
-	}
-
-	else if (hue == 240) {
-		rgb.r = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-		rgb.g = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-		rgb.b = (int) 255 * (hsi.i + (2 * hsi.i * hsi.s));
-	}
-
-	else if ((240 < hue) && (hue < 360)) {
-		rgb.r = (int) 255 * (hsi.i + (hsi.i * hsi.s) * (1 - cos(hue-240) / cos(300-hue)));
-		rgb.g = (int) 255 * (hsi.i - (hsi.i * hsi.s));
-		rgb.b = (int) 255 * (hsi.i + (hsi.i * hsi.s) * cos(hue-240) / cos(300-hue));
-	}
-
-	return rgb;
-}
-
 struct hsv rgb2hsv(struct rgb rgb)
 {
     struct hsv hsv;
@@ -500,65 +386,6 @@ struct hsv rgb2hsv(struct rgb rgb)
         hsv.h = 171 + 43 * (rgb.r - rgb.g) / (rgbMax - rgbMin);
 
     return hsv;
-}
-
-struct hsi rgb2hsi(struct rgb rgb)
-{
-    struct hsi hsi;
-	hsi.a = rgb.a;
-    unsigned char rgbMin;
-
-    rgbMin = rgb.r < rgb.g ? (rgb.r < rgb.b ? rgb.r : rgb.b) : (rgb.g < rgb.b ? rgb.g : rgb.b);
-
-    hsi.i = (1/3) * (rgb.r + rgb.g + rgb.b);
-	if (hsi.i == 0) {
-        hsi.h = 0;
-        hsi.s = 0;
-        return hsi;
-	}
-
-    hsi.s = 255 * rgbMin / hsi.i;
-    if (hsi.s == 0)
-    {
-        hsi.h = 0;
-        return hsi;
-    }
-
-    return hsi;
-}
-
-struct hsl rgb2hsl(struct rgb rgb)
-{
-    struct hsl hsl;
-	hsl.a = rgb.a;
-    unsigned char rgbMin, rgbMax;
-
-    rgbMin = rgb.r < rgb.g ? (rgb.r < rgb.b ? rgb.r : rgb.b) : (rgb.g < rgb.b ? rgb.g : rgb.b);
-    rgbMax = rgb.r > rgb.g ? (rgb.r > rgb.b ? rgb.r : rgb.b) : (rgb.g > rgb.b ? rgb.g : rgb.b);
-
-    hsl.l = (1/2) * (rgbMax + rgbMin);
-    if (hsl.l == 0 || hsl.l == 255)
-    {
-        hsl.h = 0;
-        hsl.s = 0;
-        return hsl;
-    }
-
-    hsl.s = 255 * (rgbMax - rgbMin) / (255 - abs(2 * hsl.l - 255));
-    if (hsl.s == 0)
-    {
-        hsl.h = 0;
-        return hsl;
-    }
-
-    if (rgbMax == rgb.r)
-        hsl.h = 0 + 43 * (rgb.g - rgb.b) / (rgbMax - rgbMin);
-    else if (rgbMax == rgb.g)
-        hsl.h = 85 + 43 * (rgb.b - rgb.r) / (rgbMax - rgbMin);
-    else
-        hsl.h = 171 + 43 * (rgb.r - rgb.g) / (rgbMax - rgbMin);
-
-    return hsl;
 }
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -596,7 +423,6 @@ image_convolution(
 
 					struct rgb rgb = pixel2rgb(image[imageY * w + imageX]);
 				
-
 					red   += rgb.r * matrix[filterY][filterX];
 					green += rgb.g * matrix[filterY][filterX];
 					blue  += rgb.b * matrix[filterY][filterX];
