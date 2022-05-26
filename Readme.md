@@ -12,3 +12,4 @@
 9. array - dynamic array support
 10. list - list support
 11. each - for each(){} macros
+12. bitmap - image bitmap editing
