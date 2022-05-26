@@ -17,6 +17,7 @@
  *		  int count = strcnt(string, search_pattern)
  */
 
+
 #ifndef k_lib_str_find_replace_h__
 #define k_lib_str_find_replace_h__
 
