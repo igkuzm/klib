@@ -106,7 +106,7 @@ strrep(
 	int i = 0;
 	while (*haystack) {
 		if (i == pos) { //if found word
-			strncpy(result, replace, replacelen); //copy new string to result
+			strncat(result, replace, replacelen); //copy new string to result
 			i += replacelen; //move result counter
 			haystack += len; //move read string counter
 		} else {
@@ -149,7 +149,7 @@ strarep(
 	i = 0;
 	while (*haystack) {
 		if (strstr(haystack, needle) == haystack) { //if found word
-			strncpy(result, replace, replacelen); //copy new string to result
+			strncat(result, replace, replacelen); //copy new string to result
 			i += replacelen; //move result counter
 			haystack += needlelen; //move read string counter
 		} else {
