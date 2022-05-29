@@ -22,7 +22,6 @@ extern "C"{
 #include <dirent.h>
 #endif	
 
-//run callback for every file in dir. to stop execution - return non zero from callback
 bool is_directory(const char *path){
 #if defined _WIN32 || defined _WIN64
 	WIN32_FIND_DATAA findData;
