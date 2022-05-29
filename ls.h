@@ -6,6 +6,19 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
+/**
+ * List directory
+ * Usage:
+ *		int callback(file_t *file, void *user_data) {
+ *			printf("%s\n", file.filename);
+ *			return 0;
+ *		}
+ *		int main(){
+ *			ls(path, NULL, callback);
+ *			return 0;
+ *		} 
+ */
+
 #ifndef k_lib_ls_h__
 #define k_lib_ls_h__
 
@@ -42,6 +55,13 @@ typedef struct k_lib_file_t {
 	struct timeval atime; //access time
 	struct timeval mtime; //modifier time	
 } file_t;
+
+//execute callback function for each file in path
+static int ls(const char *path, void *user_data, int (*callback)(file_t *file, void *user_data));
+
+/**
+ * IMPLIMATION
+ */
 
 void file_init(file_t * file){
 	file->filetype = FILETYPE_OTHER;
