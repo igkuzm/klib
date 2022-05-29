@@ -23,12 +23,12 @@ extern "C"{
 #endif	
 
 //run callback for every file in dir. to stop execution - return non zero from callback
-bool is_directory(const char *dir){
+bool is_directory(const char *path){
 #if defined _WIN32 || defined _WIN64
 	WIN32_FIND_DATAA findData;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	char fullpath[BUFSIZ];
-	sprintf(fullpath, "%s\\*", dir);
+	sprintf(fullpath, "%s\\*", path);
 
 	hFind = FindFirstFileA(fullpath, &findData);
 	if (hFind != INVALID_HANDLE_VALUE) {
@@ -38,7 +38,7 @@ bool is_directory(const char *dir){
 	struct dirent *entry;
 	DIR *dp;	
 
-	dp = opendir(dir);
+	dp = opendir(path);
 	if (dp != NULL){
 		closedir(dp);
 		return true;
