@@ -19,7 +19,6 @@ extern "C"{
 #if defined _WIN32 || defined _WIN64
 #include <Windows.h>
 #else
-#include <errno.h>
 #include <dirent.h>
 #endif	
 
