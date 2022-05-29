@@ -23,7 +23,6 @@ extern "C"{
 #include <unistd.h>
 #endif
 
-//copy file FROM path to destination TO path
 bool file_exists(const char *path){
 	if (access(path, F_OK) == 0)
 		return true;
