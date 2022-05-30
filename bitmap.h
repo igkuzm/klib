@@ -1,8 +1,8 @@
 /**
- * File              : pixel.h
+ * File              : bitmap.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.05.2022
- * Last Modified Date: 24.05.2022
+ * Last Modified Date: 30.05.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -252,7 +252,7 @@ filter_hsv(
 		int (*filter)(struct hsv * hsv, void * user_data)
 		)
 {
-	pixel_t * out = malloc(w * h * sizeof(pixel_t));
+	pixel_t * out = (pixel_t *)malloc(w * h * sizeof(pixel_t));
 	if (!out) {
 		perror("output image malloc");
 		exit(EXIT_FAILURE);
@@ -277,9 +277,9 @@ filter_hsv(
 			struct rgb rgb = hsv2rgb(hsv);
 
 			//convert rgb to pixel
-			pixel_t new = rgb2pixel(rgb); 
+			pixel_t newpixel = rgb2pixel(rgb); 
 
-			out[y * w + x] = new;
+			out[y * w + x] = newpixel;
 		}
 	return out;
 }
@@ -401,7 +401,7 @@ image_convolution(
 		double bias
 		)
 {
-	pixel_t * out = malloc(w * h * sizeof(pixel_t));
+	pixel_t * out = (pixel_t * )malloc(w * h * sizeof(pixel_t));
 	if (!out) {
 		perror("output image malloc");
 		exit(EXIT_FAILURE);
@@ -481,7 +481,7 @@ filter_median(
 		int filterW, int filterH
 		)
 {
-	pixel_t * out = malloc(w * h * sizeof(pixel_t));
+	pixel_t * out = (pixel_t * )malloc(w * h * sizeof(pixel_t));
 	if (!out) {
 		perror("output image malloc");
 		exit(EXIT_FAILURE);
