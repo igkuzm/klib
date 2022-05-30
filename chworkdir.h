@@ -2,7 +2,7 @@
  * File              : chworkdir.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 29.05.2022
+ * Last Modified Date: 30.05.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -30,6 +30,7 @@ extern "C"{
 #include <errno.h>
 #include <fcntl.h>
 #endif
+#include <sys/stat.h>
 
 
 int k_lib_chWorkDir(char *argv[]);
@@ -46,8 +47,22 @@ int k_lib_chWorkDir(char *argv[]);
 #elif defined _WIN32 || defined _WIN64
 #elif __ANDROID__
 #else
-int cp(const char *from, const char *to)
+int k_lib_chWorkDir_cp(const char *from, const char *to)
 {
+	//check time
+	struct stat from_st;
+	if (stat(from, &from_st) == -1)
+		return -1;
+
+	struct stat to_st;
+	if (stat(to, &to_st) == -1)
+		return -1;
+
+	//don't overwrite if date grater
+	if (to_st.st_mtimespec.tv_sec > from_st.st_mtimespec.tv_sec)
+		return 1;
+
+	//open streams
 	FILE * fp_from = fopen(from, "r");
 	if (!fp_from) 
 		return -1;
@@ -69,7 +84,7 @@ int cp(const char *from, const char *to)
 }
 
 //list of files in directory
-int copy_recursive(const char *source, const char *destination, int depth){
+int k_lib_chWorkDir_copy_recursive(const char *source, const char *destination, int depth){
 	char error[BUFSIZ];
 	struct dirent *entry;
 	DIR *dp;	
@@ -88,9 +103,9 @@ int copy_recursive(const char *source, const char *destination, int depth){
 		sprintf("%s/%s", destination, filename);
 		if (depth < 10) {
 			switch (entry->d_type) {
-				case  DT_REG: cp(source_file, dest_file); break;
-				case  DT_LNK: cp(source_file, dest_file); break;
-				case  DT_DIR: depth++; copy_recursive(source_file, dest_file, depth); break;
+				case  DT_REG: k_lib_chWorkDir_cp(source_file, dest_file); break;
+				case  DT_LNK: k_lib_chWorkDir_cp(source_file, dest_file); break;
+				case  DT_DIR: depth++; k_lib_chWorkDir_copy_recursive(source_file, dest_file, depth); break;
 				default: break;
 			}
 		}
@@ -138,7 +153,7 @@ int k_lib_chWorkDir(char *argv[]){
 		sprintf(resourceDir, "%s/../share/%s", execDir, progname); //resources dir
 
 		//copy files from resources to workdir
-		int copy_recursive(resourceDir, workDir, 0);
+		int k_lib_chWorkDir_copy_recursive(resourceDir, workDir, 0);
 		
 #endif
 	chdir(workDir); //change workdir
