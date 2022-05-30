@@ -2,7 +2,7 @@
  * File              : base64.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.04.2022
- * Last Modified Date: 26.05.2022
+ * Last Modified Date: 30.05.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -26,10 +26,10 @@ unsigned char *base64_decode(const char *data,
                              size_t *output_length);
 
 // memory allocation helpers
-#define MALLOC(size)	\
+#define BASE64_MALLOC(size)	\
 ({	\
 	void* const ___p = malloc(size); \
-	if(!___p) {perror("Malloc"); exit(EXIT_FAILURE);} \
+	if(!___p) {perror("base64 malloc"); exit(EXIT_FAILURE);} \
 	___p;\
 })
 
@@ -46,7 +46,7 @@ static int mod_table[] = {0, 2, 1};
 
 void build_decoding_table() {
 
-    decoding_table = (char *)MALLOC(256);
+    decoding_table = (char *)BASE64_MALLOC(256);
 
     for (int i = 0; i < 64; i++)
         decoding_table[(unsigned char) encoding_table[i]] = i;
@@ -64,7 +64,7 @@ char *base64_encode(const unsigned char *data,
 
     *output_length = 4 * ((input_length + 2) / 3);
 
-    char *encoded_data = (char *)MALLOC(*output_length);
+    char *encoded_data = (char *)BASE64_MALLOC(*output_length);
     if (encoded_data == NULL) return NULL;
 
     for (int i = 0, j = 0; i < input_length;) {
@@ -100,7 +100,7 @@ unsigned char *base64_decode(const char *data,
     if (data[input_length - 1] == '=') (*output_length)--;
     if (data[input_length - 2] == '=') (*output_length)--;
 
-    unsigned char *decoded_data = (unsigned char *)MALLOC(*output_length);
+    unsigned char *decoded_data = (unsigned char *)BASE64_MALLOC(*output_length);
     if (decoded_data == NULL) return NULL;
 
     for (int i = 0, j = 0; i < input_length;) {
