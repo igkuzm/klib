@@ -68,7 +68,7 @@ strcnt(
 		const char * needle		 //search pattern
 		)
 {
-	int needlelen = strlen(needle);
+	size_t needlelen = strlen(needle);
 
 	//count cases of search word in haystack
 	int i, cnt = 0;
