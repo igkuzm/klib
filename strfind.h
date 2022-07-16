@@ -125,8 +125,8 @@ strarep(
 		const char * replace		 //replace string
 	){
 
-	int needlelen = strlen(needle);
-	int replacelen = strlen(replace);
+	size_t needlelen = strlen(needle);
+	size_t replacelen = strlen(replace);
 
 	//count cases of search word in haystack
 	int i, cnt = 0;
