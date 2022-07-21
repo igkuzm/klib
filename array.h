@@ -2,7 +2,7 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 24.03.2022
+ * Last Modified Date: 22.07.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -16,88 +16,53 @@ extern "C"{
 #include <stdlib.h>
 
 //Dynamyc array
-//to use: 
-//char* array = ARRAY_NEW(char);
-//char* word = "hello";
-//for (int i = 0, i < strlen(word), i++)
-//    array = ARRAY_APPEND(array, char, word[i]);
-//ARRAY_APPEND(array, char, '');
-//ARRAY_APPEND_ITEMS(array, char, 'w', 'o', 'r', 'l', 'd', '!');
-//for EACH_IN_ARRAY(char, c, array)
-//    printf("%c\n", c);
+struct array_t {
+	void * data;
+	int len;
+};
 
-#define ARRAY_ALLOC(size)	\
-({	\
-	size_t* const ___ret = malloc(sizeof(size_t) + size); \
-	if(!___ret) {perror("Malloc"); exit(EXIT_FAILURE);} \
-	*___ret = size; \
-	void* const ___p = &___ret[1]; \
-	___p;\
-})
+#define array_new(type)\
+	({\
+		struct array_t * ___array = malloc(sizeof(struct array_t));\
+		if (___array == NULL) {\
+			perror("array_new malloc");\
+			exit(EXIT_FAILURE);\
+		}\
+		___array->data = malloc(sizeof(type));\
+		if (___array->data == NULL) {\
+			perror("array_new data malloc");\
+			exit(EXIT_FAILURE);\
+		}\
+		___array->len = 0;\
+		___array;\
+	 })
 
-#define ARRAY_NEW(T) ((T*)ARRAY_ALLOC(sizeof(T)))
+#define array_append(array, type, item) \
+	({ \
+		type * ___data = array->data;\
+		___data[array->len] = item;\
+		array->len++;\
+		array->data = realloc(array->data, sizeof(type) + sizeof(type) * array->len);\
+		if (array->data == NULL) {\
+			perror("array_append_item realloc");\
+			exit(EXIT_FAILURE);\
+		}\
+	})
 
-#define ARRAY_POINTER(array) ((size_t *)array -1)
+#define array_at(array, type, i)\
+	({\
+		type * ___data = array->data;\
+		___data[i];\
+	})
 
-#define ARRAY_ALLOCATED_SIZE(array) ((size_t*)array)[-1]
+#define array_for_each(array, type, item)\
+		type * ___data = array->data;\
+		type * ___p, item;\
+		for (___p = (___data), (item) = *___p; ___p < &((___data)[array->len]); ___p++, (item) = *___p)\
 
-#define ARRAY_SIZE(array, type) ({ARRAY_ALLOCATED_SIZE(array)/sizeof(type) - 1;})
-
-#define ARRAY_REALLOC(array, size)	\
-({	\
-	size_t* const ___ret = realloc(ARRAY_POINTER(array), sizeof(size_t) + size);	\
-	if(!___ret) { perror("Realloc"); exit(EXIT_FAILURE); }	\
-	*___ret = size; \
-	void* const ___p = &___ret[1]; \
-	___p;\
-})
-
-#define ARRAY_APPEND_ITEM(array, type, item) \
-({ \
-	size_t ___size = ARRAY_SIZE(array, type); \
-	size_t ___new_size = ARRAY_ALLOCATED_SIZE(array) + sizeof(type); \
-	array[___size] = item; \
-	array = ARRAY_REALLOC(array, ___new_size); \
-})
-
-#define ARRAY_APPEND(array, type, ...) \
-({ \
-	int ___count = sizeof((int[]){__VA_ARGS__})/sizeof(int); \
-	size_t ___size = ARRAY_SIZE(array, type); \
-	size_t ___new_size = ARRAY_ALLOCATED_SIZE(array) + sizeof(type) * ___count; \
-	array = ARRAY_REALLOC(array, ___new_size); \
-	int ___i; \
-	for (___i = 0; ___i < ___count; ++___i) { \
-		type const ___item = (type[]){__VA_ARGS__}[___i]; \
-		array[___size + ___i] = ___item; \
-	} \
-	array; \
-})
-
-#define EACH_IN_ARRAY(type, item, array) \
-(type *p = (array), (item) = *p; p < &((array)[ARRAY_SIZE(array, type)]); p++, (item) = *p)
-
-#define ARRAY_FOR_EACH(array, type, item) for EACH_IN_ARRAY(type, item, array)
-
-#define ARRAY_FREE(array) \
-({\
-	if (array)\
-		free(ARRAY_POINTER(array));\
-	array = NULL;\
-})
-
-#define ARRAY_TO_C_ARRAY(array, type, carrayptr) \
-({ \
-	size_t ___size = ARRAY_SIZE(array, type); \
-	type* ___ret = malloc(sizeof(type) * ___size); \
-	if(!___ret) {perror("Malloc"); exit(EXIT_FAILURE);} \
-	*carrayptr = ___ret; \
-	int ___i; \
-	for (___i = 0; ___i < ___size; ++___i)\
-		___ret[___i] = array[___i]; \
-	ARRAY_FREE(array); \
-	(int)___size; \
-})
+#define array_free(array)\
+	free(array->data);\
+	free(array);
 
 #ifdef __cplusplus
 }
