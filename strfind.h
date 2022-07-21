@@ -1,8 +1,8 @@
 /**
- * File              : strfnd.h
+ * File              : strfind.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 20.07.2022
+ * Last Modified Date: 22.07.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
