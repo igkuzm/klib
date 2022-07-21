@@ -29,11 +29,11 @@ extern "C"{
 #include <stdlib.h>
 #include <string.h>
 
-//check haystack does include needle - return position of pointer haystack + needle_len or NULL
+//check haystack does starts with and include needle - return position of pointer haystack + needle_len or NULL
 static char * strinc(const char * haystack, const char * needle);
 
 //find needle in haystack and return its position 
-static int strfnd(const char * haystack, const char * needle);
+static long strfnd(const char * haystack, const char * needle);
 #define strfind(haystack, needle) strfnd(haystack, needle)
 
 //return count of needle matches in haystack
@@ -69,21 +69,16 @@ strinc(
 }
 
 
-int 
+long 
 strfnd( 
 		const char * haystack, 
 		const char * needle
 		)
 {
 	//find position of search word in haystack
-	char *ptr = (char *)haystack; //haystack pointer
-	int i = 0;
-	while (*ptr) {
-		if (strinc(ptr, needle))
-			return i;
-		i++; ptr++;
-	}
-
+	const char *p = strstr(haystack, needle);
+	if (p)
+		return p - haystack;
 	return -1;
 }
 
@@ -173,14 +168,13 @@ strarep(
 		const char * replace		 //replace string
 	){
 
-	char *ptr = (char *)haystack; //haystack pointer
 	size_t needlelen = strlen(needle);
 	size_t replacelen = strlen(replace);
 
 	//count cases of search word in haystack
 	int i, cnt = 0;
 	for (i = 0; haystack[i] != '\0'; i++) {
-		if (strinc(ptr, needle)) {
+		if (strinc(haystack, needle)) {
 			cnt++;
 
 			// Jumping to index after the needle word.
@@ -196,7 +190,7 @@ strarep(
 	}
 
 	//replace search needle string with replace string
-	ptr = (char *)haystack;
+	char *ptr = (char *)haystack; //haystack pointer
 	i = 0;
 	while (*ptr) {
 		char *p = strinc(ptr, needle); 
