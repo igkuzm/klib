@@ -2,7 +2,7 @@
  * File              : reachability.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 15.09.2021
- * Last Modified Date: 23.02.2022
+ * Last Modified Date: 01.08.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "reachability.h"
@@ -22,8 +22,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>  //for sleep
+#include <netdb.h>
 
-bool k_lib_ipAddressIsReachable(const char *address, int port)
+bool ip_address_is_reachable(const char *address, int port)
 {
 	char error[BUFSIZ];
 #if defined _WIN32 || defined _WIN64
@@ -98,7 +99,7 @@ bool k_lib_ipAddressIsReachable(const char *address, int port)
 }
 
 //struct to pass arguments from thread to function
-struct k_lib_reachability_params{
+struct reachability_params{
 	const char *address;
 	int port;
 	int seconds_to_sleep;
@@ -106,18 +107,18 @@ struct k_lib_reachability_params{
 	void *user_data;
 };
 
-void *k_lib_checkAddressIsReachable(void *param) 
+void *check_address_is_reachable(void *param) 
 {
-	struct k_lib_reachability_params *reachability_params = param;
+	struct reachability_params *p = param;
 
-	const char *address = reachability_params -> address; 
-	int port = reachability_params -> port;
-	void *user_data = reachability_params->user_data;
-	int seconds_to_sleep = reachability_params -> seconds_to_sleep; 
-	int (*callback)(bool isReachable, void *user_data) = reachability_params -> callback;
+	const char *address = p -> address; 
+	int port = p -> port;
+	void *user_data = p->user_data;
+	int seconds_to_sleep = p -> seconds_to_sleep; 
+	int (*callback)(bool isReachable, void *user_data) = p->callback;
 	
 	while (1) {
-		if (callback(k_lib_ipAddressIsReachable(address, port), user_data)) {
+		if (callback(ip_address_is_reachable(address, port), user_data)) {
 			//stop function if callback returned not zero
 			perror("Reachability function stoped as callback returned non zero");
 			break;
@@ -125,14 +126,14 @@ void *k_lib_checkAddressIsReachable(void *param)
 		sleep(seconds_to_sleep);
 	}
 
-	free(reachability_params);
-	reachability_params=NULL;
+	free(p);
+	p=NULL;
 
 	pthread_exit(0);
 }
 
 
-void k_lib_reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(bool isReachable, void *user_data)){
+void reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(bool isReachable, void *user_data)){
 	int err;
 
 	pthread_t tid; //идентификатор потока
@@ -146,15 +147,15 @@ void k_lib_reachability(const char *address, int port, int seconds_to_sleep, voi
 	}	
 
 	//allocate Reachability_params
-	struct k_lib_reachability_params reachability_params;
-	reachability_params.address = address;
-	reachability_params.port = port;
-	reachability_params.seconds_to_sleep = seconds_to_sleep;
-	reachability_params.callback = callback;
-	reachability_params.user_data = user_data;
+	struct reachability_params *p = malloc(sizeof(struct reachability_params));
+	p->address = address;
+	p->port = port;
+	p->seconds_to_sleep = seconds_to_sleep;
+	p->callback = callback;
+	p->user_data = user_data;
 
 	//создаем новый поток
-	err = pthread_create(&tid, &attr, k_lib_checkAddressIsReachable, &reachability_params);
+	err = pthread_create(&tid, &attr, check_address_is_reachable, p);
 	if (err) {
 		perror("Can't create THREAD");
 		exit(EXIT_FAILURE);
@@ -166,5 +167,20 @@ void k_lib_reachability(const char *address, int port, int seconds_to_sleep, voi
 		/*fprintf(stderr, "Error in THREAD: %d, errno: %d (%s)\n", err, errno,  strerror(errno));*/
 		/*exit(err);*/
 	/*}	*/
+}
+
+void reachability_hostname(const char *hostname, int port, int seconds_to_sleep, void *user_data, int (*callback)(bool isReachable, void *user_data)){
+	struct hostent * hp = gethostbyname(hostname);
+	struct in_addr ** p = (struct in_addr **)hp->h_addr_list;
+	char ip_address[INET_ADDRSTRLEN]; *ip_address=0;
+	int i;
+	for (i = 0; p[i]!=NULL; ++i) {
+		inet_ntop(AF_INET, &p[i], ip_address, INET_ADDRSTRLEN);
+	}
+	if (strlen(ip_address) < 4) {
+		perror("reachability: can't get ip_address");
+		return;
+	}
+	reachability(ip_address, port, seconds_to_sleep, user_data, callback);
 }
 
