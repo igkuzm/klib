@@ -2,7 +2,7 @@
  * File              : reachability.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 15.09.2021
- * Last Modified Date: 01.08.2022
+ * Last Modified Date: 02.08.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #include "reachability.h"
@@ -20,13 +20,13 @@
 #endif
 #include <errno.h>
 #include <string.h>
-#include <pthread.h>
 #include <unistd.h>  //for sleep
 #include <netdb.h>
 
-bool ip_address_is_reachable(const char *address, int port)
+bool ip_address_is_reachable(const char *address, int port, char * error)
 {
-	char error[BUFSIZ];
+	char _error[BUFSIZ];
+	if (!error) error = _error; 
 #if defined _WIN32 || defined _WIN64
     //----------------------
     // Initialize Winsock
@@ -101,29 +101,36 @@ bool ip_address_is_reachable(const char *address, int port)
 //struct to pass arguments from thread to function
 struct reachability_params{
 	const char *address;
+	bool find_ip;
 	int port;
 	int seconds_to_sleep;
-	int (*callback)(bool isReachable, void *user_data);
+	int (*callback)(void *user_data, bool isReachable, char * error);
 	void *user_data;
 };
 
 void *check_address_is_reachable(void *param) 
 {
 	struct reachability_params *p = param;
-
-	const char *address = p -> address; 
-	int port = p -> port;
-	void *user_data = p->user_data;
-	int seconds_to_sleep = p -> seconds_to_sleep; 
-	int (*callback)(bool isReachable, void *user_data) = p->callback;
 	
 	while (1) {
-		if (callback(ip_address_is_reachable(address, port), user_data)) {
+		const char *address;
+		if (p->find_ip){
+			struct hostent * hp = gethostbyname(p->address);
+			struct in_addr ** p = (struct in_addr **)hp->h_addr_list;
+			char ip_address[INET_ADDRSTRLEN];
+			int i;
+			for (i = 0; p[i]!=NULL; ++i) {
+				inet_ntop(AF_INET, &p[i], ip_address, INET_ADDRSTRLEN);
+			}
+			address = ip_address;
+		}
+		char error[BUFSIZ];
+		if (p->callback(p->user_data, ip_address_is_reachable(address, p->port, error), error)) {
 			//stop function if callback returned not zero
 			perror("Reachability function stoped as callback returned non zero");
 			break;
 		}
-		sleep(seconds_to_sleep);
+		sleep(p->seconds_to_sleep);
 	}
 
 	free(p);
@@ -132,8 +139,8 @@ void *check_address_is_reachable(void *param)
 	pthread_exit(0);
 }
 
+pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_sleep, void *user_data, int (*callback)(void * user_data, bool isReachable, char * error)){
 
-void reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(bool isReachable, void *user_data)){
 	int err;
 
 	pthread_t tid; //идентификатор потока
@@ -141,10 +148,11 @@ void reachability(const char *address, int port, int seconds_to_sleep, void *use
 
 	//получаем дефолтные значения атрибутов
 	err = pthread_attr_init(&attr);
-	if (err) {
-		perror("Can't set THREAD attributes");
-		exit(EXIT_FAILURE);
-	}	
+	if (err){
+		if (callback)
+			callback(user_data, false, "Can't set THREAD attributes");
+		return 0;
+	}
 
 	//allocate Reachability_params
 	struct reachability_params *p = malloc(sizeof(struct reachability_params));
@@ -153,34 +161,24 @@ void reachability(const char *address, int port, int seconds_to_sleep, void *use
 	p->seconds_to_sleep = seconds_to_sleep;
 	p->callback = callback;
 	p->user_data = user_data;
+	p->find_ip = find_ip;
 
 	//создаем новый поток
 	err = pthread_create(&tid, &attr, check_address_is_reachable, p);
-	if (err) {
-		perror("Can't create THREAD");
-		exit(EXIT_FAILURE);
+	if (err){
+		if (callback)
+			callback(user_data, false, "Can't create THREAD");
+		return 0;
 	}
 
-	//ждем завершения исполнения потока
-	/*err = pthread_join(tid,NULL);*/
-	/*if (err) {*/
-		/*fprintf(stderr, "Error in THREAD: %d, errno: %d (%s)\n", err, errno,  strerror(errno));*/
-		/*exit(err);*/
-	/*}	*/
+	return tid;	
 }
 
-void reachability_hostname(const char *hostname, int port, int seconds_to_sleep, void *user_data, int (*callback)(bool isReachable, void *user_data)){
-	struct hostent * hp = gethostbyname(hostname);
-	struct in_addr ** p = (struct in_addr **)hp->h_addr_list;
-	char ip_address[INET_ADDRSTRLEN]; *ip_address=0;
-	int i;
-	for (i = 0; p[i]!=NULL; ++i) {
-		inet_ntop(AF_INET, &p[i], ip_address, INET_ADDRSTRLEN);
-	}
-	if (strlen(ip_address) < 4) {
-		perror("reachability: can't get ip_address");
-		return;
-	}
-	reachability(ip_address, port, seconds_to_sleep, user_data, callback);
+pthread_t reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error)){
+	return dispatch(address, false, port, seconds_to_sleep, user_data, callback);
+}
+
+pthread_t reachability_hostname(const char *hostname, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error)){
+	return dispatch(hostname, true, port, seconds_to_sleep, user_data, callback);
 }
 
