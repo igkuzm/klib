@@ -159,6 +159,12 @@ void *check_address_is_reachable(void * params)
 
 pthread_t dispatch(const char *address, bool find_ip, int port, int timeout, void *user_data, int (*callback)(void * user_data, bool reachable, char * error)){
 
+	if (!address || *address == 0){
+		if (callback)
+			callback(user_data, false, "reachability: cant't read address");
+		return 0;
+	}
+
 	int err;
 
 	pthread_t tid; //идентификатор потока
