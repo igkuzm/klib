@@ -178,10 +178,10 @@ pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_s
 	return tid;	
 }
 
-pthread_t reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error)){
+pthread_t reachability(const char *address, int port, int timeout, void *user_data, int (*callback)(void *user_data, bool reachable, char * error)){
 	if (isalpha(address[0])) {
-		return dispatch(address, true, port, seconds_to_sleep, user_data, callback);
+		return dispatch(address, true, port, timeout, user_data, callback);
 	} else {
-		return dispatch(address, false,  port, seconds_to_sleep, user_data, callback);
+		return dispatch(address, false,  port, timeout, user_data, callback);
 	}
 }

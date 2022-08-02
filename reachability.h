@@ -26,7 +26,7 @@ bool ip_address_is_reachable(const char *address, int port, char * error);
 //function starts in additional THREAD, checks reachability of adress (hostname or ip4 address) and port 
 //every seconds_to_sleep seconds and executes callback function - return thread id (pthread_t)
 //to stop reachability function and close THREAD - retun no zero in callback
-pthread_t reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error));
+pthread_t reachability(const char *address, int port, int timeout, void *user_data, int (*callback)(void *user_data, bool reachable, char * error));
 
 #ifdef __cplusplus
 }
