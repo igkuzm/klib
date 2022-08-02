@@ -21,8 +21,8 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>  //for sleep
-#include <netdb.h>
-#include <ctype.h>  //for isalpha
+#include <netdb.h>   //gethostbyname
+#include <ctype.h>   //for isalpha
 
 
 bool ip_address_is_reachable(const char *address, int port, char * error)
