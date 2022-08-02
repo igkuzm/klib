@@ -136,7 +136,7 @@ void *check_address_is_reachable(void * params)
 					p->callback(p->user_data, false, error);
 			}
 		}
-		if (*address != 0){
+		if (address && *address != 0){
 			if (p->callback){
 				if (p->callback(p->user_data, ip_address_is_reachable(address, p->port, error), error)) {
 					//stop function if callback returned not zero
