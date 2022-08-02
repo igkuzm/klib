@@ -119,12 +119,8 @@ void *check_address_is_reachable(void * params)
 		const char *address = p->address;
 		if (p->find_ip){
 			struct hostent * hp = gethostbyname(p->address);
-			struct in_addr ** p = (struct in_addr **)hp->h_addr_list;
 			char ip_address[INET_ADDRSTRLEN];
-			int i;
-			for (i = 0; p[i]!=NULL; ++i) {
-				inet_ntop(AF_INET, &p[i], ip_address, INET_ADDRSTRLEN);
-			}
+			inet_ntop(AF_INET, hp->h_addr_list[0], ip_address, INET_ADDRSTRLEN);
 			address = ip_address;
 		}
 		char error[BUFSIZ];
