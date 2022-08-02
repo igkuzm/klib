@@ -22,18 +22,21 @@
 #include <string.h>
 #include <unistd.h>  //for sleep
 #include <netdb.h>
+#include <ctype.h>  //for isalpha
+
 
 bool ip_address_is_reachable(const char *address, int port, char * error)
 {
 	char _error[BUFSIZ];
 	if (!error) error = _error; 
+
 #if defined _WIN32 || defined _WIN64
     //----------------------
     // Initialize Winsock
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != NO_ERROR) {
-        sprintf(error,"WSAStartup function failed with error: %d\n", iResult);
+        sprintf(error,"reachability: WSAStartup function failed with error: %d\n", iResult);
 		perror(error);
         return false;
     }
@@ -42,7 +45,7 @@ bool ip_address_is_reachable(const char *address, int port, char * error)
     SOCKET ConnectSocket;
     ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (ConnectSocket == INVALID_SOCKET) {
-        sprintf(error,"socket function failed with error: %ld\n", WSAGetLastError());
+        sprintf(error,"reachability: socket function failed with error: %ld\n", WSAGetLastError());
 		perror(error);
         WSACleanup();
         return false;
@@ -59,11 +62,11 @@ bool ip_address_is_reachable(const char *address, int port, char * error)
     // Connect to server.
     iResult = connect(ConnectSocket, (SOCKADDR *) & clientService, sizeof (clientService));
     if (iResult == SOCKET_ERROR) {
-        sprintf(error, "connect function failed with error: %ld\n", WSAGetLastError());
+        sprintf(error, "reachability: connect function failed with error: %ld\n", WSAGetLastError());
 		perror(error);
         iResult = closesocket(ConnectSocket);
         if (iResult == SOCKET_ERROR)
-            sprintf(error, "closesocket function failed with error: %ld\n", WSAGetLastError());
+            sprintf(error, "reachability: closesocket function failed with error: %ld\n", WSAGetLastError());
 			perror(error);
         WSACleanup();
         return false;
@@ -71,7 +74,7 @@ bool ip_address_is_reachable(const char *address, int port, char * error)
 
     iResult = closesocket(ConnectSocket);
     if (iResult == SOCKET_ERROR) {
-        sprintf(error, "closesocket function failed with error: %ld\n", WSAGetLastError());
+        sprintf(error, "reachability: closesocket function failed with error: %ld\n", WSAGetLastError());
 		perror(error);
         WSACleanup();
         return false;
@@ -89,7 +92,7 @@ bool ip_address_is_reachable(const char *address, int port, char * error)
 
 	if (connect(sockfd, (struct sockaddr *) &sin, sizeof(sin)) == -1)
 	{
-		sprintf(error, "Error connecting %s:%d - %d (%s)\n", address, port, errno, strerror(errno));
+		sprintf(error, "reachability: error connecting %s:%d - %d (%s)\n", address, port, errno, strerror(errno));
 		perror(error);
 		return false;
 	}
@@ -108,9 +111,9 @@ struct reachability_params{
 	void *user_data;
 };
 
-void *check_address_is_reachable(void *param) 
+void *check_address_is_reachable(void * params) 
 {
-	struct reachability_params *p = param;
+	struct reachability_params * p = params;
 	
 	while (1) {
 		const char *address;
@@ -150,12 +153,17 @@ pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_s
 	err = pthread_attr_init(&attr);
 	if (err){
 		if (callback)
-			callback(user_data, false, "Can't set THREAD attributes");
+			callback(user_data, false, "reachability: can't set THREAD attributes");
 		return 0;
 	}
 
 	//allocate Reachability_params
-	struct reachability_params *p = malloc(sizeof(struct reachability_params));
+	struct reachability_params * p = malloc(sizeof(struct reachability_params));
+	if (p == NULL) {
+		if (callback)
+			callback(user_data, false, "reachability: can't allocate memory");
+		return 0;
+	}
 	p->address = address;
 	p->port = port;
 	p->seconds_to_sleep = seconds_to_sleep;
@@ -167,7 +175,7 @@ pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_s
 	err = pthread_create(&tid, &attr, check_address_is_reachable, p);
 	if (err){
 		if (callback)
-			callback(user_data, false, "Can't create THREAD");
+			callback(user_data, false, "reachability: can't create THREAD");
 		return 0;
 	}
 
@@ -175,10 +183,9 @@ pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_s
 }
 
 pthread_t reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error)){
-	return dispatch(address, false, port, seconds_to_sleep, user_data, callback);
+	if (isalpha(address[0])) {
+		return dispatch(address, false, port, seconds_to_sleep, user_data, callback);
+	} else {
+		return dispatch(address, true,  port, seconds_to_sleep, user_data, callback);
+	}
 }
-
-pthread_t reachability_hostname(const char *hostname, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error)){
-	return dispatch(hostname, true, port, seconds_to_sleep, user_data, callback);
-}
-

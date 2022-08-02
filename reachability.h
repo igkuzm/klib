@@ -15,15 +15,18 @@ extern "C"{
 
 #include <stdio.h>
 #include <stdbool.h>
+
+#ifndef __ANDROID__
 #include <pthread.h>
+#endif
 
 //function returns true if address and port is reachable, otherwise - false
 bool ip_address_is_reachable(const char *address, int port, char * error);
 
-//function starts in additional THREAD, checks reachability of adress and port every seconds_to_sleep seconds and executes callback function - return thread id
+//function starts in additional THREAD, checks reachability of adress (hostname or ip4 address) and port 
+//every seconds_to_sleep seconds and executes callback function - return thread id (pthread_t)
 //to stop reachability function and close THREAD - retun no zero in callback
 pthread_t reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error));
-pthread_t reachability_hostname(const char *hostname, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error));
 
 #ifdef __cplusplus
 }
