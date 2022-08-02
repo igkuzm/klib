@@ -106,8 +106,8 @@ struct reachability_params{
 	const char *address;
 	bool find_ip;
 	int port;
-	int seconds_to_sleep;
-	int (*callback)(void *user_data, bool isReachable, char * error);
+	int timeout;
+	int (*callback)(void *user_data, bool reachable, char * error);
 	void *user_data;
 };
 
@@ -116,20 +116,36 @@ void *check_address_is_reachable(void * params)
 	struct reachability_params * p = params;
 	
 	while (1) {
+		char error[BUFSIZ];
 		const char *address = p->address;
 		if (p->find_ip){
 			struct hostent * hp = gethostbyname(p->address);
-			char ip_address[INET_ADDRSTRLEN];
-			inet_ntop(AF_INET, hp->h_addr_list[0], ip_address, INET_ADDRSTRLEN);
-			address = ip_address;
+			if (hp){
+				if (hp->h_addrtype == AF_INET){
+					char ip_address[INET_ADDRSTRLEN];
+					inet_ntop(AF_INET, hp->h_addr_list[0], ip_address, INET_ADDRSTRLEN);
+					address = ip_address;
+				} else {
+					sprintf(error, "reachability: host %s has no ipv4 address", p->address);
+					if (p->callback)
+						p->callback(p->user_data, false, error);
+				}
+			}else {	
+				sprintf(error, "reachability: cant get host data for hostname: %s", p->address);
+				if (p->callback)
+					p->callback(p->user_data, false, error);
+			}
 		}
-		char error[BUFSIZ];
-		if (p->callback(p->user_data, ip_address_is_reachable(address, p->port, error), error)) {
-			//stop function if callback returned not zero
-			perror("Reachability function stoped as callback returned non zero");
-			break;
+		if (*address != 0){
+			if (p->callback){
+				if (p->callback(p->user_data, ip_address_is_reachable(address, p->port, error), error)) {
+					//stop function if callback returned not zero
+					perror("Reachability function stoped as callback returned non zero");
+					break;
+				}
+			}
 		}
-		sleep(p->seconds_to_sleep);
+		sleep(p->timeout);
 	}
 
 	free(p);
@@ -138,7 +154,7 @@ void *check_address_is_reachable(void * params)
 	pthread_exit(0);
 }
 
-pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_sleep, void *user_data, int (*callback)(void * user_data, bool isReachable, char * error)){
+pthread_t dispatch(const char *address, bool find_ip, int port, int timeout, void *user_data, int (*callback)(void * user_data, bool reachable, char * error)){
 
 	int err;
 
@@ -162,7 +178,7 @@ pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_s
 	}
 	p->address = address;
 	p->port = port;
-	p->seconds_to_sleep = seconds_to_sleep;
+	p->timeout = timeout;
 	p->callback = callback;
 	p->user_data = user_data;
 	p->find_ip = find_ip;
