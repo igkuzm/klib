@@ -116,7 +116,7 @@ void *check_address_is_reachable(void * params)
 	struct reachability_params * p = params;
 	
 	while (1) {
-		const char *address;
+		const char *address = p->address;
 		if (p->find_ip){
 			struct hostent * hp = gethostbyname(p->address);
 			struct in_addr ** p = (struct in_addr **)hp->h_addr_list;
@@ -184,8 +184,8 @@ pthread_t dispatch(const char *address, bool find_ip, int port, int seconds_to_s
 
 pthread_t reachability(const char *address, int port, int seconds_to_sleep, void *user_data, int (*callback)(void *user_data, bool isReachable, char * error)){
 	if (isalpha(address[0])) {
-		return dispatch(address, false, port, seconds_to_sleep, user_data, callback);
+		return dispatch(address, true, port, seconds_to_sleep, user_data, callback);
 	} else {
-		return dispatch(address, true,  port, seconds_to_sleep, user_data, callback);
+		return dispatch(address, false,  port, seconds_to_sleep, user_data, callback);
 	}
 }
