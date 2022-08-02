@@ -144,7 +144,9 @@ void *check_address_is_reachable(void * params)
 					break;
 				}
 			}
-		}
+		} else {
+			if (p->callback)
+				p->callback(p->user_data, false, "reachability: cant't read address");
 		sleep(p->timeout);
 	}
 
