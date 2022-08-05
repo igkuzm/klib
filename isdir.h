@@ -1,5 +1,5 @@
 /**
- * File              : is_directory.h
+ * File              : isdir.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.05.2022
  * Last Modified Date: 05.08.2022

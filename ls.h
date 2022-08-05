@@ -2,7 +2,7 @@
  * File              : ls.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 29.05.2022
+ * Last Modified Date: 05.08.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
