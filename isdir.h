@@ -2,7 +2,7 @@
  * File              : isdir.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 29.05.2022
- * Last Modified Date: 05.08.2022
+ * Last Modified Date: 14.08.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -22,7 +22,7 @@ extern "C"{
 #include <dirent.h>
 #endif	
 
-bool is_directory(const char *path){
+bool isdir(const char *path){
 #if defined _WIN32 || defined _WIN64
 	WIN32_FIND_DATAA findData;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
