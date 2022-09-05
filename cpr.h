@@ -1,9 +1,13 @@
 /**
- * File              : cp_recursive.h
+ * File              : cpr.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 26.05.2022
+ * Last Modified Date: 06.09.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
+
+/*
+ * copy directory recursive from path to destination
  */
 
 #ifndef k_lib_cp_recursive_h__
@@ -20,7 +24,7 @@ extern "C"{
 #include <sys/stat.h>
 	
 
-int k_lib_cp_recursive(const char *from, const char *to);
+int cpr(const char *from, const char *to);
 
 struct k_lib_cp_recursive_args {
 	const char *source;
