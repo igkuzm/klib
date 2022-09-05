@@ -2,8 +2,16 @@
  * File              : alloc.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 23.03.2022
+ * Last Modified Date: 06.09.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
+
+/*
+ * C Library for memory allocation
+ * void * MALLOC(size_t size) - allocates size bytes, if memory is null - exit application
+ * void * REALLOC(void * ptr, size_t size) - realloc size bytes, if memory is null - exit application
+ * void FREE(void * ptr) - free memory of pointer ptr if is not null and set pointer to null
+ * void * NEW(T) - allocates memory with size of type T
  */
 
 #ifndef k_lib_alloc_h__
