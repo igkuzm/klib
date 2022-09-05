@@ -39,7 +39,7 @@ extern "C"{
 #endif
 #include <sys/stat.h>
 
-#define changeWorkDir(argv)	\
+#define chworkdir(argv)	\
 ({	\
 	int ___c = k_lib_chWorkDir(argv);\
 	___c;	\
