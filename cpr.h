@@ -59,7 +59,7 @@ int k_lib_cp_recursive_callback(KLibFile *file, void *user_data){
 				new_ags.dest = dest;
 				new_ags.depth = args->depth + 1;			
 			
-				k_lib_ls(source, &new_ags, k_lib_cp_recursive_callback);
+				ls(source, &new_ags, k_lib_cp_recursive_callback);
 			}
 		}
 	}
@@ -72,7 +72,7 @@ int cpr(const char *from, const char *to) {
 	args.source = from;
 	args.dest = to;
 	args.depth = 0;
-	return k_lib_ls(from, &args, k_lib_cp_recursive_callback);
+	return ls(from, &args, k_lib_cp_recursive_callback);
 }
 
 
