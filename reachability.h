@@ -2,8 +2,12 @@
  * File              : reachability.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 15.09.2021
- * Last Modified Date: 05.08.2022
+ * Last Modified Date: 06.09.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
+
+/*
+ * chech's network is reachable
  */
 
 #ifndef k_lib_reachability_h__
