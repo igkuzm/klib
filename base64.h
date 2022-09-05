@@ -2,8 +2,13 @@
  * File              : base64.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.04.2022
- * Last Modified Date: 30.05.2022
+ * Last Modified Date: 06.09.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
+
+/*
+ * Base64 encoder/decoder
+ * use base64_encode and base64_decode
  */
 
 #ifndef k_base64_h__
