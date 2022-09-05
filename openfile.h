@@ -2,8 +2,12 @@
  * File              : openfile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 18.09.2021
- * Last Modified Date: 26.05.2022
+ * Last Modified Date: 06.09.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
+
+/*
+ * open file at default program
  */
 
 #ifndef k_lib_openfile_h__
@@ -20,17 +24,7 @@ extern "C"{
 #include <windows.h>
 #endif	
 
-int k_lib_openfile(const char *filename);
-
-#ifndef openfile
-#define openfile(filename)	\
-({	\
-	int ___c = k_lib_openfile(filename);\
-	___c;	\
-})
-#endif
-
-int k_lib_openfile(const char *filename){
+int openfile(const char *filename){
 	char open_file_command[BUFSIZ];
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
