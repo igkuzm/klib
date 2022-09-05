@@ -46,10 +46,10 @@ int k_lib_cp_recursive_callback(KLibFile *file, void *user_data){
 	sprintf(dest, "%s\\%s", dir->dest, file->filename);
 #endif
 	
-	if (file->filetype == KLIBFILETYPE_FILE)
+	if (file->filetype == FILETYPE_FILE)
 		k_lib_cp(source, dest);
 
-	if (file->filetype == KLIBFILETYPE_DIR){
+	if (file->filetype == FILETYPE_DIR){
 		if (mkdir(dest, 0700) == -1) {
 			perror("Can't create directory");
 		} else {
