@@ -7,7 +7,7 @@
  */
 
 /*
- * copy file from path to destination
+ * copy file from path to destination (overwrite destination)
  */
 
 #ifndef k_lib_cp_h__
