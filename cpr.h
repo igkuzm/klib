@@ -32,7 +32,7 @@ struct k_lib_cp_recursive_args {
 	int depth;
 };
 
-int k_lib_cp_recursive_callback(KLibFile *file, void *user_data){
+int k_lib_cp_recursive_callback(file_t *file, void *user_data){
 	struct k_lib_cp_recursive_args *args = (struct k_lib_cp_recursive_args *)user_data;
 	
 	char source[BUFSIZ];
