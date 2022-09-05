@@ -47,7 +47,7 @@ int k_lib_cp_recursive_callback(KLibFile *file, void *user_data){
 #endif
 	
 	if (file->filetype == FILETYPE_FILE)
-		k_lib_cp(source, dest);
+		cp(source, dest);
 
 	if (file->filetype == FILETYPE_DIR){
 		if (mkdir(dest, 0700) == -1) {
@@ -67,7 +67,7 @@ int k_lib_cp_recursive_callback(KLibFile *file, void *user_data){
 	return 0;
 }
 
-int k_lib_cp_recursive(const char *from, const char *to) {
+int cpr(const char *from, const char *to) {
 	struct k_lib_cp_recursive_args args;
 	args.source = from;
 	args.dest = to;
