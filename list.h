@@ -8,6 +8,11 @@
 
 /*
  * Library to manage lists
+ * struct list_t * list_new() - create new list
+ * void list_append(struct list_t * list, void * item) - append item to list 
+ * int list_size(struct list_t * list) - return size of list
+ * void * list_at(struct list_t * list, int i) - return item at position i
+ * list_for_each - iterete the list
  */
 
 #ifndef k_lib_list_h__
