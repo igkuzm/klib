@@ -6,8 +6,12 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef k_lib_chworkdir_h__
-#define k_lib_chworkdir_h__
+/*
+ * 
+ */
+
+#ifndef k_lib_cd_h__
+#define k_lib_cd_h__
 
 #ifdef __cplusplus
 extern "C"{
@@ -166,4 +170,4 @@ int k_lib_chWorkDir(char *argv[]){
 }
 #endif
 
-#endif //k_lib_chworkdir_h__
+#endif //k_lib_cd_h__
