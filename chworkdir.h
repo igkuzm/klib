@@ -7,11 +7,14 @@
  */
 
 /*
- * 
+ * void chworkdir(char *argv[]) - chande working directory:
+ * Windows - to directory of executable file
+ * MacOS - to .app/Content/Resources
+ * Unix/Linux - creates, chdir to HOME/$name dir and copy contents of /usr/[loacal]/shre/$name to it
  */
 
-#ifndef k_lib_cd_h__
-#define k_lib_cd_h__
+#ifndef k_lib_chworkdir_h__
+#define k_lib_chworkdir_h__
 
 #ifdef __cplusplus
 extern "C"{
@@ -36,16 +39,11 @@ extern "C"{
 #endif
 #include <sys/stat.h>
 
-
-int k_lib_chWorkDir(char *argv[]);
-
-#ifndef changeWorkDir 
 #define changeWorkDir(argv)	\
 ({	\
 	int ___c = k_lib_chWorkDir(argv);\
 	___c;	\
 })
-#endif
 
 #ifdef __APPLE__
 #elif defined _WIN32 || defined _WIN64
@@ -170,4 +168,4 @@ int k_lib_chWorkDir(char *argv[]){
 }
 #endif
 
-#endif //k_lib_cd_h__
+#endif //k_lib_chworkdir_h__
