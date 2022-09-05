@@ -7,7 +7,7 @@
  */
 
 /*
- * open file at default program
+ * open file at path with default program
  */
 
 #ifndef k_lib_openfile_h__
@@ -24,7 +24,7 @@ extern "C"{
 #include <windows.h>
 #endif	
 
-int openfile(const char *filename){
+int openfile(const char *path){
 	char open_file_command[BUFSIZ];
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
@@ -32,14 +32,14 @@ int openfile(const char *filename){
 	#elif TARGET_OS_MACCATALYST
 	#elif TARGET_OS_IPHONE
 	#elif TARGET_OS_MAC
-		sprintf(open_file_command, "open %s", filename);	
+		sprintf(open_file_command, "open %s", path);
 		system(open_file_command);
 	#else
 	#endif
 #elif defined _WIN32 || defined _WIN64
-	ShellExecute(NULL, "open", filename, NULL, NULL, SW_SHOWDEFAULT);
+	ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT);
 #else
-	sprintf(open_file_command, "xdg-open %s", filename);	
+	sprintf(open_file_command, "xdg-open %s", path);	
 	system(open_file_command);
 #endif	
 	
