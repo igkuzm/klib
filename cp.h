@@ -2,7 +2,7 @@
  * File              : cp.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 29.05.2022
+ * Last Modified Date: 06.09.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 #ifndef k_lib_cp_h__
@@ -18,17 +18,7 @@ extern "C"{
 #include <fcntl.h>
 
 //copy file FROM path to destination TO path
-int k_lib_cp(const char *from, const char *to);
-
-#ifndef cp
-#define cp(from, to)	\
-({	\
-	int ___c = k_lib_cp(from, to);\
-	___c;	\
-})
-#endif
-
-int k_lib_cp(const char *from, const char *to)
+int cp(const char *from, const char *to)
 {
 	FILE * fp_from = fopen(from, "r");
 	if (!fp_from) 
