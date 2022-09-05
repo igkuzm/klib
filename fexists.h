@@ -7,7 +7,7 @@
  */
 
 /*
- * check if file exists
+ * check if file exists and accessable
  */
 
 #ifndef k_fexists_h__
