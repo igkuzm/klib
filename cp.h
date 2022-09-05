@@ -5,6 +5,11 @@
  * Last Modified Date: 06.09.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
+
+/*
+ * copy file from path to destination
+ */
+
 #ifndef k_lib_cp_h__
 #define k_lib_cp_h__
 
@@ -17,7 +22,6 @@ extern "C"{
 #include <unistd.h>
 #include <fcntl.h>
 
-//copy file FROM path to destination TO path
 int cp(const char *from, const char *to)
 {
 	FILE * fp_from = fopen(from, "r");
