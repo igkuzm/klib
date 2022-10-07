@@ -22,7 +22,9 @@ extern "C"{
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h> //dirname
-#if not defined WIN32 && not defined __APPLE__
+#ifdef WIN32 
+#elif defined __APPLE__
+#else
 #include <unistd.h> //readlink
 #endif
 
