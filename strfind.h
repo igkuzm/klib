@@ -183,8 +183,8 @@ strarep(
 	}	
 
 	//allocate result string with enough memory
-	char *result = (char *)malloc(i + cnt * (replacelen - needlelen) + 1);
-	if (result == NULL)
+	char *res = (char *)malloc(i + cnt * (replacelen - needlelen) + 1);
+	if (res == NULL)
 		return NULL;
 
 	//replace search needle string with replace string
@@ -193,13 +193,13 @@ strarep(
 	while (*ptr) {
 		char *p = strinc(ptr, needle); 
 		if (p){
-			strncat(result, replace, replacelen);
+			strncat(res, replace, replacelen);
 			ptr = p;
 		} else 
-			result[i++] = *ptr++;
+			res[i++] = *ptr++;
 	}
-	result[i] = '\0';
-	return result;
+	res[i++] = 0;
+	return res;
 }
 
 int 
