@@ -150,13 +150,10 @@ char * strins(const char *haystack, const char *needle, int pos){
 	int i = 0;
 	while (*hp) {
 		if (i == pos) {
-			while(*np){
-				str[i] = *np;
-				i++; np++;
-			}
+			while(*np)
+				str[i++] = *np++;
 		}
-		str[i] = *hp;
-		i++; hp++;
+		str[i++] = *hp++;
 	}
 	str[i++] = 0;
 
