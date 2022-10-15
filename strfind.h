@@ -49,7 +49,7 @@ static char * strins(const char *haystack, const char *needle, int pos);
 static char * strarep(const char * haystack, const char * needle, const char * replace);
 
 //create out file copy of in file with all needle replaced by replace and return it's count 
-int strfrep(FILE *in, FILE *out, const char * needle, const char * replace); 
+static int strfrep(FILE *in, FILE *out, const char * needle, const char * replace); 
 
 /**
  * implimation of functions
