@@ -171,7 +171,7 @@ strarep(
 
 	char *ptr = (char *)haystack; //haystack pointer
 	
-	//count cases of search word in haystack
+	//count cases of search word in haystack and length of haystack
 	int i = 0, cnt = 0;
 	while (*ptr) {
 		char *p = strinc(ptr, needle); 
