@@ -67,7 +67,7 @@ strinc(
 	char * hp = (char *)haystack; //haystack pointer
 	char * np = (char *)needle;   //needle pointer
 
-	while(*np)
+	while(*hp)
 		if (*hp++ != *np++)
 			return NULL;
 	
@@ -169,16 +169,18 @@ strarep(
 	size_t needlelen = strlen(needle);
 	size_t replacelen = strlen(replace);
 
+	char *ptr = (char *)haystack; //haystack pointer
+	
 	//count cases of search word in haystack
-	int i, cnt = 0;
-	for (i = 0; haystack[i] != '\0'; i++) {
-		if (strinc(haystack, needle)) {
+	int i = 0, cnt = 0;
+	while (*ptr) {
+		char *p = strinc(ptr, needle); 
+		if (p){
 			cnt++;
-
-			// Jumping to index after the needle word.
-			i += needlelen - 1;
-		}
-	}
+			ptr = p;
+		} else
+			ptr++;
+	}	
 
 	//allocate result string with enough memory
 	char *result = (char *)malloc(i + cnt * (replacelen - needlelen) + 1);
@@ -186,16 +188,15 @@ strarep(
 		return NULL;
 
 	//replace search needle string with replace string
-	char *ptr = (char *)haystack; //haystack pointer
+	ptr = (char *)haystack; //haystack pointer
 	i = 0;
 	while (*ptr) {
 		char *p = strinc(ptr, needle); 
 		if (p){
 			strncat(result, replace, replacelen);
 			ptr = p;
-		} else {
+		} else 
 			result[i++] = *ptr++;
-		}
 	}
 	result[i] = '\0';
 	return result;
@@ -218,9 +219,8 @@ fstrrep(
 	int i, cnt = 0;
 
 	//clear buf
-	for (int i = 0; i < nlen; i++) {
+	for (int i = 0; i < nlen; i++)
 		buf[i] = 0;
-	}
 
 	i=0;
 
