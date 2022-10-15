@@ -2,7 +2,7 @@
  * File              : each.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.03.2022
- * Last Modified Date: 23.03.2022
+ * Last Modified Date: 15.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -14,16 +14,10 @@ extern "C"{
 #endif
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-	
 
-//MACROS FOR EACH
-// "length" is the length of the array.   
-// can be used with for (as in for each (...))
-#define each(type, item, array, length) \
-(type *p = (array), (item) = *p; p < &((array)[length]); p++, (item) = *p)
+//MACROS FOR EACH for NULL-terminated array
+#define each(type, item, array) \
+(type *p = (array), (item) = *p; *p; p++, (item) = *p)
 
 #ifdef __cplusplus
 }

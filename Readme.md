@@ -1,7 +1,6 @@
 # Library of functions and macros for plain C
 
-1. chworkdir.h - changes work directory - for Windows to EXEC, for MacOS to BUNDLE/Resources, for
-   Linux - to $install_path/share/$progname
+1. getbundke.h -for Windows to EXEC, for MacOS to BUNDLE/Resources, for Linux - ../share/$progname
 2. alloc.h - macros for malloc, realloc and free functions
 3. cp.h - copy file
 4. cpr.h - copy directory recursive
@@ -18,3 +17,6 @@
 15. fsize.h - file size
 16. isdir.h - check if file is directory
 17. fexists.h - check if file exists
+18. strsplit.h - split string with delim
+19. strptime.cc - implimation of strptime
+20. ls.h - list directory
