@@ -64,6 +64,8 @@ strsplit (
 	// set tokens pointer
 	if (tokens)
 		*tokens = arr;
+	else
+		free(arr); // free array
 
 	return i;
 }
