@@ -18,7 +18,6 @@ extern "C"{
 #endif
 
 #include <stdio.h>
-#include <stdbool.h>
 #include <sys/stat.h>
 #include "cp.h"
 #include "ls.h"
