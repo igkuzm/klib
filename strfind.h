@@ -2,7 +2,7 @@
  * File              : strfind.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 15.10.2022
+ * Last Modified Date: 16.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -67,7 +67,8 @@ strinc(
 	char * hp = (char *)haystack; //haystack pointer
 	char * np = (char *)needle;   //needle pointer
 
-	while(*hp)
+	//for each char in neddle check if matches haystack
+	while(*np)
 		if (*hp++ != *np++)
 			return NULL;
 	
