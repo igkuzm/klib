@@ -2,7 +2,7 @@
  * File              : cpr.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 06.09.2022
+ * Last Modified Date: 16.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -18,39 +18,41 @@ extern "C"{
 #endif
 
 #include <stdio.h>
+#include <stdbool.h>
+#include <sys/stat.h>
 #include "cp.h"
 #include "ls.h"
-
-#include <sys/stat.h>
+#include "fexists.h"
 	
-
-int cpr(const char *from, const char *to);
+static int cpr(const char *from, const char *to, bool overwrite);
 
 struct k_lib_cp_recursive_args {
 	const char *source;
 	const char *dest;
+	bool overwrite;
 	int depth;
 };
 
-int k_lib_cp_recursive_callback(file_t *file, void *user_data){
+int k_lib_cp_recursive_callback(char *filename, FILETYPE filetype, void *user_data){
 	struct k_lib_cp_recursive_args *args = (struct k_lib_cp_recursive_args *)user_data;
 	
 	char source[BUFSIZ];
-	sprintf(source, "%s/%s", args->source, file->filename);
-	
 	char dest[BUFSIZ];
-	sprintf(dest, "%s/%s", args->dest, file->filename);
 
-#if defined _WIN32 || defined _WIN64
-	sprintf(source, "%s\\%s", dir->source, file->filename);
-	sprintf(dest, "%s\\%s", dir->dest, file->filename);
+#if defined _WIN32
+	sprintf(source, "%s\\%s", args->source, filename);
+	sprintf(dest, "%s\\%s", args->dest, filename);
+#else
+	sprintf(source, "%s/%s", args->source, filename);
+	sprintf(dest, "%s/%s", args->dest, filename);
 #endif
 	
-	if (file->filetype == FILETYPE_FILE)
-		cp(source, dest);
+	if (filetype == FILETYPE_FILE)
+		if (args->overwrite || !fexists(dest))
+			cp(source, dest);
 
-	if (file->filetype == FILETYPE_DIR){
-		if (mkdir(dest, 0700) == -1) {
+	if (filetype == FILETYPE_DIR){
+		if (!fexists(dest) && mkdir(dest, 0700) == -1) {
 			perror("Can't create directory");
 		} else {
 			if (args->depth < 10 ) {
@@ -67,11 +69,13 @@ int k_lib_cp_recursive_callback(file_t *file, void *user_data){
 	return 0;
 }
 
-int cpr(const char *from, const char *to) {
-	struct k_lib_cp_recursive_args args;
-	args.source = from;
-	args.dest = to;
-	args.depth = 0;
+int cpr(const char *from, const char *to, bool overwrite) {
+	struct k_lib_cp_recursive_args args = {
+		args.source = from,
+		args.dest = to,
+		args.depth = 0,
+		args.overwrite = overwrite
+	};
 	return ls(from, &args, k_lib_cp_recursive_callback);
 }
 
