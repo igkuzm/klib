@@ -52,7 +52,9 @@ int k_lib_cp_recursive_callback(char *filename, FILETYPE filetype, void *user_da
 
 	if (filetype == FILETYPE_DIR){
 		if (!fexists(dest) && mkdir(dest, 0700) == -1) {
-			perror("Can't create directory");
+			char error[BUFSIZ];
+			sprintf(error, "Can't create directory: %s", dest);
+			perror(error);
 		} else {
 			if (args->depth < 10 ) {
 				struct k_lib_cp_recursive_args new_ags;
