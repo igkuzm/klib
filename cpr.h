@@ -63,6 +63,8 @@ int k_lib_cp_recursive_callback(char *filename, FILETYPE filetype, void *user_da
 				new_ags.depth = args->depth + 1;			
 			
 				ls(source, &new_ags, k_lib_cp_recursive_callback);
+			} else {
+				perror("pth is too deep: > 10");
 			}
 		}
 	}
