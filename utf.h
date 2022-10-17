@@ -2,7 +2,7 @@
  * File              : utf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 17.10.2022
+ * Last Modified Date: 18.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -124,16 +124,16 @@ utf32_to_utf8(
 		uint8_t utf8_char[4];
 
 		//get first byte - first 3 bit
-		utf8_char[0] = (utf32_char >> 18) | 0b11110000;
+		utf8_char[0] = ((utf32_char & 0b00000000000111000000000000000000) >> 18) | 0b11110000;
 
 		//get second
-		utf8_char[1] = (utf32_char >> 12) | 0b10000000;
+		utf8_char[1] = ((utf32_char & 0b00000000000000111111000000000000) >> 12) | 0b10000000;
 		
 		//get third
-		utf8_char[2] = (utf32_char >> 6 ) | 0b10000000;
+		utf8_char[2] = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
 
 		//get last
-		utf8_char[3] =  utf32_char | 0b10000000;
+		utf8_char[3] = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
 
 		callback(user_data, 4, utf8_char);
 		
@@ -142,23 +142,23 @@ utf32_to_utf8(
 		uint8_t utf8_char[3];
 		
 		//get first byte - first 4 bit
-		utf8_char[0] = (utf32_char >> 12) | 0b11100000;
+		utf8_char[0] = ((utf32_char & 0b00000000000000001111000000000000) >> 12) | 0b11100000;
 
 		//get second
-		utf8_char[1] = (utf32_char >> 6 ) | 0b10000000;
+		utf8_char[1] = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
 		
 		//get last
-		utf8_char[2] =  utf32_char | 0b10000000;
+		utf8_char[2] = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
 		
 		callback(user_data, 3, utf8_char);
 	}
 	else if (utf32_char > 256){ //2-byte
 		uint8_t utf8_char[2];
 		//get first byte - first 5 bit
-		utf8_char[0] = (utf32_char >> 6) | 0b11000000;
+		utf8_char[0] = ((utf32_char & 0b00000000000000000000011111000000)>> 6) | 0b11000000;
 
 		//get last
-		utf8_char[1] =  utf32_char | 0b10000000;
+		utf8_char[1] = ( utf32_char & 0b00000000000000000000000000111111)      | 0b10000000;
 		
 		callback(user_data, 2, utf8_char);
 	}
