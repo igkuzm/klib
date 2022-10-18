@@ -2,7 +2,7 @@
  * File              : smsearch.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 18.10.2022
+ * Last Modified Date: 19.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -18,6 +18,7 @@ extern "C"{
 #endif
 
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
@@ -64,10 +65,13 @@ void needle_list_add(needle_list *list, char *needle){
 	ptr->next = new_list;
 }
 
-bool strmatch(char *haystack, char *needle){
-	while(*needle)
+bool strmatch(char *haystack, char *needle, size_t *len){
+	*len = 0;
+	while(*needle){
+		len[0]++;
 		if (*needle++ != *haystack++)
 			return false;
+	}
 	return true;
 }
 
@@ -92,34 +96,36 @@ void smsearch(
 		if (*hp == 32){ //if new word
 			ptr = list; //pointer to list - update search list
 		}
+		
+		if (ptr){
+			needle_list *p = ptr; //pointer to iterate search strings
+			prev = NULL;
+			while(p){
+				char * np = p->needle;
+				char * hpp = &*hp;
+				size_t len;
+				if (strmatch(np, hpp, &len)){
+					//callback result - stop if return non zero
+					if (callback)
+						if (callback(userdata, (char *)&haystack[i], p->needle))
+							return;
+					//skip needle_len
+					i += len;
+					ptr = list;
+					prev = NULL;
+					goto iterate;
+				} else {
+					//remove needle from search;
+					if (prev)
+						prev->next = p->next;
+					else 
+						ptr = p->next;
+				}
 
-		needle_list *p = ptr; //pointer to iterate search strings
-		prev = NULL;
-		while(p){
-			char * np = p->needle;
-			char * hpp = &*hp;
-			if (strmatch(np, hpp)){
-				//callback result - stop if return non zero
-				if (callback)
-					if (callback(userdata, (char *)&haystack[i], p->needle))
-						return;
-				//skip needle_len
-				size_t len = strlen(p->needle);
-				i += len;
-				ptr = list;
-				prev = NULL;
-				goto iterate;
-			} else {
-				//remove needle from search;
-				if (prev)
-					prev->next = p->next;
-				else 
-					ptr = p->next;
+				//iterate list
+				prev = p;
+				p = p->next;
 			}
-
-			//iterate list
-			prev = p;
-			p = p->next;
 		}
 
 		i++;
