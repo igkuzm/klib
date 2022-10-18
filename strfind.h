@@ -2,7 +2,7 @@
  * File              : strfind.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 16.10.2022
+ * Last Modified Date: 19.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -35,6 +35,19 @@ static char * strinc(const char * haystack, const char * needle);
 //find needle in haystack and return its position 
 static long strfnd(const char * haystack, const char * needle);
 #define strfind(haystack, needle) strfnd(haystack, needle)
+
+//find one of strings of null-terminated array in haystack and callback 
+//it's position in haystack and index in array for eatch match 
+static void strfnda(
+		const char *haystack, //string where search needle
+		const char *needle[], //null-terminated array of search strings
+		void * userdata,      //data to transfer via callback
+		int (*callback)(      ///callback - return not-null to stop function
+			void * userdata,  //data transfered via callback
+			size_t pos,       //position of founded needle in haystack
+			int index		  //index of founded needle in array
+			)
+		);
 
 //return count of needle matches in haystack
 static int strcnt(const char * haystack, const char * needle);
@@ -201,6 +214,58 @@ strarep(
 	}
 	res[i++] = 0;
 	return res;
+}
+
+int strmatch(char *haystack, char *needle){
+	int len = 0;
+	while(*needle){
+		len++;
+		if (*needle++ != *haystack++)
+			return 0;
+	}
+	return len;
+}
+
+void strfnda(
+		const char *haystack,
+		const char *needle[],
+		void * userdata,
+		int (*callback)(
+			void * userdata,
+			size_t pos,
+			int i
+			)
+		)
+{
+	char * hp = (char *)haystack; //pointer to haystack
+	char **np = (char **)needle; //pointer to needle
+	size_t pos = 0; //iterator
+	while(hp[pos]){ //iterate haystack
+		iterate:;
+		if (*hp == 32){ //if new word
+			np = (char **)needle; //pointer to needle - update
+		}
+		
+		int index = 0;  //iterator	
+		while(np[index]){ //iterate search words
+			char * npp = *np;
+			char * hpp = &hp[pos];
+			int len = strmatch(npp, hpp);
+			if (len){
+				//callback result - stop if return non zero
+				if (callback)
+					if (callback(userdata, pos, index))
+						return;
+				//skip needle_len
+				pos += len;
+				goto iterate;
+			} 			
+			//iterate list
+			index++;
+		}
+
+		pos++;
+	}
 }
 
 int 
