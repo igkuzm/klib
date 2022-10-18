@@ -35,7 +35,7 @@ static int utf8_filepath_to_utf32(
 static void utf32_to_utf8(
 		uint32_t utf32_char, 
 		void * user_data, 
-		void (*callback)(void * user_data, int count, uint8_t *utf8_char));
+		void (*callback)(void * user_data, uint8_t utf8_char));
 
 
 /*
@@ -117,55 +117,58 @@ void
 utf32_to_utf8(
 		uint32_t utf32_char,
 		void * user_data,
-		void (*callback)(void * user_data, int count, uint8_t *utf8_char)		
+		void (*callback)(void * user_data, uint8_t utf8_char)		
 		)
 {
-	if (utf32_char > 16777216){ //4-byte
-		uint8_t utf8_char[4];
+	if (utf32_char > 0b00000000000001000000000000000000){ //4-byte
+		uint8_t utf8_char;
 
 		//get first byte - first 3 bit
-		utf8_char[0] = ((utf32_char & 0b00000000000111000000000000000000) >> 18) | 0b11110000;
+		utf8_char = ((utf32_char & 0b00000000000111000000000000000000) >> 18) | 0b11110000;
+		callback(user_data, utf8_char);
 
 		//get second
-		utf8_char[1] = ((utf32_char & 0b00000000000000111111000000000000) >> 12) | 0b10000000;
+		utf8_char = ((utf32_char & 0b00000000000000111111000000000000) >> 12) | 0b10000000;
+		callback(user_data, utf8_char);
 		
 		//get third
-		utf8_char[2] = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
+		utf8_char = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
+		callback(user_data, utf8_char);
 
 		//get last
-		utf8_char[3] = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
+		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
+		callback(user_data, utf8_char);
 
-		callback(user_data, 4, utf8_char);
 		
 	}
-	else if (utf32_char > 65536){ //3-byte
-		uint8_t utf8_char[3];
+	else if (utf32_char > 0b00000000000000000001000000000000){ //3-byte
+		uint8_t utf8_char;
 		
 		//get first byte - first 4 bit
-		utf8_char[0] = ((utf32_char & 0b00000000000000001111000000000000) >> 12) | 0b11100000;
+		utf8_char = ((utf32_char & 0b00000000000000001111000000000000) >> 12) | 0b11100000;
+		callback(user_data, utf8_char);
 
 		//get second
-		utf8_char[1] = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
+		utf8_char = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
+		callback(user_data, utf8_char);
 		
 		//get last
-		utf8_char[2] = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
-		
-		callback(user_data, 3, utf8_char);
+		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
+		callback(user_data, utf8_char);
 	}
-	else if (utf32_char > 256){ //2-byte
-		uint8_t utf8_char[2];
+	else if (utf32_char > 0b00000000000000000000000001000000){ //2-byte
+		uint8_t utf8_char;
 		//get first byte - first 5 bit
-		utf8_char[0] = ((utf32_char & 0b00000000000000000000011111000000)>> 6) | 0b11000000;
+		utf8_char = ((utf32_char & 0b00000000000000000000011111000000)>> 6) | 0b11000000;
+		callback(user_data, utf8_char);
 
 		//get last
-		utf8_char[1] = ( utf32_char & 0b00000000000000000000000000111111)      | 0b10000000;
-		
-		callback(user_data, 2, utf8_char);
+		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)      | 0b10000000;
+		callback(user_data, utf8_char);
 	}
 	else { //ANSY
-		uint8_t utf8_char[1];
-		utf8_char[0] = utf32_char;
-		callback(user_data, 1, utf8_char);
+		uint8_t utf8_char = utf32_char;
+		callback(user_data, utf8_char);
 	}
 }
 
