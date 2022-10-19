@@ -27,6 +27,7 @@ extern "C"{
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 //check haystack does starts with and include needle - return position of pointer haystack + needle_len or NULL
@@ -77,7 +78,7 @@ static void  fstrfnd(
 		void * userdata,
 		int (*callback)(
 			void * userdata,
-			off64_t *pos,
+			off_t *pos,
 			bool found,
 			int len,
 			char *buf
@@ -290,7 +291,7 @@ fstrfnd(
 		void * userdata,
 		int (*callback)(
 			void * userdata,
-			off64_t *pos,
+			off_t *pos,
 			bool found,
 			int len,
 			char *buf
@@ -303,7 +304,7 @@ fstrfnd(
 	int buflen = 0; //buf len
 	int i      = 0; //iterator
 	
-	off64_t pos = 0; //file position
+	off_t pos = 0; //file position
 	
 	//clear buf
 	for (i = 0; i < nlen; i++)
@@ -318,8 +319,7 @@ fstrfnd(
 		char ch = (char)chi;
 
 		if (ch==needle[buflen]) {
-			buf[buflen]=ch;
-			buflen++;
+			buf[buflen++]=ch;
 			if (buflen==nlen) {
 				//callback founded
 				if (callback)
@@ -352,6 +352,63 @@ fstrfnd(
 	}
 }
 
+typedef
+struct fstrfnda_list {
+	int index;
+	size_t pos;
+	int len;
+	struct fstrfnda_list * next;
+} fstrfnda_list;
+
+fstrfnda_list *
+fstrfnda_list_new(){
+	fstrfnda_list *list = malloc(sizeof(fstrfnda_list));
+	if (!list)
+		return NULL;
+	list->next = NULL;
+	return list;	
+}
+
+void
+fstrfnda_list_add(fstrfnda_list *list, size_t * pos, int * index, int * len){
+	fstrfnda_list *ptr = list;
+	while(ptr->next)
+		ptr++;
+	
+	fstrfnda_list *new_list = fstrfnda_list_new();
+	if (!new_list)
+		return;
+	
+	ptr->next  = new_list;
+	ptr->pos   = *pos;
+	ptr->index = *index;
+	ptr->len   = *len;
+}
+
+void
+fstrfnda_list_free(fstrfnda_list *list){
+	fstrfnda_list *ptr = list;
+	while(ptr){
+		fstrfnda_list *next = ptr->next;
+		free(ptr);
+		ptr = next;
+	}
+}
+
+#define fstrfnda_list_for_each(item, list) \
+	fstrfnda_list * ___ptr = list; \
+	fstrfnda_list * item; \
+	for (item = ___ptr; ___ptr->next; ___ptr=___ptr->next, item = ___ptr)
+
+int 
+fstrfnda_cb(void * userdata, size_t *pos, int index, int len){
+	fstrfnda_list *list = userdata;
+	fstrfnda_list_add(list, pos, &index, &len);
+	*pos += len;
+
+	return 0;
+}
+
 void 
 fstrfnda(
 		FILE *file, 
@@ -359,9 +416,8 @@ fstrfnda(
 		void * userdata,
 		int (*callback)(
 			void * userdata,
-			off64_t *pos,
-			int index,
-			int len,
+			off_t *pos,
+			fstrfnda_list *list,
 			char *buf
 			)
 		) 
@@ -370,6 +426,7 @@ fstrfnda(
 
 	int minlen = BUFSIZ;
 	int maxlen = 0;
+	int size   = 0;
 
 	//count len
 	while(*np){
@@ -378,19 +435,27 @@ fstrfnda(
 			maxlen = len;
 		if (len < minlen)
 		   minlen = len;	
+		size++;
 	}
 
-	char buf[maxlen];
+	char buf [BUFSIZ];
+	char fbuf[2*maxlen]; //fix buffer - to find 
+						 //words splitted by main buffers
 	
-	off64_t pos = 0; //file position
+	off_t pos = 0; //file position
 	
-	int buflen = 0; //buf len
-	int i      = 0; //iterator
+	int buflen  = 0; //buf len
+	int fbuflen = 0; //fix buf len
+	int i       = 0; //iterator
 	
 	//clear buf
-	for (i = 0; i < maxlen; i++)
+	for (i = 0; i < BUFSIZ; i++)
 		buf[i] = 0;
-    
+
+	//clear fbuf
+	for (i = 0; i < 2*maxlen; i++)
+		fbuf[i] = 0;	
+
 	while (1) { 
 		int chi = fgetc(file);
 		if (chi == EOF) { 
@@ -398,37 +463,67 @@ fstrfnda(
 		}
 		char ch = (char)chi;
 
-		if (ch==needle[buflen]) {
-			buf[buflen]=ch;
-			buflen++;
-			if (buflen==nlen) {
-				//callback founded
-				if (callback)
-					if(callback(userdata, &pos, true, buflen, buf))
-						break;
-			}
-			//clear buf
-			for (i = 0; i < buflen; ++i) {
-				buf[i] = 0;
-			}
-		}
-		else {
-			if (buflen>0) {
-				//callback buff	
-				if (callback)
-					if(callback(userdata, &pos, false, buflen, buf))
-						break;
-				//clear buf
-				for (i = 0; i < buflen; ++i) {
-					buf[i] = 0;
-				}
-			}
-			buflen = 0;
-			//callback ch
-			if (callback)
-				if(callback(userdata, &pos, false, 1, &ch))
+		//fill main buffer
+		if (buflen < BUFSIZ){
+			buf[buflen++] = ch;
+		} else {
+			//check main buffer for matches and callback
+			//list of matches
+			fstrfnda_list *list = fstrfnda_list_new();
+			
+			//scan buffer
+			strfnda(buf, needle, list, fstrfnda_cb);
+
+			//callback buffer
+			if(callback)
+				if(callback(userdata, &pos, list, buf))
 					break;
+
+			//clear buffer
+			for (i = 0; i < buflen; i++)
+				buf[i] = 0;
+			buflen = 0;
 		}
+
+		//we need fix buffer to find matches if search string is splitted by main buffer
+		//start fix buffer at the end of main and at start on next buffer
+		if (buflen == BUFSIZ - maxlen) {//start fix buffer 
+			//clear fbuf
+			for (i = 0; i < fbuflen; i++)
+				fbuf[i] = 0;
+			fbuflen = 0;
+			
+			fbuf[fbuflen++] = ch;
+		} 
+
+		if (buflen < maxlen && buflen > BUFSIZ - maxlen){
+			fbuf[fbuflen++] = ch;
+		} 
+		
+		if (fbuflen == 2*maxlen - 1){ //check if there is matches in fbuf
+			fbuf[fbuflen++] = ch;
+			//list of matches
+			fstrfnda_list *list = fstrfnda_list_new();
+			
+			//scan buffer
+			strfnda(fbuf, needle, list, fstrfnda_cb);
+			if (list->next){ //we have string matches
+				//callback fixbuffer
+				if(callback)
+					if(callback(userdata, &pos, list, fbuf))
+						break;
+				//free fixbuffer	
+				for (i = 0; i < fbuflen; i++)
+					fbuf[i] = 0;
+				fbuflen = 0;
+				
+				//free main buffer
+				for (i = 0; i < buflen; i++)
+					buf[i] = 0;
+				buflen = 0;				
+			}
+		}
+
 		pos++;
 	}
 }
