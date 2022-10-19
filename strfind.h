@@ -2,7 +2,7 @@
  * File              : strfind.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 19.10.2022
+ * Last Modified Date: 20.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -395,9 +395,8 @@ fstrfnda_list_free(fstrfnda_list *list){
 }
 
 #define fstrfnda_list_for_each(item, list) \
-	fstrfnda_list * ___ptr = list; \
 	fstrfnda_list * item; \
-	for (item = ___ptr; ___ptr->next; ___ptr=___ptr->next, item = ___ptr)
+	for (item = list; item->next; item=item->next)
 
 int 
 fstrfnda_cb(void * userdata, size_t *pos, int index, int len){
