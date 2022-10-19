@@ -69,6 +69,20 @@ static int fstrrep(FILE *in, FILE *out, const char * needle, const char * replac
 //fstrep with filepaths. return -1 if file_in access error, -2 if file_out access error
 static int fpstrrep(const char *file_in, const char *file_out, const char * needle, const char * replace); 
 
+//iterate file content and callback buffer with buffer len, file position and founded needle
+//if needle has founded - buffer is needle
+static void  fstrfnd(
+		FILE *file, 
+		const char * needle, 
+		void * userdata,
+		int (*callback)(
+			void * userdata,
+			off64_t *pos,
+			bool found,
+			int len,
+			char *buf
+			)
+		); 
 /**
  * implimation of functions
  */
@@ -268,6 +282,158 @@ void strfnda(
 		pos++;
 	}
 }
+
+void 
+fstrfnd(
+		FILE *file, 
+		const char * needle, 
+		void * userdata,
+		int (*callback)(
+			void * userdata,
+			off64_t *pos,
+			bool found,
+			int len,
+			char *buf
+			)
+		) 
+{
+	int nlen=strlen(needle);
+	char buf[nlen];
+	
+	int buflen = 0; //buf len
+	int i      = 0; //iterator
+	
+	off64_t pos = 0; //file position
+	
+	//clear buf
+	for (i = 0; i < nlen; i++)
+		buf[i] = 0;
+
+    
+	while (1) { 
+		int chi = fgetc(file);
+		if (chi == EOF) { 
+			break; 
+		}
+		char ch = (char)chi;
+
+		if (ch==needle[buflen]) {
+			buf[buflen]=ch;
+			buflen++;
+			if (buflen==nlen) {
+				//callback founded
+				if (callback)
+					if(callback(userdata, &pos, true, buflen, buf))
+						break;
+			}
+			//clear buf
+			for (i = 0; i < buflen; ++i) {
+				buf[i] = 0;
+			}
+		}
+		else {
+			if (buflen>0) {
+				//callback buff	
+				if (callback)
+					if(callback(userdata, &pos, false, buflen, buf))
+						break;
+				//clear buf
+				for (i = 0; i < buflen; ++i) {
+					buf[i] = 0;
+				}
+			}
+			buflen = 0;
+			//callback ch
+			if (callback)
+				if(callback(userdata, &pos, false, 1, &ch))
+					break;
+		}
+		pos++;
+	}
+}
+
+void 
+fstrfnda(
+		FILE *file, 
+		const char * needle[], 
+		void * userdata,
+		int (*callback)(
+			void * userdata,
+			off64_t *pos,
+			int index,
+			int len,
+			char *buf
+			)
+		) 
+{
+	char ** np = (char **)needle; //pointer to needle array
+
+	int minlen = BUFSIZ;
+	int maxlen = 0;
+
+	//count len
+	while(*np){
+		int len = strlen(*np++);
+		if (len > maxlen)
+			maxlen = len;
+		if (len < minlen)
+		   minlen = len;	
+	}
+
+	char buf[maxlen];
+	
+	off64_t pos = 0; //file position
+	
+	int buflen = 0; //buf len
+	int i      = 0; //iterator
+	
+	//clear buf
+	for (i = 0; i < maxlen; i++)
+		buf[i] = 0;
+    
+	while (1) { 
+		int chi = fgetc(file);
+		if (chi == EOF) { 
+			break; 
+		}
+		char ch = (char)chi;
+
+		if (ch==needle[buflen]) {
+			buf[buflen]=ch;
+			buflen++;
+			if (buflen==nlen) {
+				//callback founded
+				if (callback)
+					if(callback(userdata, &pos, true, buflen, buf))
+						break;
+			}
+			//clear buf
+			for (i = 0; i < buflen; ++i) {
+				buf[i] = 0;
+			}
+		}
+		else {
+			if (buflen>0) {
+				//callback buff	
+				if (callback)
+					if(callback(userdata, &pos, false, buflen, buf))
+						break;
+				//clear buf
+				for (i = 0; i < buflen; ++i) {
+					buf[i] = 0;
+				}
+			}
+			buflen = 0;
+			//callback ch
+			if (callback)
+				if(callback(userdata, &pos, false, 1, &ch))
+					break;
+		}
+		pos++;
+	}
+}
+
+
 
 int 
 fstrrep(
