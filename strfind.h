@@ -38,14 +38,16 @@ static long strfnd(const char * haystack, const char * needle);
 
 //find one of strings of null-terminated array in haystack and callback 
 //it's position in haystack and index in array for eatch match 
+//add '*pos += len;' in callback function to increase search algorithm speed 
 static void strfnda(
 		const char *haystack, //string where search needle
 		const char *needle[], //null-terminated array of search strings
 		void * userdata,      //data to transfer via callback
-		int (*callback)(      ///callback - return not-null to stop function
+		int (*callback)(      ///callback - return non-zero to stop function
 			void * userdata,  //data transfered via callback
-			size_t pos,       //position of founded needle in haystack
-			int index		  //index of founded needle in array
+			size_t *pos,      //position of founded needle in haystack
+			int index,		  //index of founded needle in array
+			int len           //string length of founded needle
 			)
 		);
 
@@ -232,8 +234,9 @@ void strfnda(
 		void * userdata,
 		int (*callback)(
 			void * userdata,
-			size_t pos,
-			int i
+			size_t *pos,
+			int index,
+			int len
 			)
 		)
 {
@@ -254,10 +257,8 @@ void strfnda(
 			if (len){
 				//callback result - stop if return non zero
 				if (callback)
-					if (callback(userdata, pos, index))
+					if (callback(userdata, &pos, index, len))
 						return;
-				//skip needle_len
-				pos += len;
 				goto iterate;
 			} 			
 			//iterate list
