@@ -2,7 +2,7 @@
  * File              : strfind.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 20.10.2022
+ * Last Modified Date: 21.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -266,20 +266,19 @@ void strfnda(
 		
 		int index = 0;  //iterator	
 		while(np[index]){ //iterate search words
-			char * npp = *np;
+			char * npp = np[index];
 			char * hpp = &hp[pos];
-			int len = strmatch(npp, hpp);
+			int len = strmatch(hpp, npp);
 			if (len){
 				//callback result - stop if return non zero
 				if (callback)
 					if (callback(userdata, &pos, index, len))
 						return;
+				pos++;
 				goto iterate;
 			} 			
-			//iterate list
 			index++;
 		}
-
 		pos++;
 	}
 }
