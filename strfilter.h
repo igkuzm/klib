@@ -41,6 +41,8 @@ strfilter_date(const char * str)
 	char * buf = malloc(BUFSIZ);
 	if(!buf)
 		return NULL;
+	//pointer to buffer
+	char *bp = buf;
 
 	//iterate string
 	int i = 0, dotcnt = 0;
@@ -50,12 +52,12 @@ strfilter_date(const char * str)
 			break;
 		
 		if (ptr[i] >= '0' && ptr[i] <= '9') //check numbers
-			*buf++ = ptr[i];
+			*bp++ = ptr[i];
 
 		if(ptr[i] == '.'){               //stop filter if there is more then 2 dots
 			if (dotcnt < 2){
 				dotcnt++;
-				*buf++ = ptr[i];
+				*bp++ = ptr[i];
 			} else
 				break;
 		}
@@ -64,7 +66,7 @@ strfilter_date(const char * str)
 	}
 
 	//null-terminate string
-	*buf = 0;
+	*bp = 0;
 
 	return buf;
 }
@@ -79,6 +81,8 @@ strfilter_datetime(const char * str)
 	char * buf = malloc(BUFSIZ);
 	if(!buf)
 		return NULL;
+	//pointer to buffer
+	char *bp = buf;
 
 	//iterate string
 	int i = 0, dotcnt = 0, spaces = 0;
@@ -88,29 +92,29 @@ strfilter_datetime(const char * str)
 			break;
 		
 		if (ptr[i] >= '0' && ptr[i] <= '9') //check numbers
-			*buf++ = ptr[i];
+			*bp++ = ptr[i];
 
 		if(ptr[i] == '.'){               //stop filter if there is more then 2 dots
 			if (dotcnt < 2){
 				dotcnt++;
-				*buf++ = ptr[i];
+				*bp++ = ptr[i];
 			} else
 				break;
 		}
 
 		if(ptr[i] == ' ' && dotcnt == 2 && spaces == 0){ //allow space if dotcnt == 2
 			spaces++;
-			*buf++ = ptr[i];
+			*bp++ = ptr[i];
 		}
 
 		if(ptr[i] == ':' && spaces == 1) //allow ':'
-			*buf++ = ptr[i];
+			*bp++ = ptr[i];
 
 		i++;
 	}
 	
 	//null-terminate string
-	*buf = 0;
+	*bp = 0;
 
 	return buf;
 }
@@ -148,6 +152,8 @@ strfilter_str(
 	char * buf = malloc(BUFSIZ);
 	if(!buf)
 		return NULL;
+	//pointer to buffer
+	char *bp = buf;
 
 	//iterate string
 	int i, c = 0;
@@ -159,10 +165,10 @@ strfilter_str(
 		//pointer to array
 		char ** pa = (char **)chars;		
 		while(*pa){
-			int len = _strfilter_strinc(&ptr[c], *pa);
+			int len = _strfilter_strinc(&ptr[c], *pa++);
 			if (len)
 				for (i = 0; i < len; i++) {
-					*buf++ = ptr[c++];
+					*bp++ = ptr[c++];
 				}
 		}
 		
@@ -170,7 +176,7 @@ strfilter_str(
 	}
 
 	//null-terminate string
-	*buf = 0;
+	*bp = 0;
 
 	return buf;
 }
