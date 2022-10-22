@@ -2,7 +2,7 @@
  * File              : strsplit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 15.10.2022
+ * Last Modified Date: 22.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -41,7 +41,7 @@ strsplit (
 	char * ptr = (char *)str;
 
 	// alloc array of strings (pointers)
-	char **arr = malloc(8);
+	char **arr = malloc(sizeof(ptr));
 	if (!arr)
 		return -1;			
 
@@ -53,7 +53,7 @@ strsplit (
 		arr[i++] = token;
 		token = strtok(NULL, delim);
 		//realloc array
-		arr = realloc(arr, i*8 + 8);
+		arr = realloc(arr, i*sizeof(token) + sizeof(token));
 		if (!arr)
 			return -1;			
 	}
