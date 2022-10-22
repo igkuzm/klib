@@ -2,7 +2,7 @@
  * File              : utf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 21.10.2022
+ * Last Modified Date: 18.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -15,89 +15,6 @@ extern "C"{
 
 #include <stdio.h>
 #include <stdint.h>
-
-/*
- * if uint32 has mask > 00000000 00000100 00000000 00000000
- * and use more then 18 bits
- */
-#define UTF32_USE_4_BYTE(c) (c > 0x00040000)
-
-/*
- * if uint32 has mask > 00000000 00000000 00010000 00000000
- * and use more then 12 bits
- */
-#define UTF32_USE_3_BYTE(c) (c > 0x00001000)
-
-/*
- * if uint32 has mask > 00000000 00000000 00000000 01000000
- * and use more then 6 bits
- */
-#define UTF32_USE_2_BYTE(c) (c > 0x00000040)	
-	
-
-/*
- * utf8 from 32bit first byte has 3 bit
- * and mask 00000000 00011100 00000000 00000000
- * need to add 11110000 to start of byte 
- */
-#define UTF8_4BYTE_FIRST_BYTE(c) (((c & 0x001C0000) >> 18)|0xF0)
-
-/*
- * utf8 from 32bit second byte has 6 bit
- * and mask 00000000 00000011 11110000 00000000
- * need to add 10000000 to start of byte 
- */
-#define UTF8_4BYTE_SECOND_BYTE(c) (((c & 0x0003F000) >> 12)|0x80)
-
-/*
- * utf8 from 32bit third byte has 6 bit
- * and mask 00000000 00000000 00001111 11000000
- * need to add 10000000 to start of byte 
- */
-#define UTF8_4BYTE_THIRD_BYTE(c) (((c & 0x00000FC0) >> 6)|0x80)	
-
-/*
- * utf8 from 32bit fouth byte has 6 bit
- * and mask 00000000 00000000 00000000 00111111
- * need to add 10000000 to start of byte 
- */
-#define UTF8_4BYTE_FOURTH_BYTE(c) ((c & 0x0000003F)|0x80)
-
-/*
- * utf8 from 24bit first byte has 4 bit
- * and mask 00000000 00000000 11110000 00000000
- * need to add 11100000 to start of byte 
- */
-#define UTF8_3BYTE_FIRST_BYTE(c) (((c & 0x0000F000) >> 12)|0xE0)
-
-/*
- * utf8 from 24bit second byte has 6 bit
- * and mask 00000000 00000000 00001111 11000000
- * need to add 10000000 to start of byte 
- */
-#define UTF8_3BYTE_SECOND_BYTE(c) (((c & 0x00000FC0) >> 6)|0x80)	
-
-/*
- * utf8 from 24bit third byte has 6 bit
- * and mask 00000000 00000000 00000000 00111111
- * need to add 10000000 to start of byte 
- */
-#define UTF8_3BYTE_THIRD_BYTE(c) ((c & 0x0000003F)|0x80)
-
-/*
- * utf8 from 16bit first byte has 5 bit
- * and mask 00000000 00000000 00000111 11000000
- * need to add 11000000 to start of byte 
- */
-#define UTF8_2BYTE_FIRST_BYTE(c) (((c & 0x000007C0) >> 12)|0xC0)
-
-/*
- * utf8 from 16bit second byte has 6 bit
- * and mask 00000000 00000000 00000000 00111111
- * need to add 10000000 to start of byte 
- */
-#define UTF8_2BYTE_SECOND_BYTE(c) ((c & 0x0000003F)|0x80)
-
 
 static void utf8_to_utf32(
 		int count, 
@@ -203,64 +120,64 @@ utf32_to_utf8(
 		int (*callback)(void * user_data, uint8_t utf8_char)		
 		)
 {
-	if (UTF32_USE_4_BYTE(utf32_char)){ //4-byte
+	if (utf32_char > 0b00000000000001000000000000000000){ //4-byte
 		uint8_t utf8_char;
 
 		//get first byte - first 3 bit
-		utf8_char = UTF8_4BYTE_FIRST_BYTE(utf32_char);
+		utf8_char = ((utf32_char & 0b00000000000111000000000000000000) >> 18) | 0b11110000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
 		//get second
-		utf8_char = UTF8_4BYTE_SECOND_BYTE(utf32_char);
+		utf8_char = ((utf32_char & 0b00000000000000111111000000000000) >> 12) | 0b10000000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 		
 		//get third
-		utf8_char = UTF8_4BYTE_THIRD_BYTE(utf32_char);
+		utf8_char = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
 		//get last
-		utf8_char = UTF8_4BYTE_FOURTH_BYTE(utf32_char);
+		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 	}
-	else if (UTF32_USE_3_BYTE(utf32_char)){ //3-byte
+	else if (utf32_char > 0b00000000000000000001000000000000){ //3-byte
 		uint8_t utf8_char;
 		
 		//get first byte - first 4 bit
-		utf8_char = UTF8_3BYTE_FIRST_BYTE(utf32_char);
+		utf8_char = ((utf32_char & 0b00000000000000001111000000000000) >> 12) | 0b11100000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
 		//get second
-		utf8_char = UTF8_3BYTE_SECOND_BYTE(utf32_char);
+		utf8_char = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 		
 		//get last
-		utf8_char = UTF8_3BYTE_THIRD_BYTE(utf32_char);
+		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 	}
-	else if (UTF32_USE_2_BYTE(utf32_char)){ //2-byte
+	else if (utf32_char > 0b00000000000000000000000001000000){ //2-byte
 		uint8_t utf8_char;
 		//get first byte - first 5 bit
-		utf8_char = UTF8_2BYTE_FIRST_BYTE(utf32_char);
+		utf8_char = ((utf32_char & 0b00000000000000000000011111000000)>> 6) | 0b11000000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
 		//get last
-		utf8_char = UTF8_2BYTE_SECOND_BYTE(utf32_char);
+		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)      | 0b10000000;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
