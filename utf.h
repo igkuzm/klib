@@ -2,7 +2,7 @@
  * File              : utf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 18.10.2022
+ * Last Modified Date: 22.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -120,64 +120,76 @@ utf32_to_utf8(
 		int (*callback)(void * user_data, uint8_t utf8_char)		
 		)
 {
-	if (utf32_char > 0b00000000000001000000000000000000){ //4-byte
+	//more than 00000000 00000100 00000000 00000000
+	if (utf32_char > 0x040000){ //4-byte
 		uint8_t utf8_char;
 
-		//get first byte - first 3 bit
-		utf8_char = ((utf32_char & 0b00000000000111000000000000000000) >> 18) | 0b11110000;
+		//get first byte - first 3 bit 00000000 00011100 00000000 00000000
+		//and mask with 11110000 
+		utf8_char = ((utf32_char & 0x1C0000) >> 18) | 0xF0;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
-		//get second
-		utf8_char = ((utf32_char & 0b00000000000000111111000000000000) >> 12) | 0b10000000;
+		//get second - 00000000 00000011 11110000 00000000
+		//and mask with 10000000 
+		utf8_char = ((utf32_char & 0x03F000) >> 12) | 0x80;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 		
-		//get third
-		utf8_char = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
+		//get third - 00000000 00000000 00001111 11000000
+		//and mask with 10000000 
+		utf8_char = ((utf32_char & 0x0FC0) >> 6 )   | 0x80;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
-		//get last
-		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
+		//get last - 00000000 00000000 00000000 00111111
+		//and mask with 10000000 
+		utf8_char = ( utf32_char & 0x3F)            | 0x80;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 	}
-	else if (utf32_char > 0b00000000000000000001000000000000){ //3-byte
+	//more than 00000000 00000000 00010000 00000000
+	else if (utf32_char > 0x1000){ //3-byte
 		uint8_t utf8_char;
 		
-		//get first byte - first 4 bit
-		utf8_char = ((utf32_char & 0b00000000000000001111000000000000) >> 12) | 0b11100000;
+		//get first byte - first 4 bit 00000000 00000000 11110000 00000000
+		//and mask with 11100000 
+		utf8_char = ((utf32_char & 0xF000) >> 12) | 0xE0;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
-		//get second
-		utf8_char = ((utf32_char & 0b00000000000000000000111111000000) >> 6 ) | 0b10000000;
+		//get second - 00000000 00000000 00001111 11000000
+		//and mask with 10000000 
+		utf8_char = ((utf32_char & 0x0FC0) >> 6 ) | 0x80;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 		
-		//get last
-		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)        | 0b10000000;
+		//get last - 00000000 00000000 00000000 00111111
+		//and mask with 10000000 
+		utf8_char = ( utf32_char & 0x3F)          | 0x80;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 	}
-	else if (utf32_char > 0b00000000000000000000000001000000){ //2-byte
+	//more than 000000000 00000000 00000000 1000000
+	else if (utf32_char > 0x80){ //2-byte
 		uint8_t utf8_char;
-		//get first byte - first 5 bit
-		utf8_char = ((utf32_char & 0b00000000000000000000011111000000)>> 6) | 0b11000000;
+		//get first byte - first 5 bit 00000000 00000000 00000111 11000000
+		//and mask with 11000000 
+		utf8_char = ((utf32_char & 0x7C0)>> 6) | 0xC0;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
 
-		//get last
-		utf8_char = ( utf32_char & 0b00000000000000000000000000111111)      | 0b10000000;
+		//get last - 00000000 00000000 00000000 00111111 
+		//and mask with 10000000 
+		utf8_char = ( utf32_char & 0x3F)       | 0x80;
 		if (callback)
 			if(callback(user_data, utf8_char))
 				return;
