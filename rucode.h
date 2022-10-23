@@ -2,7 +2,7 @@
  * File              : rucode.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 07.03.2022
- * Last Modified Date: 23.10.2022
+ * Last Modified Date: 24.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -319,6 +319,8 @@ static int rucode_compare (const void * s1, const void * s2) {
 		return ((rucode_t *)s1)->cp1251 - key->cp1251;
 	if (key->iso8859_5)
 		return ((rucode_t *)s1)->iso8859_5 - key->iso8859_5;
+	if (key->koi8r)
+		return ((rucode_t *)s1)->koi8r - key->koi8r;	
 	return 0;
 }
 
@@ -451,37 +453,37 @@ rucode_convert_codepage(const char * str, RUCODE_CODEPAGE from, RUCODE_CODEPAGE 
 				default:
 					break;
 			}
-			//make bsearch
-			rucode_t *value = 
-					bsearch(&key, sorted_table, 
-							table_size, sizeof(rucode_t), 
-									rucode_compare);
-			if (value){
-				switch (to) {
-					case RUCODE_CODEPAGE_UTF8: {
-						char * p = value->utf8;
-						while (*p) {
-							*rp++ = *p++;
-						}
-						break;						
+		}
+		//make bsearch
+		rucode_t *value = 
+				bsearch(&key, sorted_table, 
+						table_size, sizeof(rucode_t), 
+								rucode_compare);
+		if (value){
+			switch (to) {
+				case RUCODE_CODEPAGE_UTF8: {
+					char * p = value->utf8;
+					while (*p) {
+						*rp++ = *p++;
 					}
-					case RUCODE_CODEPAGE_CP1251:
-						*rp++ = value->cp1251;
-						break;
-					case RUCODE_CODEPAGE_CP866:
-						*rp++ = value->cp866;
-						break;
-					case RUCODE_CODEPAGE_ISO8859_5:
-						*rp++ = value->iso8859_5;
-						break;
-					
-					default:
-						break;
+					break;						
 				}
-			} else {
-				for (i = 0; i < buflen; ++i) {
-					*rp++ = buf[i];	
-				}
+				case RUCODE_CODEPAGE_CP1251:
+					*rp++ = value->cp1251;
+					break;
+				case RUCODE_CODEPAGE_CP866:
+					*rp++ = value->cp866;
+					break;
+				case RUCODE_CODEPAGE_ISO8859_5:
+					*rp++ = value->iso8859_5;
+					break;
+				
+				default:
+					break;
+			}
+		} else {
+			for (i = 0; i < buflen; ++i) {
+				*rp++ = buf[i];	
 			}
 		}
 	}
