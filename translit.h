@@ -22,6 +22,11 @@ extern "C"{
 
 static char * translit(const char * string);
 
+
+/*
+ * IMP
+ */
+
 typedef struct translit_t {
 	uint32_t utf_code;
 	char utf[5];
@@ -101,12 +106,12 @@ static translit_t translit_table[] =
 	{0x2116, "№", "#"  },
 };
 
-#ifndef TRANSLIT_LINEAR_SEARCH
+//#ifndef TRANSLIT_LINEAR_SEARCH
 //function for binary search
 static int translit_compare (const void * s1, const void * s2) {
-    return *((uint32_t *)s1) - *((uint32_t *)s2);
+    return ((translit_t *)s1)->utf_code - ((translit_t *)s2)->utf_code;
 }
-#endif
+//#endif
 
 char * 
 translit(
