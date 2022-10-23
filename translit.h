@@ -106,12 +106,12 @@ static translit_t translit_table[] =
 	{0x2116, "№", "#"  },
 };
 
-//#ifndef TRANSLIT_LINEAR_SEARCH
+#ifndef TRANSLIT_LINEAR_SEARCH
 //function for binary search
 static int translit_compare (const void * s1, const void * s2) {
     return ((translit_t *)s1)->utf_code - ((translit_t *)s2)->utf_code;
 }
-//#endif
+#endif
 
 char * 
 translit(
