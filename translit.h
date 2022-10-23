@@ -207,7 +207,9 @@ translit(
 		}
 		if (value.utf_code) {
 			translit_t *translit = 
-				bsearch(&value, translit_table, translit_table_size, sizeof(translit_t), translit_compare);
+					bsearch(&value, translit_table, 
+							translit_table_size, sizeof(translit_t), 
+									translit_compare);
 			if (translit)
 				strcat(ret, translit->ascii);
 			else
