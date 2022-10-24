@@ -1,5 +1,5 @@
 /**
- * File              : rucode.h
+ * File              : cprecode.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 07.03.2022
  * Last Modified Date: 24.10.2022
@@ -7,8 +7,8 @@
  */
 
 
-#ifndef k_lib_rucode_h__
-#define k_lib_rucode_h__
+#ifndef k_lib_cprecode_h__
+#define k_lib_cprecode_h__
 
 #ifdef __cplusplus
 extern "C"{
@@ -22,14 +22,14 @@ extern "C"{
 //#define TRANSLIT_LINEAR_SEARCH
 
 typedef enum {
-	RUCODE_CODEPAGE_UTF8,
-	RUCODE_CODEPAGE_ASCII,
-	RUCODE_CODEPAGE_CP1251,
-	RUCODE_CODEPAGE_KOI8R,
-	RUCODE_CODEPAGE_CP866,
-	RUCODE_CODEPAGE_ISO8859_5,
-	RUCODE_CODEPAGE_MACCYRILLIC,
-} RUCODE_CODEPAGE;
+	CPRECODE_UTF8,
+	CPRECODE_ASCII,
+	CPRECODE_CP1251,
+	CPRECODE_KOI8R,
+	CPRECODE_CP866,
+	CPRECODE_ISO8859_5,
+	CPRECODE_MACCYRILLIC,
+} CPRECODE_CODEPAGE;
 
 /*
  * Convert russian utf8 string to ASCII transliterating string
@@ -41,13 +41,13 @@ static char * translit(const char * string);
  * Convert string from one codepage to other
  * allocate new string
  */
-static char * rucode_convert_codepage(const char * string, RUCODE_CODEPAGE from, RUCODE_CODEPAGE to);
+static char * cprecode(const char * string, CPRECODE_CODEPAGE from, CPRECODE_CODEPAGE to);
 
 /*
  * IMP
  */
 
-typedef struct rucode_t {
+typedef struct cprecode_t {
 	uint32_t utf_code;
 	char utf8[5];
 	char ascii[4];
@@ -56,10 +56,10 @@ typedef struct rucode_t {
 	char cp866;
 	char iso8859_5;
 	char maccyrillic;
-} rucode_t;
+} cprecode_t;
 
 //for binary search we need sorted array
-static rucode_t codepage_table[] = 
+static cprecode_t cprecode_table[] = 
 {
 	{0x00AB, "«", "<<", 0xAB, 0x22,  34,  0x22,  0xC7  }, //0
 	{0x00BB, "»", ">>", 0xBB, 0x22,  34,  0x22,  0xC8  }, //1
@@ -135,7 +135,7 @@ static rucode_t codepage_table[] =
 #ifndef TRANSLIT_LINEAR_SEARCH
 //function for binary search
 static int translit_compare (const void * s1, const void * s2) {
-    return ((rucode_t *)s1)->utf_code - ((rucode_t *)s2)->utf_code;
+    return ((cprecode_t *)s1)->utf_code - ((cprecode_t *)s2)->utf_code;
 }
 #endif
 
@@ -154,7 +154,7 @@ translit(
 
 	//get size of translit table
 	int translit_table_size = 
-			sizeof(codepage_table) / sizeof(rucode_t);
+			sizeof(cprecode_table) / sizeof(cprecode_t);
 	
 
 	int i;
@@ -206,7 +206,7 @@ translit(
 			strcat(ret, buf);
 #else
 		//binary search
-		rucode_t key = {0};
+		cprecode_t key = {0};
 		switch (buflen) {
 			case 4: {
 				key.utf_code = (
@@ -237,9 +237,9 @@ translit(
 				break;
 		}
 		if (key.utf_code) {
-			rucode_t *translit = 
-					bsearch(&key, codepage_table, 
-							translit_table_size, sizeof(rucode_t), 
+			cprecode_t *translit = 
+					bsearch(&key, cprecode_table, 
+							translit_table_size, sizeof(cprecode_t), 
 									translit_compare);
 			if (translit)
 				strcat(ret, translit->ascii);
@@ -253,7 +253,7 @@ translit(
 	return ret;
 }
 
-int get_utf8_code(char *ptr, rucode_t * key, char * buf){
+int get_utf8_code(char *ptr, cprecode_t * key, char * buf){
 	int i, buflen = 0;
 	if ((*ptr & 0b11110000) == 240) {     //4 byte
 		for (i = 0; i < 4; i++) {
@@ -316,24 +316,24 @@ int get_utf8_code(char *ptr, rucode_t * key, char * buf){
 
 //function for binary search
 static int rucode_compare (const void * s1, const void * s2) {
-	rucode_t * key = (rucode_t * )s2;
+	cprecode_t * key = (cprecode_t * )s2;
 	if (key->utf_code)
-		return ((rucode_t *)s1)->utf_code - key->utf_code;
+		return ((cprecode_t *)s1)->utf_code - key->utf_code;
 	if (key->cp1251)
-		return ((rucode_t *)s1)->cp1251 - key->cp1251;
+		return ((cprecode_t *)s1)->cp1251 - key->cp1251;
 	if (key->iso8859_5)
-		return ((rucode_t *)s1)->iso8859_5 - key->iso8859_5;
+		return ((cprecode_t *)s1)->iso8859_5 - key->iso8859_5;
 	if (key->koi8r)
-		return ((rucode_t *)s1)->koi8r - key->koi8r;	
+		return ((cprecode_t *)s1)->koi8r - key->koi8r;	
 	if (key->maccyrillic)
-		return ((rucode_t *)s1)->maccyrillic - key->maccyrillic;	
+		return ((cprecode_t *)s1)->maccyrillic - key->maccyrillic;	
 	return 0;
 }
 
 void
-sort_koi8r_table(const rucode_t * table, rucode_t * sorted_table, int table_size)
+sort_koi8r_table(const cprecode_t * table, cprecode_t * sorted_table, int table_size)
 {
-	rucode_t item;
+	cprecode_t item;
 	int i, j;
 	//fill table
 	for (i = 0; i < table_size; ++i) {
@@ -353,9 +353,9 @@ sort_koi8r_table(const rucode_t * table, rucode_t * sorted_table, int table_size
 }
 
 void
-sort_maccyrillic_table(const rucode_t * table, rucode_t * sorted_table, int table_size)
+sort_maccyrillic_table(const cprecode_t * table, cprecode_t * sorted_table, int table_size)
 {
-	rucode_t item;
+	cprecode_t item;
 	int i, j;
 	//fill table
 	for (i = 0; i < table_size; ++i) {
@@ -375,14 +375,14 @@ sort_maccyrillic_table(const rucode_t * table, rucode_t * sorted_table, int tabl
 }
 
 char * 
-rucode_convert_codepage(const char * str, RUCODE_CODEPAGE from, RUCODE_CODEPAGE to)
+cprecode(const char * str, CPRECODE_CODEPAGE from, CPRECODE_CODEPAGE to)
 {
 	int i;
 
 	if (from == to)
 		return (char *)str;
 
-	if (from == RUCODE_CODEPAGE_ASCII){
+	if (from == CPRECODE_ASCII){
 		printf("rucode: we can't use ASCII as source codepage yet\n");
 		return NULL;
 	}
@@ -392,58 +392,58 @@ rucode_convert_codepage(const char * str, RUCODE_CODEPAGE from, RUCODE_CODEPAGE 
 	
 	//get size of translit table
 	int table_size = 
-			sizeof(codepage_table) / sizeof(rucode_t);	
+			sizeof(cprecode_table) / sizeof(cprecode_t);	
 
 	//sort array
-	rucode_t * sorted_table;
-	rucode_t   sorted_table_content[sizeof(codepage_table)];
+	cprecode_t * sorted_table;
+	cprecode_t   sorted_table_content[sizeof(cprecode_table)];
 	switch (from) {
-		case RUCODE_CODEPAGE_UTF8:
-			sorted_table = codepage_table;
+		case CPRECODE_UTF8:
+			sorted_table = cprecode_table;
 			break;	
 
-		case RUCODE_CODEPAGE_CP1251: {
-			sorted_table_content[0] = codepage_table[2];
-			sorted_table_content[1] = codepage_table[0];
-			sorted_table_content[2] = codepage_table[1];
-			sorted_table_content[3] = codepage_table[67];
-			sorted_table_content[4] = codepage_table[68];
+		case CPRECODE_CP1251: {
+			sorted_table_content[0] = cprecode_table[2];
+			sorted_table_content[1] = cprecode_table[0];
+			sorted_table_content[2] = cprecode_table[1];
+			sorted_table_content[3] = cprecode_table[67];
+			sorted_table_content[4] = cprecode_table[68];
 			for (i = 5; i < table_size - 2; ++i) {
-				sorted_table_content[i] = codepage_table[i-2];
+				sorted_table_content[i] = cprecode_table[i-2];
 			}
 			sorted_table = sorted_table_content;
 			break;
 		}
-		case RUCODE_CODEPAGE_KOI8R:
-			sort_koi8r_table(codepage_table, sorted_table, table_size);
+		case CPRECODE_KOI8R:
+			sort_koi8r_table(cprecode_table, sorted_table, table_size);
 			sorted_table = sorted_table_content;
 			break;
 
-		case RUCODE_CODEPAGE_CP866:
-			sorted_table_content[0] = codepage_table[0];
-			sorted_table_content[1] = codepage_table[1];
+		case CPRECODE_CP866:
+			sorted_table_content[0] = cprecode_table[0];
+			sorted_table_content[1] = cprecode_table[1];
 			for (i = 3; i < table_size - 2; ++i) {
-				sorted_table_content[i-1] = codepage_table[i];
+				sorted_table_content[i-1] = cprecode_table[i];
 			}
-			sorted_table_content[66] = codepage_table[2];
-			sorted_table_content[67] = codepage_table[67];
-			sorted_table_content[68] = codepage_table[68];
+			sorted_table_content[66] = cprecode_table[2];
+			sorted_table_content[67] = cprecode_table[67];
+			sorted_table_content[68] = cprecode_table[68];
 			sorted_table = sorted_table_content;
 			break;
 
-		case RUCODE_CODEPAGE_ISO8859_5:
-			sorted_table_content[0] = codepage_table[0];
-			sorted_table_content[1] = codepage_table[1];
+		case CPRECODE_ISO8859_5:
+			sorted_table_content[0] = cprecode_table[0];
+			sorted_table_content[1] = cprecode_table[1];
 			for (i = 2; i < table_size - 2; ++i) {
-				sorted_table_content[i] = codepage_table[i];
+				sorted_table_content[i] = cprecode_table[i];
 			}
-			sorted_table_content[67] = codepage_table[68];
-			sorted_table_content[68] = codepage_table[67];
+			sorted_table_content[67] = cprecode_table[68];
+			sorted_table_content[68] = cprecode_table[67];
 			sorted_table = sorted_table_content;
 			break;
 
-		case RUCODE_CODEPAGE_MACCYRILLIC:
-			sort_maccyrillic_table(codepage_table, sorted_table, table_size);
+		case CPRECODE_MACCYRILLIC:
+			sort_maccyrillic_table(cprecode_table, sorted_table, table_size);
 			sorted_table = sorted_table_content;
 			break;			
 
@@ -454,7 +454,7 @@ rucode_convert_codepage(const char * str, RUCODE_CODEPAGE from, RUCODE_CODEPAGE 
 
 	//allocate buffer
 	char * ret;
-	if (to == RUCODE_CODEPAGE_UTF8 || to == RUCODE_CODEPAGE_ASCII){
+	if (to == CPRECODE_UTF8 || to == CPRECODE_ASCII){
 		//allocate 3*len should be enough	
 		ret = malloc(len*3 +1);
 		if (!ret)
@@ -473,27 +473,27 @@ rucode_convert_codepage(const char * str, RUCODE_CODEPAGE from, RUCODE_CODEPAGE 
 
 	//iterate string
 	while(*ptr){
-		rucode_t key = {0};
+		cprecode_t key = {0};
 		char buf[5];
 		int buflen = 0;
-		if (from == RUCODE_CODEPAGE_UTF8)
+		if (from == CPRECODE_UTF8)
 			buflen = get_utf8_code(ptr, &key, buf);
 		else{
 			buflen = 1;
 			switch (from) {
-				case RUCODE_CODEPAGE_CP1251:
+				case CPRECODE_CP1251:
 					buf[0] = key.cp1251 = *ptr++;
 					break;
-				case RUCODE_CODEPAGE_KOI8R:
+				case CPRECODE_KOI8R:
 					buf[0] = key.koi8r = *ptr++;
 					break;
-				case RUCODE_CODEPAGE_CP866:
+				case CPRECODE_CP866:
 					buf[0] = key.cp866 = *ptr++;
 					break;
-				case RUCODE_CODEPAGE_ISO8859_5:
+				case CPRECODE_ISO8859_5:
 					buf[0] = key.iso8859_5 = *ptr++;
 					break;
-				case RUCODE_CODEPAGE_MACCYRILLIC:
+				case CPRECODE_MACCYRILLIC:
 					buf[0] = key.maccyrillic = *ptr++;
 					break;					
 				
@@ -502,29 +502,29 @@ rucode_convert_codepage(const char * str, RUCODE_CODEPAGE from, RUCODE_CODEPAGE 
 			}
 		}
 		//make bsearch
-		rucode_t *value = 
+		cprecode_t *value = 
 				bsearch(&key, sorted_table, 
-						table_size, sizeof(rucode_t), 
+						table_size, sizeof(cprecode_t), 
 								rucode_compare);
 		if (value){
 			switch (to) {
-				case RUCODE_CODEPAGE_UTF8: {
+				case CPRECODE_UTF8: {
 					char * p = value->utf8;
 					while (*p) {
 						*rp++ = *p++;
 					}
 					break;						
 				}
-				case RUCODE_CODEPAGE_CP1251:
+				case CPRECODE_CP1251:
 					*rp++ = value->cp1251;
 					break;
-				case RUCODE_CODEPAGE_CP866:
+				case CPRECODE_CP866:
 					*rp++ = value->cp866;
 					break;
-				case RUCODE_CODEPAGE_ISO8859_5:
+				case CPRECODE_ISO8859_5:
 					*rp++ = value->iso8859_5;
 					break;
-				case RUCODE_CODEPAGE_MACCYRILLIC:
+				case CPRECODE_MACCYRILLIC:
 					*rp++ = value->maccyrillic;
 					break;					
 				
@@ -544,4 +544,4 @@ rucode_convert_codepage(const char * str, RUCODE_CODEPAGE from, RUCODE_CODEPAGE 
 }
 #endif
 
-#endif //k_lib_rucode_h__
+#endif //k_lib_cprecode_h__
