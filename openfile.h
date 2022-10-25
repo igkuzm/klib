@@ -2,7 +2,7 @@
  * File              : openfile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 18.09.2021
- * Last Modified Date: 03.10.2022
+ * Last Modified Date: 25.10.2022
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -22,7 +22,6 @@ extern "C"{
 #include <stdlib.h>
 
 int openfile(const char *path){
-	char open_file_command[BUFSIZ];
 #ifdef __APPLE__
 	#include <TargetConditionals.h>
 	#include <objc/objc-runtime.h>
@@ -47,6 +46,7 @@ int openfile(const char *path){
 	#include <windows.h>
 	ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT);
 #else
+	char open_file_command[BUFSIZ];
 	sprintf(open_file_command, "xdg-open %s", path);	
 	system(open_file_command);
 #endif	
