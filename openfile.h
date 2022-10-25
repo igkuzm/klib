@@ -18,17 +18,15 @@ extern "C"{
 #endif
 
 #include <stdio.h>
-#include <strings.h>
-#include <stdlib.h>
 
 int openfile(const char *path){
 #ifdef __APPLE__
-	#include <TargetConditionals.h>
 	#include <objc/objc-runtime.h>
 	id str = ((id(*)(Class, SEL, const char *))objc_msgSend)(
 				objc_getClass("NSString"), sel_registerName("stringWithUTF8String:"), path);
 	id url = ((id(*)(Class, SEL, id))objc_msgSend)(
 				objc_getClass("NSURL"), sel_registerName("fileURLWithPath:"), str);
+	#include <TargetConditionals.h>
 	#if TARGET_OS_MAC
 		id ws = ((id(*)(Class, SEL))objc_msgSend)(
 			objc_getClass("NSWorkspace"), sel_registerName("sharedWorkspace"));
@@ -46,6 +44,8 @@ int openfile(const char *path){
 	#include <windows.h>
 	ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT);
 #else
+	#include <stdlib.h>
+	#include <strings.h>
 	char open_file_command[BUFSIZ];
 	sprintf(open_file_command, "xdg-open %s", path);	
 	system(open_file_command);
