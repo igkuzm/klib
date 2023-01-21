@@ -2,7 +2,7 @@
  * File              : strio.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 22.10.2022
+ * Last Modified Date: 21.01.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -35,7 +35,7 @@ extern "C"{
 	_Generic((src), \
 			char*: _strio_read_range_file, \
 			int:   _strio_read_range_fd, \
-			FILE*: _strio_read_renge_fp \
+			FILE*: _strio_read_range_fp \
 	)((str), (src))	
 
 /*

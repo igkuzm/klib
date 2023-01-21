@@ -2,7 +2,7 @@
  * File              : strptime.cc
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.10.2022
- * Last Modified Date: 04.10.2022
+ * Last Modified Date: 21.01.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 

@@ -2,7 +2,7 @@
  * File              : uuid.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 10.10.2022
+ * Last Modified Date: 21.01.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 

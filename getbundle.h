@@ -2,7 +2,7 @@
  * File              : getbundle.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 07.10.2022
- * Last Modified Date: 07.10.2022
+ * Last Modified Date: 21.01.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -16,52 +16,51 @@
 #ifndef k_lib_getbundle_h__
 #define k_lib_getbundle_h__
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h> //dirname
 #if defined __APPLE__
-#elif defined _WIN32 
-#include <Windows.h>	
+#elif defined _WIN32
+#include <Windows.h>
 #else
 #include <unistd.h> //readlink
 #endif
 
-	char * getbundle(char *argv[]){
-		if (!argv || !argv[0])
-			return NULL;
-	
+char *getbundle(char *argv[]) {
+  if (!argv || !argv[0])
+    return NULL;
 #ifdef _WIN32
-		char * executable = dirname((char *)argv[0]);
-		return executable;
+  return dirname((char *)argv[0]);
 #else
-		char * bundle = (char *)malloc(BUFSIZ);
-		if (!bundle)
-			return NULL;
+  char *bundle = (char *)malloc(BUFSIZ);
+  if (!bundle)
+    return NULL;
 #ifdef __APPLE__
-		char * executable = dirname((char *)argv[0]);
-		sprintf(bundle, "%s%s", executable, "/../Resources");
-		return bundle; 
-#else 
-		char selfpath[128];
-		if (readlink ("/proc/self/exe", selfpath, sizeof (selfpath) - 1) < 0){
-			free(bundle);
-			return NULL;
-		}
-
-		char *executable=dirname(selfpath);
-		char *progname = basename(argv[0]);
-		
-		sprintf(bundle, "%s/../share/%s", executable, progname);		
-		return bundle; 
+#include <TargetConditionals.h>
+#if TARGET_OS_MAC
+  sprintf(bundle, "%s%s", dirname((char *)argv[0]), "/../Resources");
+  return bundle;
+#else
+  free(bundle);
+  return dirname((char *)argv[0]);
+#endif
+#else
+  char selfpath[128];
+  if (readlink("/proc/self/exe", selfpath, sizeof(selfpath) - 1) < 0) {
+    free(bundle);
+    return NULL;
+  }
+  sprintf(bundle, "%s/../share/%s", dirname(selfpath), basename(argv[0]));
+  return bundle;
 #endif
 #endif
-		return NULL;
-	}
+  return NULL;
+}
 
 #ifdef __cplusplus
 }
 #endif
-#endif //k_lib_getbundle_h__	
+#endif // k_lib_getbundle_h__

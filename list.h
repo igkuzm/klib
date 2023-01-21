@@ -2,7 +2,7 @@
  * File              : list.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 23.03.2022
- * Last Modified Date: 06.09.2022
+ * Last Modified Date: 21.01.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -22,9 +22,8 @@
 extern "C"{
 #endif
 
-#include <stdlib.h>
-#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 struct list_t {
 	struct list_t *next;
