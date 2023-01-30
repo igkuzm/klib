@@ -8,20 +8,10 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <stdlib.h>
 
 #define CONFIG_ARG_MAX_BYTES 128
 
-typedef struct config_option config_option;
-typedef config_option* config_option_t;
-
-struct config_option {
-    config_option_t prev;
-    char key[CONFIG_ARG_MAX_BYTES];
-    char value[CONFIG_ARG_MAX_BYTES];
-};
-
-config_option_t read_config_file(char* path) {
+void read_config_file(char* path, void *user_data, int (*callback)(void *user_data, char *key, char *value)) {
     FILE* fp;
     
     if ((fp = fopen(path, "r+")) == NULL) {
@@ -29,34 +19,31 @@ config_option_t read_config_file(char* path) {
         return NULL;
     }
     
-    config_option_t last_co_addr = NULL;
-    
     while(1) {
-        config_option_t co = NULL;
-        if ((co = malloc(sizeof(config_option))) == NULL)
-            continue;
-        memset(co, 0, sizeof(config_option));
-        co->prev = last_co_addr;
+        char key[CONFIG_ARG_MAX_BYTES];
+        char value[CONFIG_ARG_MAX_BYTES];
         
-        if (fscanf(fp, "%s = %s", &co->key[0], &co->value[0]) != 2) {
-            if (feof(fp)) {
-                break;
-            }
-            if (co->key[0] == '#') {
-                while (fgetc(fp) != '\n') {
-                    // Do nothing (to move the cursor to the end of the line).
-                }
-                free(co);
-                continue;
-            }
-            perror("fscanf()");
-            free(co);
+        if (fscanf(fp, "%s = %s", key, value) != 2) {
+            //perror("fscanf()");
             continue;
         }
-        //printf("Key: %s\nValue: %s\n", co->key, co->value);
-        last_co_addr = co;
+        
+        if (feof(fp)) {
+            break;
+        }
+
+        if (key[0] == '#') {
+            //while (fgetc(fp) != '\n') {
+            // Do nothing (to move the cursor to the end of the line).
+            //}
+           continue;
+        }
+
+        //printf("Key: %s\nValue: %s\n", key, value);
+        if (callback)
+            if (!callback(user_data, key, value)) //stop exec if callback != 0
+                break;
     }
-    return last_co_addr;
 }
 
 #ifdef __cplusplus
