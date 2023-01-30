@@ -28,10 +28,6 @@ void read_config_file(char* path, void *user_data, int (*callback)(void *user_da
             continue;
         }
         
-        if (feof(fp)) {
-            break;
-        }
-
         if (key[0] == '#') {
             //while (fgetc(fp) != '\n') {
             // Do nothing (to move the cursor to the end of the line).
@@ -43,6 +39,9 @@ void read_config_file(char* path, void *user_data, int (*callback)(void *user_da
         if (callback)
             if (!callback(user_data, key, value)) //stop exec if callback != 0
                 break;
+        
+        if (feof(fp))
+            break;
     }
 }
 
