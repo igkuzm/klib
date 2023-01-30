@@ -1,5 +1,14 @@
 /* Read config file */
 
+#ifndef k_lib_config_h__
+#define k_lib_config_h__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #define CONFIG_ARG_MAX_BYTES 128
 
@@ -24,7 +33,7 @@ config_option_t read_config_file(char* path) {
     
     while(1) {
         config_option_t co = NULL;
-        if ((co = calloc(1, sizeof(config_option))) == NULL)
+        if ((co = malloc(sizeof(config_option))) == NULL)
             continue;
         memset(co, 0, sizeof(config_option));
         co->prev = last_co_addr;
@@ -49,3 +58,9 @@ config_option_t read_config_file(char* path) {
     }
     return last_co_addr;
 }
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // k_lib_config_h__
