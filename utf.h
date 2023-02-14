@@ -2,7 +2,7 @@
  * File              : utf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 22.10.2022
+ * Last Modified Date: 15.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -120,6 +120,49 @@ utf32_to_utf8(
 		int (*callback)(void * user_data, uint8_t utf8_char)		
 		)
 {
+	//uint8_t utf8_char;
+		//if (wc <= 0x7F) {
+			//// Plain single-byte ASCII.
+			//utf8[k++] = (char) wc;
+		//}
+		//else if (wc <= 0x7FF) {
+			//// Two bytes.
+			//utf8[k++] = 0xC0 |  (wc >> 6);
+			//utf8[k++] = 0x80 | ((wc >> 0) & 0x3F);
+		//}
+		//else if (wc <= 0xFFFF) {
+			//// Three bytes.
+			//utf8[k++] = 0xE0 |  (wc >> 12);
+			//utf8[k++] = 0x80 | ((wc >> 6) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 0) & 0x3F);
+		//}
+		//else if (wc <= 0x1FFFFF) {
+			//// Four bytes.
+			//utf8[k++] = 0xF0 |  (wc >> 18);
+			//utf8[k++] = 0x80 | ((wc >> 12) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 6) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 0) & 0x3F);
+		//}
+		//else if (wc <= 0x3FFFFFF) {
+			//// Five bytes.
+			//utf8[k++] = 0xF8 |  (wc >> 24);
+			//utf8[k++] = 0x80 | ((wc >> 18) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 12) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 6) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 0) & 0x3F);
+		//}
+		//else if (wc <= 0x7FFFFFFF) {
+			//// Six bytes.
+			//utf8[k++] = 0xFC |  (wc >> 30);
+			//utf8[k++] = 0x80 | ((wc >> 24) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 18) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 12) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 6) & 0x3F);
+			//utf8[k++] = 0x80 | ((wc >> 0) & 0x3F);
+		//}
+		//else{
+			//// Invalid char; don't encode anything.
+		//}	
 	//more than 00000000 00000100 00000000 00000000
 	if (utf32_char > 0x040000){ //4-byte
 		uint8_t utf8_char;
