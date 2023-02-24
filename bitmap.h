@@ -2,7 +2,7 @@
  * File              : bitmap.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.05.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 25.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -69,9 +69,9 @@ static pixel_t *filter_hsv( // make filter for hsv image represantation
 
 // blur filter
 #define filter_blur(image, w, h) \
-({
-double ___matrix[3][3] = { 0.0, 0.2, 0.0, 0.2, 0.2, 0.2, 0.0, 0.2, 0.0, };
-image_convolution(image, w, h, 3, 3, ___matrix, 1.0, 0);
+({\
+double ___matrix[3][3] = { 0.0, 0.2, 0.0, 0.2, 0.2, 0.2, 0.0, 0.2, 0.0, };\
+image_convolution(image, w, h, 3, 3, ___matrix, 1.0, 0);\
 })
 
 #define filter_blur5(image, w, h) \
