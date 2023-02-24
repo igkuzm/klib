@@ -2,7 +2,7 @@
  * File              : config.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 02.02.2023
- * Last Modified Date: 24.02.2023
+ * Last Modified Date: 25.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /* Read config file */
@@ -96,13 +96,13 @@ static void read_config_file(FILE *fp, void *user_data,
 static long int write_config_file(FILE *fp, char *key, char *value) 
 {
 
-	int i;                           // iterator
-	
+	int i=0;                         // iterator
 	while (i < CONFIG_ARG_MAX_BYTES && key[i])
 		fputc(key[i++], fp);	
 	
 	fputc('=', fp);	
 	
+	i=0;
 	while (i < CONFIG_ARG_MAX_BYTES && value[i])
 		fputc(value[i++], fp);	
 	
