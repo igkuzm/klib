@@ -91,9 +91,8 @@ static void read_config_file(FILE *fp, void *user_data,
  * @fp - stream FILE pointer 
  * @key - null-terminated key string
  * @value - null-terminated value string
- * return file position
  */
-static long int write_config_file(FILE *fp, char *key, char *value) 
+static void write_config_file(FILE *fp, char *key, char *value) 
 {
 
 	int i=0;                         // iterator
@@ -107,8 +106,6 @@ static long int write_config_file(FILE *fp, char *key, char *value)
 		fputc(value[i++], fp);	
 	
 	fputc('\n', fp);	
-
-	return ftell(fp);
 }
 
 
