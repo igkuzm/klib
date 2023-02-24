@@ -2,7 +2,7 @@
  * File              : config.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 02.02.2023
- * Last Modified Date: 02.02.2023
+ * Last Modified Date: 24.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /* Read config file */
@@ -16,22 +16,35 @@ extern "C" {
 
 #include <stdio.h>
 
-#define CONFIG_ARG_MAX_BYTES 128
+#ifndef logfile
+#define logfile stderr
+#endif
+#ifndef ERR
+#define ERR(...) ({fprintf(logfile, __VA_ARGS__);})
+#endif	
+
+#define CONFIG_ARG_MAX_BYTES 128     // max size of key/value string
 
 /*
- * read file and run callback for each key/value pair
+ * read_config_file - read file and run callback for each key/value pair
+ * @fp - stream FILE pointer 
+ * @user_data - pointer to data transfered through callback function
+ * @callback - callback function - return non zero to stop function execution
  */
-void read_config_file(const char* path, void *user_data, 
+static void read_config_file(FILE *fp, void *user_data, 
 		int (*callback)(void *user_data, char *key, char *value)) 
 {
-  FILE* fp;
-	char buf[BUFSIZ], key[CONFIG_ARG_MAX_BYTES], value[CONFIG_ARG_MAX_BYTES];
-	int i, ch, blen=0, klen=0, vlen=0, first=0, match=0, comment=0;
-
-  if ((fp = fopen(path, "r+")) == NULL) {
-      perror("fopen()");
-      return;
-  }
+	char 
+		key[CONFIG_ARG_MAX_BYTES],   // key string 
+		value[CONFIG_ARG_MAX_BYTES]; // value string
+	int 
+		i,                           // iterator
+		ch,                          // fread char
+		klen=0,                      // key string len
+		vlen=0,                      // value string len
+		first=1,                     // boolean - if char is first in line
+		match=0,                     // boolean - if found key/value pair
+		comment=0;                   // boolean - if line starts with '#'
 
 	while((ch=fgetc(fp))!=EOF){
 		if (ch=='#' && first)
@@ -63,10 +76,41 @@ void read_config_file(const char* path, void *user_data,
 		else
 			key[klen++] = ch;
 		first = 0;
+		if (klen > CONFIG_ARG_MAX_BYTES || 
+				vlen > CONFIG_ARG_MAX_BYTES) 
+		{
+			ERR("read_config_file: error: arg is to long, "
+			"more then %d len", CONFIG_ARG_MAX_BYTES);	
+			break;
+		}
 	}
-
-	fclose(fp);
 }
+
+/*
+ * write_config_file - write key/value pair to file (append)
+ * @fp - stream FILE pointer 
+ * @key - null-terminated key string
+ * @value - null-terminated value string
+ * return file position
+ */
+static long int write_config_file(FILE *fp, char *key, char *value) 
+{
+
+	int i;                           // iterator
+	
+	while (i < CONFIG_ARG_MAX_BYTES && key[i])
+		fputc(key[i++], fp);	
+	
+	fputc('=', fp);	
+	
+	while (i < CONFIG_ARG_MAX_BYTES && value[i])
+		fputc(value[i++], fp);	
+	
+	fputc('\n', fp);	
+
+	return ftell(fp);
+}
+
 
 #ifdef __cplusplus
 }
