@@ -2,7 +2,7 @@
  * File              : ls.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 25.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -57,8 +57,9 @@ int ls(const char *dir, void *user_data, int (*callback)(char *filename, FILETYP
 		else
 			filetype = FILETYPE_FILE;
 		
-		if (callback(filename, filetype, user_data) != 0)
-			return 1;
+		if (callback)
+			if (callback(filename, filetype, user_data) != 0)
+				return 1;
 	}
 	dwError = GetLastError();
 	FindClose(hFind);
@@ -80,8 +81,9 @@ int ls(const char *dir, void *user_data, int (*callback)(char *filename, FILETYP
 			case  DT_LNK: filetype = FILETYPE_LINK; break;
 			default: filetype = FILETYPE_OTHER; break;
 		}
-		if (callback(filename, filetype, user_data) != 0)
-			return 1;
+		if (callback)
+			if (callback(filename, filetype, user_data) != 0)
+				return 1;
 	}
 	closedir(dp);
 #endif
