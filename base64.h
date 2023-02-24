@@ -2,7 +2,7 @@
  * File              : base64.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.04.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 25.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -30,13 +30,13 @@ unsigned char *base64_decode(const char *data, size_t input_length,
 
 // memory allocation helpers
 #define BASE64_MALLOC(size)	\
-({
-void *const ___p = malloc(size);
-if (!___p) {
-  perror("base64 malloc");
-  exit(EXIT_FAILURE);
-}
-___p;
+({\
+void *const ___p = malloc(size);\
+if (!___p) {\
+  perror("base64 malloc");\
+  exit(EXIT_FAILURE);\
+}\
+___p;\
 })
 
 static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
