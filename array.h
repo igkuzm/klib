@@ -2,7 +2,7 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 25.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -32,48 +32,48 @@ struct array_t {
   int len;
 };
 
-#define array_new(T)
-({
-  struct array_t *___array = malloc(sizeof(struct array_t));
-  if (___array == NULL) {
-    perror("array_new malloc");
-    exit(EXIT_FAILURE);
-  }
-  ___array->data = malloc(sizeof(T));
-  if (___array->data == NULL) {
-    perror("array_new data malloc");
-    exit(EXIT_FAILURE);
-  }
-  ___array->len = 0;
-  ___array;
+#define array_new(T)\
+({\
+  struct array_t *___array = malloc(sizeof(struct array_t));\
+  if (___array == NULL) {\
+    perror("array_new malloc");\
+    exit(EXIT_FAILURE);\
+  }\
+  ___array->data = malloc(sizeof(T));\
+  if (___array->data == NULL) {\
+    perror("array_new data malloc");\
+    exit(EXIT_FAILURE);\
+  };\
+  ___array->len = 0;\
+  ___array;\
 })
 
-#define array_append(array, T, item)
-    ({
-      T *___data = array->data;
-      ___data[array->len] = item;
-      array->len++;
-      array->data = realloc(array->data, sizeof(T) + sizeof(T) * array->len);
-      if (array->data == NULL) {
-        perror("array_append_item realloc");
-        exit(EXIT_FAILURE);
-      }
+#define array_append(array, T, item)\
+    ({\
+      T *___data = array->data;\
+      ___data[array->len] = item;\
+      array->len++;\
+      array->data = realloc(array->data, sizeof(T) + sizeof(T) * array->len);\
+      if (array->data == NULL) {\
+        perror("array_append_item realloc");\
+        exit(EXIT_FAILURE);\
+      }\
     })
 
-#define array_at(array, T, i)
-    ({
-      T *___data = array->data;
-      ___data[i];
+#define array_at(array, T, i)\
+    ({\
+      T *___data = array->data;\
+      ___data[i];\
     })
 
-#define array_for_each(array, T, item)
-T *___data = array->data;
-T *___p, item;
-for (___p = (___data), (item) = *___p; ___p < &((___data)[array->len]);
+#define array_for_each(array, T, item)\
+T *___data = array->data;\
+T *___p, item;\
+for (___p = (___data), (item) = *___p; ___p < &((___data)[array->len]);\
      ___p++, (item) = *___p)
 
-#define array_free(array)
-  free(array->data);
+#define array_free(array)\
+  free(array->data);\
 free(array);
 
 #ifdef __cplusplus
