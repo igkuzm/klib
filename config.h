@@ -39,7 +39,7 @@ static void read_config_file(FILE *fp, void *user_data,
 		value[CONFIG_ARG_MAX_BYTES]; // value string
 	int 
 		i,                           // iterator
-		ch,                          // fread char
+		ch,                          // fgetc char
 		klen=0,                      // key string len
 		vlen=0,                      // value string len
 		first=1,                     // boolean - if char is first in line
