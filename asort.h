@@ -2,7 +2,7 @@
  * File              : asort.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 25.02.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -37,7 +37,7 @@ extern "C" {
  * % array
  * % T - array type 
  * % size - sizeof array
- * % cmp - compare function
+ * % cmp - compare function: return > 0 - sort array by descending; < 0 - ascending
  */
 #define asort(array, T, size, cmp) \
 ({\
