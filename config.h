@@ -23,7 +23,7 @@ extern "C" {
 #define ERR(...) ({fprintf(logfile, __VA_ARGS__);})
 #endif	
 
-#define CONFIG_ARG_MAX_BYTES 128     // max size of key/value pair
+#define CONFIG_ARG_MAX_BYTES 128     // max size of key/value value
 
 /*
  * read_config_file - read file and run callback for each key/value pair
