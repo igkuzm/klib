@@ -32,7 +32,7 @@ extern "C" {
 	#define LOG(fmt, ...) NSLog(CFSTR(fmt), ##__VA_ARGS__)
 	#define ERR(fmt, ...) LOG(fmt, __VA_ARGS__) 
 #else
-	#define LOG(...) printf("%s: _%s: %s\n", __FILE__, __func__, STR(__VA_ARGS__))
+	#define LOG(...) printf("%s: _%s: %s\n",   __FILE__, __func__, STR(__VA_ARGS__))
 	#define ERR(...) perror(STR("%s: _%s: %s", __FILE__, __func__, STR(__VA_ARGS__))) 
 #endif
 
