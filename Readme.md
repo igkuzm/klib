@@ -10,6 +10,7 @@
 4. cpr.h - copy directory recursive
 5. each.h - for each(){} macros
 6. fexists.h - check if file exists
+7. fext.h - get file extension
 7. fsize.h - get file size
 8. getbundle.h -for Windows to EXEC, for MacOS to BUNDLE/Resources, for Linux - ../share/$progname
 9. isdir.h - check if is directory
