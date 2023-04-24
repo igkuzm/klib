@@ -9,6 +9,7 @@
 3. cp.h - copy file
 4. cpr.h - copy directory recursive
 5. each.h - for each(){} macros
+5. enum.h - converting C enums to strings
 6. fexists.h - check if file exists
 7. fext.h - get file extension
 7. fsize.h - get file size
