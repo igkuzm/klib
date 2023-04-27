@@ -2,7 +2,7 @@
  * File              : enum.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 24.04.2023
- * Last Modified Date: 25.04.2023
+ * Last Modified Date: 27.04.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -64,5 +64,5 @@
 			}\
 		   	return -1;\
 		}
-
+	
 #endif /* ifndef ENUM_H */
