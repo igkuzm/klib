@@ -8,13 +8,16 @@
 #define MYMETYPE_H
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct mimetype_map_t {
 	char *extension;
-	char *mymetype;
+	char *mimetype;
 };
 
-static const struct mimetype_map_t mimetype_map[] = 
+static const struct mimetype_map_t 
+mimetype_map[] = 
 {
    {".323", "text/h323"},
    {".3g2", "video/3gpp2"},
@@ -653,74 +656,48 @@ static const struct mimetype_map_t mimetype_map[] =
    {".xwd", "image/x-xwindowdump"},
    {".z", "application/x-compress"},
    {".zip", "application/zip"},
-	 NULL
 };
 
-/*								
+static int 
+_mimetype_from_extension_cmp(const void *arg1, const void *arg2)
+{
+	struct mimetype_map_t *_arg1 = (struct mimetype_map_t *)arg1;
+	struct mimetype_map_t *_arg2 = (struct mimetype_map_t *)arg2;
 
-                {"application/fsharp-script", ".fsx"},
-                {"application/msaccess", ".adp"},
-                {"application/msword", ".doc"},
-                {"application/octet-stream", ".bin"},
-                {"application/onenote", ".one"},
-                {"application/postscript", ".eps"},
-                {"application/step", ".step"},
-                {"application/vnd.apple.keynote", ".key"},
-                {"application/vnd.apple.numbers", ".numbers"},
-                {"application/vnd.apple.pages", ".pages"},
-                {"application/vnd.ms-excel", ".xls"},
-                {"application/vnd.ms-powerpoint", ".ppt"},
-                {"application/vnd.ms-works", ".wks"},
-                {"application/vnd.visio", ".vsd"},
-                {"application/x-director", ".dir"},
-                {"application/x-msdos-program", ".exe"},
-                {"application/x-shockwave-flash", ".swf"},
-                {"application/x-x509-ca-cert", ".cer"},
-                {"application/x-zip-compressed", ".zip"},
-                {"application/xhtml+xml", ".xhtml"},
-                {"application/x-iwork-keynote-sffkey", ".key"},
-                {"application/x-iwork-numbers-sffnumbers", ".numbers"},
-                {"application/x-iwork-pages-sffpages", ".pages"},
-                {"application/xml", ".xml"}, // anomaly, .xml -> text/xml, but application/xml -> many things, but all are xml, so safest is .xml
-                {"audio/aac", ".AAC"},
-                {"audio/aiff", ".aiff"},
-                {"audio/basic", ".snd"},
-                {"audio/mid", ".midi"},
-                {"audio/mp4", ".m4a"}, // one way mapping only, mime -> ext
-                {"audio/ogg", ".ogg"},
-                {"audio/ogg; codecs=opus", ".opus"},
-                {"audio/wav", ".wav"},
-                {"audio/x-m4a", ".m4a"},
-                {"audio/x-mpegurl", ".m3u"},
-                {"audio/x-pn-realaudio", ".ra"},
-                {"audio/x-smd", ".smd"},
-                {"image/bmp", ".bmp"},                
-                {"image/heic", ".heic"},
-                {"image/heif", ".heif"},
-                {"image/jpeg", ".jpg"},
-                {"image/pict", ".pic"},
-                {"image/png", ".png"}, // Defined in [RFC-2045], [RFC-2048]
-                {"image/x-png", ".png"}, // See https://www.w3.org/TR/PNG/#A-Media-type :"It is recommended that implementations also recognize the media type "image/x-png"."
-                {"image/tiff", ".tiff"},
-                {"image/x-macpaint", ".mac"},
-                {"image/x-quicktime", ".qti"},
-                {"message/rfc822", ".eml"},
-                {"text/calendar", ".ics"},
-                {"text/html", ".html"},
-                {"text/plain", ".txt"},
-                {"text/scriptlet", ".wsc"},
-                {"text/xml", ".xml"},
-                {"video/3gpp", ".3gp"},
-                {"video/3gpp2", ".3gp2"},
-                {"video/mp4", ".mp4"},
-                {"video/mpeg", ".mpg"},
-                {"video/quicktime", ".mov"},
-                {"video/vnd.dlna.mpeg-tts", ".m2t"},
-                {"video/x-dv", ".dv"},
-                {"video/x-la-asf", ".lsf"},
-                {"video/x-ms-asf", ".asf"},
-                {"x-world/x-vrml", ".xof"},
-*/
+	return (strcmp(_arg1->extension, _arg2->extension));
+}
+
+static const char *
+mimetype_from_extension(const char *extension)
+{
+	/* get len of array */
+	int len = sizeof(mimetype_map)/sizeof(struct mimetype_map_t);
+
+	/* make binary search */
+	struct mimetype_map_t * found = 
+			bsearch(extension, mimetype_map, len, 
+					sizeof(struct mimetype_map_t), _mimetype_from_extension_cmp);
+
+	if (found)
+		return found->mimetype;
+
+	return NULL;
+}
+
+static const char *
+extension_from_mimetype(const char *mimetype)
+{
+	/* get len of array */
+	int len = sizeof(mimetype_map)/sizeof(struct mimetype_map_t);
+
+	/* make linear search */
+	int i;
+	for (i = 0; i < len; ++i)
+		if (strcmp(mimetype, mimetype_map[i].mimetype) == 0)
+			return mimetype_map[i].extension;
+	
+	return NULL;
+}
 
 
 #endif //MYMETYPE_H
