@@ -2,7 +2,7 @@
  * File              : strfilter.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 03.05.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -23,6 +23,9 @@ static char *strfilter_date(const char *str);
 // allocate new string and fill with str filtred by date and time like
 // DD.MM.YYYY HH:MM
 static char *strfilter_datetime(const char *str);
+
+// allocate new string and fill with str filtred only by digits
+static char *strfilter_digit(const char *str);
 
 // allocate new string and fill with str filtred by allowed strings in
 // null-terminated array
@@ -106,6 +109,36 @@ char *strfilter_datetime(const char *str) {
     }
 
     if (ptr[i] == ':' && spaces == 1) // allow ':'
+      *bp++ = ptr[i];
+
+    i++;
+  }
+
+  // null-terminate string
+  *bp = 0;
+
+  return buf;
+}
+
+char *strfilter_digit(const char *str) {
+  // pointer to string
+  char *ptr = (char *)str;
+
+  // allocate return buffer
+  char *buf = malloc(BUFSIZ);
+  if (!buf)
+    return NULL;
+  // pointer to buffer
+  char *bp = buf;
+
+  // iterate string
+  int i = 0, dotcnt = 0;
+  while (ptr[i]) {
+    // stop if overbuf
+    if (i == BUFSIZ)
+      break;
+
+    if (ptr[i] >= '0' && ptr[i] <= '9') // check numbers
       *bp++ = ptr[i];
 
     i++;
