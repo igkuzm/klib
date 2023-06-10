@@ -2,7 +2,7 @@
  * File              : openfile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 18.09.2021
- * Last Modified Date: 02.06.2023
+ * Last Modified Date: 10.06.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -37,13 +37,18 @@ int openfile(const char *path) {
 			objc_getClass("NSWorkspace"), sel_registerName("sharedWorkspace"));
 		((void (*)(id, SEL, id))objc_msgSend)(ws, sel_registerName("openURL:"), url);
 	#else
+	#include <Availability.h>
 		id app = ((id (*)(Class, SEL))objc_msgSend)(
 			objc_getClass("UIApplication"), sel_registerName("sharedApplication"));
-		id opt = ((id (*)(Class, SEL))objc_msgSend)(objc_getClass("NSDictionary"),
+		#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000
+			id opt = ((id (*)(Class, SEL))objc_msgSend)(objc_getClass("NSDictionary"),
                                               sel_registerName("dictionary"));
 			((void (*)(id, SEL, id, id, id))objc_msgSend)(
-			app, sel_registerName("openURL:options:completionHandler:"), url, opt,
-			NULL);
+				app, sel_registerName("openURL:options:completionHandler:"), url, opt,
+				NULL);
+		#else
+			((void (*)(id, SEL, id))objc_msgSend)(app, sel_registerName("openURL:"), url);			
+		#endif
 	#endif
 #else
 #include <stdlib.h>
