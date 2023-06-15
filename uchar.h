@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 /* convert utf32 char to utf8 multybite char array and return number of bytes */ 
-static int c32tomb(uint8_t s[6], const uint32_t c32){
+static int c32tomb(char s[6], const uint32_t c32){
 	int i = 0;
 	if (c32 <= 0x7F) {
 		// Plain single-byte ASCII.
