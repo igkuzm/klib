@@ -158,6 +158,8 @@ static void utf8_to_utf32(
 	}
 }
 
+/* parse utf8-encoded text file and callback utf32 chars; 
+ * return non zero in callback to stop function */
 static void utf8_file_to_utf32(
 		FILE * file, 
 		void * user_data, 
@@ -199,6 +201,8 @@ static void utf8_file_to_utf32(
 	}
 }
 
+/* convert utf32 char to utf8 multybite array and make callback; 
+ * return non zero in callback to stop function */
 static void utf32_to_utf8(
 		uint32_t utf32_char, 
 		void * user_data, 
