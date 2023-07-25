@@ -2,7 +2,7 @@
  * File              : strfind.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 25.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -184,39 +184,52 @@ char * // return result string
             const char *replace // replace string
             ) {
 
-  size_t needlelen = strlen(needle);
-  size_t replacelen = strlen(replace);
+  size_t hlen = strlen(haystack);
+  size_t nlen = strlen(needle);
+  size_t rlen = strlen(replace);
 
-  char *ptr = (char *)haystack; // haystack pointer
+	int diff = (rlen - nlen);
+	if (diff < 0)
+		diff = 0;
 
-  // count cases of search word in haystack and length of haystack
-  int i = 0, cnt = 0;
-  while (*ptr) {
-    char *p = strinc(ptr, needle);
-    if (p) {
-      cnt++;
-      ptr = p;
-    } else
-      ptr++;
-  }
+	size_t len = hlen;
+	char *res = (char *)malloc(len);
+	if (!res)
+		return NULL;
 
-  // allocate result string with enough memory
-  char *res = (char *)malloc(i + cnt * (replacelen - needlelen) + 1);
-  if (res == NULL)
-    return NULL;
+	int i = 0;
+	char *ptr = (char *)haystack;
+	while (*ptr){
+		char *p = strstr(ptr, needle);
+		if (p){
+			// copy before string match
+			while (ptr != p)
+				res[i++] = *ptr++;
 
-  // replace search needle string with replace string
-  ptr = (char *)haystack; // haystack pointer
-  i = 0;
-  while (*ptr) {
-    char *p = strinc(ptr, needle);
-    if (p) {
-      strncat(res, replace, replacelen);
-      ptr = p;
-    } else
-      res[i++] = *ptr++;
-  }
-  res[i++] = 0;
+			// realloc if diff
+			if (diff){
+				len += rlen;
+				res = (char *)realloc(res, len);
+				if (!res)
+					return NULL;
+			}
+
+			// copy replace string
+			char *rp = (char *)replace;
+			while (*rp)
+				res[i++] = *rp++;
+
+			// move ptr to end of needle
+			ptr += nlen;
+
+		// no match - copy string
+		} else
+				res[i++] = *ptr++;
+	}
+
+	//NULL-terminate
+	res[i] = 0;
+
   return res;
 }
 
