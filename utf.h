@@ -2,7 +2,7 @@
  * File              : utf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 15.06.2023
+ * Last Modified Date: 27.07.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -73,7 +73,7 @@ static size_t mbtoc32(uint32_t *s32, const char *s){
 	while (*ptr){
 		uint8_t c = *ptr;
 		if (c >= 252){/* 6-bytes */
-			s32[i] |= (*ptr++ & 0x1)  << 30;  // 0b00000001
+			s32[i]  = (*ptr++ & 0x1)  << 30;  // 0b00000001
 			s32[i] |= (*ptr++ & 0x3F) << 24;  // 0b00111111	
 			s32[i] |= (*ptr++ & 0x3F) << 18;  // 0b00111111
 			s32[i] |= (*ptr++ & 0x3F) << 12;  // 0b00111111
@@ -82,7 +82,7 @@ static size_t mbtoc32(uint32_t *s32, const char *s){
 			i++;
 		} 
 		else if (c >= 248){/* 5-bytes */
-			s32[i] |= (*ptr++ & 0x3)  << 24;  // 0b00000011
+			s32[i]  = (*ptr++ & 0x3)  << 24;  // 0b00000011
 			s32[i] |= (*ptr++ & 0x3F) << 18;  // 0b00111111
 			s32[i] |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			s32[i] |= (*ptr++ & 0x3F) << 6;   // 0b00111111
@@ -90,20 +90,20 @@ static size_t mbtoc32(uint32_t *s32, const char *s){
 			i++;
 		}
 		else if (c >= 240){/* 4-bytes */
-			s32[i] |= (*ptr++ & 0x7)  << 18;  // 0b00000111
+			s32[i]  = (*ptr++ & 0x7)  << 18;  // 0b00000111
 			s32[i] |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			s32[i] |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			s32[i] |=  *ptr++ & 0x3F;         // 0b00111111
 			i++;
 		} 
 		else if (c >= 224){/* 3-bytes */
-			s32[i] |= (*ptr++ & 0xF)  << 12;  // 0b00001111
+			s32[i]  = (*ptr++ & 0xF)  << 12;  // 0b00001111
 			s32[i] |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			s32[i] |=  *ptr++ & 0x3F;         // 0b00111111
 			i++;                
 		}
 		else if (c >= 192){/* 2-bytes */
-			s32[i] |= (*ptr++ & 0x1F) << 6;   // 0b00011111
+			s32[i]  = (*ptr++ & 0x1F) << 6;   // 0b00011111
 			s32[i] |=  *ptr++ & 0x3F;         // 0b00111111 
 			i++; 
 		} 
