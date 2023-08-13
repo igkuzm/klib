@@ -2,7 +2,7 @@
  * File              : openfile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 18.09.2021
- * Last Modified Date: 10.06.2023
+ * Last Modified Date: 13.08.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -19,7 +19,7 @@ extern "C" {
 
 #include <stdio.h>
 
-int openfile(const char *path) {
+static int openfile(const char *path) {
 #if defined _WIN32_
 #include <windows.h>
   ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT);
@@ -60,6 +60,41 @@ int openfile(const char *path) {
 
   return 0;
 }
+
+static int openurl(const char *uri) {
+#ifdef __APPLE__
+#include <objc/objc-runtime.h>
+  id str = ((id (*)(Class, SEL, const char *))objc_msgSend)(
+      objc_getClass("NSString"), sel_registerName("stringWithUTF8String:"),
+      uri);
+  id url = ((id (*)(Class, SEL, id))objc_msgSend)(
+      objc_getClass("NSURL"), sel_registerName("URLWithString:"), str);
+#include <TargetConditionals.h>
+	#if TARGET_OS_MAC
+		id ws = ((id (*)(Class, SEL))objc_msgSend)(
+			objc_getClass("NSWorkspace"), sel_registerName("sharedWorkspace"));
+		((void (*)(id, SEL, id))objc_msgSend)(ws, sel_registerName("openURL:"), url);
+	#else
+	#include <Availability.h>
+		id app = ((id (*)(Class, SEL))objc_msgSend)(
+			objc_getClass("UIApplication"), sel_registerName("sharedApplication"));
+		#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000
+			id opt = ((id (*)(Class, SEL))objc_msgSend)(objc_getClass("NSDictionary"),
+                                              sel_registerName("dictionary"));
+			((void (*)(id, SEL, id, id, id))objc_msgSend)(
+				app, sel_registerName("openURL:options:completionHandler:"), url, opt,
+				NULL);
+		#else
+			((void (*)(id, SEL, id))objc_msgSend)(app, sel_registerName("openURL:"), url);			
+		#endif
+	#endif
+#else
+	openfile(uri);
+#endif
+
+  return 0;
+}
+
 
 #ifdef __cplusplus
 }
