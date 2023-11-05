@@ -2,7 +2,7 @@
  * File              : config.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 02.02.2023
- * Last Modified Date: 25.02.2023
+ * Last Modified Date: 05.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /* Read config file */
@@ -31,8 +31,10 @@ extern "C" {
  * @user_data - pointer to data transfered through callback function
  * @callback - callback function - return non zero to stop function execution
  */
-static void read_config_file(FILE *fp, void *user_data, 
-		int (*callback)(void *user_data, char *key, char *value)) 
+static void read_config_file(
+		FILE *fp, void *user_data, 
+		int (*callback)(
+			void *user_data, const char *key, const char *value)) 
 {
 	char 
 		key[CONFIG_ARG_MAX_BYTES],   // key string 
@@ -52,6 +54,7 @@ static void read_config_file(FILE *fp, void *user_data,
 		if (ch=='=') {
 			key[klen+1] = 0;
 			match = 1;
+			continue;
 		}
 		if (ch=='\n'){
 			if (match & !comment) {
@@ -92,7 +95,8 @@ static void read_config_file(FILE *fp, void *user_data,
  * @key - null-terminated key string
  * @value - null-terminated value string
  */
-static void write_config_file(FILE *fp, char *key, char *value) 
+static void write_config_file(
+		FILE *fp, const char *key, const char *value) 
 {
 
 	int i=0;                         // iterator
