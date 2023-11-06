@@ -2,7 +2,7 @@
  * File              : config.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 02.02.2023
- * Last Modified Date: 05.11.2023
+ * Last Modified Date: 06.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /* Read config file */
@@ -37,7 +37,7 @@ static void read_config_file(
 			void *user_data, const char *key, const char *value)) 
 {
 	char 
-		key[CONFIG_ARG_MAX_BYTES],   // key string 
+		key  [CONFIG_ARG_MAX_BYTES], // key string 
 		value[CONFIG_ARG_MAX_BYTES]; // value string
 	int 
 		i,                           // iterator
@@ -57,18 +57,23 @@ static void read_config_file(
 			continue;
 		}
 		if (ch=='\n'){
+			// do if new line
 			if (match & !comment) {
+				// callback key/value pair
 				value[vlen+1] = 0;
 				if (callback)
 					if (callback(user_data, key, value))
 						break;
 			}
+			// free key buffer
 			for (i = 0; i < klen; ++i)
 				key[i] = 0;
 			klen = 0;
+			// free value buffer
 			for (i = 0; i < vlen; ++i)
 				value[i] = 0;
 			vlen = 0;
+			// init values
 			match = 0;
 			comment = 0;
 			first = 1;
