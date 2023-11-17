@@ -2,7 +2,7 @@
  * File              : base64.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.04.2022
- * Last Modified Date: 25.02.2023
+ * Last Modified Date: 17.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -22,11 +22,17 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 
-char *base64_encode(const unsigned char *data, size_t input_length,
-                    size_t *output_length);
+static char *
+base64_encode(
+		const unsigned char *data, 
+		size_t input_length,
+    size_t *output_length);
 
-unsigned char *base64_decode(const char *data, size_t input_length,
-                             size_t *output_length);
+static unsigned char *
+base64_decode(
+		const char *data, 
+		size_t input_length,
+    size_t *output_length);
 
 // memory allocation helpers
 #define BASE64_MALLOC(size)	\
@@ -50,7 +56,7 @@ static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 static char *decoding_table = NULL;
 static int mod_table[] = { 0, 2, 1 };
 
-void build_decoding_table() {
+static void build_decoding_table() {
 
   decoding_table = (char *)BASE64_MALLOC(256);
 
@@ -58,7 +64,7 @@ void build_decoding_table() {
     decoding_table[(unsigned char)encoding_table[i]] = i;
 }
 
-void base64_cleanup() { free(decoding_table); }
+static void base64_cleanup() { free(decoding_table); }
 
 char *base64_encode(const unsigned char *data, size_t input_length,
                     size_t *output_length) {

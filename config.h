@@ -2,7 +2,7 @@
  * File              : config.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 02.02.2023
- * Last Modified Date: 06.11.2023
+ * Last Modified Date: 17.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /* Read config file */
