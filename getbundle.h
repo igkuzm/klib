@@ -2,7 +2,7 @@
  * File              : getbundle.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 07.10.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 17.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -29,7 +29,15 @@ extern "C" {
 #include <unistd.h> //readlink
 #endif
 
-char *getbundle(char *argv[]) {
+/*
+ * getbundle
+ * Get bundle of application
+ * for mac os - APP/Contents/Resources,
+ * for win - executable directory
+ * for linux/unix - /usr/[local]/share/APP
+ * %argv - arguments of main() function
+ * */
+static char *getbundle(char *argv[]) {
   if (!argv || !argv[0])
     return NULL;
 #ifdef _WIN32
