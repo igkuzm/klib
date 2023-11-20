@@ -416,7 +416,6 @@ dirname(path)
 		}
 
 		if (endp - path + 2 > MAX_PATH) {
-						errno = ENAMETOOLONG;
 						return(NULL);
 		}
 		(void)strncpy(bname, path, endp - path + 1);
