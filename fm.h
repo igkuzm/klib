@@ -41,12 +41,12 @@ static const char * fext(
 		const char *filename);
 
 /* fname
- * return allocated file name(path) without extension 
- * or NULL on error 
+ * return allocated string eith file name without 
+ * extension and path
  * %filename - name or path of file
  */
 static char * fname(
-		const char *filename);
+		char *filename);
 
 /* fcopy 
  * copy and overwrite file 
@@ -120,6 +120,7 @@ static int dcopy(
 #include <windows.h>
 #define F_OK 0
 #define access _access
+	static const char *basename(const char *path);
 #else
 #include <unistd.h>
 #include <sys/stat.h> // mkdir, stat
@@ -162,18 +163,14 @@ const char * fext(const char *filename) {
 }
 
 char *
-fname(const char *filename)
+fname(char *filename)
 {
-	const char *dot = strrchr(filename, '.');
-	if (!dot || dot == filename)
-		return strdup(filename);
-	int len = strlen(filename) - strlen(dot);
-	char *name = (char *)malloc(len+1);
-	if (!name)
-			return NULL;
-	strncpy(name, filename, len);
-	name[len] = 0;
-	return name;
+	char *b = basename(filename);
+	char *p = strdup(b);
+	char *s = strrchr(p, '.');
+	if (s)
+		*s = 0;
+	return p;
 }
 
 /* return codes of fcopy functions */
@@ -369,7 +366,7 @@ struct dirent {
 
 /* returns pointer to path string without 
  * last path component*/
-static const char *
+const char *
 basename(const char *path)
 {
 	const char *dash = strrchr(path, '\\');
