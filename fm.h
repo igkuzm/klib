@@ -40,6 +40,14 @@ static bool isdir(const char *path);
 static const char * fext(
 		const char *filename);
 
+/* fname
+ * return allocated file name(path) without extension 
+ * or NULL on error 
+ * %filename - name or path of file
+ */
+static char * fname(
+		const char *filename);
+
 /* fcopy 
  * copy and overwrite file 
  * return 0 on success
@@ -147,10 +155,25 @@ bool isdir(const char *path) {
 }
 
 const char * fext(const char *filename) {
-		const char *dot = strrchr(filename, '.');
-		if (!dot || dot == filename)
-			return "";
-		return dot + 1;
+	const char *dot = strrchr(filename, '.');
+	if (!dot || dot == filename)
+		return "";
+	return dot + 1;
+}
+
+char *
+fname(const char *filename)
+{
+	const char *dot = strrchr(filename, '.');
+	if (!dot || dot == filename)
+		return strdup(filename);
+	int len = strlen(filename) - strlen(dot);
+	char *name = (char *)malloc(len+1);
+	if (!name)
+			return NULL;
+	strncpy(name, filename, len);
+	name[len] = 0;
+	return name;
 }
 
 /* return codes of fcopy functions */
