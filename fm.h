@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 17.11.2023
+ * Last Modified Date: 20.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -529,8 +529,13 @@ scandir(
 
 	if (namelist)
 		*namelist = array;
+	else{
+		for (i = 0; i < len; ++i)
+			free(array[i])
+		free(array);
+	}
 
-	return 0;
+	return len;
 }
 
 #endif
