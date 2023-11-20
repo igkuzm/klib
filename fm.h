@@ -78,10 +78,10 @@ static int dcopy(
  * const char *basename(const char *path);
  *
  * dirname
- * returns the path without last component or NULL 
- * on error
+ * returns allocated string with the path without last component 
+ * or NULL on error
  * %path - file path
- * char *dirname(char *path);
+ * char *dirname(const char *path);
  *
  * scandir
  * scans the directory dirp, calling filter()
@@ -380,19 +380,51 @@ basename(const char *path)
 
 /* returns allocated string with directory path 
  * or NULL on error */
-static char *
-dirname(const char *path)
+char *
+dirname(path)
+        const char *path;
 {
-	const char *dash = strrchr(path, '\\');
-	if (!dash || dash == path)
-		return NULL;
-	int len = strlen(path) - strlen(dash);
-	char *dname = (char *)malloc(len+1);
-	if (!dname)
-			return NULL;
-	strncpy(dname, path, len);
-	dname[len] = 0;
-	return dname;
+		static char *bname = NULL;
+		const char *endp;
+
+		if (bname == NULL) {
+						bname = (char *)malloc(MAX_PATH);
+						if (bname == NULL)
+										return(NULL);
+		}
+
+		/* Empty or NULL string gets treated as "." */
+		if (path == NULL || *path == '\0') {
+						(void)strcpy(bname, ".");
+						return(bname);
+		}
+
+		/* Strip trailing slashes */
+		endp = path + strlen(path) - 1;
+		while (endp > path && *endp == '\\')
+						endp--;
+
+		/* Find the start of the dir */
+		while (endp > path && *endp != '\\')
+						endp--;
+
+		/* Either the dir is "/" or there are no slashes */
+		if (endp == path) {
+						(void)strcpy(bname, *endp == '\\' ? "\\" : ".");
+						return(bname);
+		} else {
+						do {
+										endp--;
+						} while (endp > path && *endp == '\\');
+		}
+
+		if (endp - path + 2 > MAX_PATH) {
+						errno = ENAMETOOLONG;
+						return(NULL);
+		}
+		(void)strncpy(bname, path, endp - path + 1);
+		bname[endp - path + 1] = '\0';
+		return(bname);
 }
 
 #define ISDIGIT(a) isdigit(a)
