@@ -119,7 +119,10 @@ static int dcopy(
  *					const struct dirent **));
  */
 
-// IMPLIMATION	
+/********************************************/
+/*IMPLIMATION *******************************/	
+/********************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
