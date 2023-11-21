@@ -329,6 +329,11 @@ int dcopy(const char *from, const char *to,
 	
 	// read files
 	while((entry = readdir(dp))){
+		// skip system dir names
+		if (strcmp(entry->d_name, ".") == 0 ||
+				strcmp(entry->d_name, "..") == 0)
+			continue;
+		
 		char src[BUFSIZ], dst[BUFSIZ];
 		sprintf(src, "%s/%s", from, entry->d_name);
 		sprintf(dst, "%s/%s", to,   entry->d_name);
