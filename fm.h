@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 20.11.2023
+ * Last Modified Date: 21.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -41,12 +41,20 @@ static const char * fext(
 		const char *filename);
 
 /* fname
- * return allocated string eith file name without 
+ * return allocated string with file name without 
  * extension and path
- * %filename - name or path of file
+ * %path - name or path of file
  */
 static char * fname(
-		char *filename);
+		char *path);
+
+/* dname
+ * return allocated string with name of 
+ * directory path (like POSIX dirname())
+ * %path - path of file
+ */
+static char * dname(
+		const char *path);
 
 /* fcopy 
  * copy and overwrite file 
@@ -171,6 +179,18 @@ fname(char *filename)
 	if (s)
 		*s = 0;
 	return p;
+}
+
+char * dname(const char *path) {
+	char *d = strdup(path);
+#if defined _WIN32
+	char *s = strrchr(d, '\\');
+#else
+	char *s = strrchr(d, '/');
+#endif
+	if (s)
+		*s = 0;
+	return d;
 }
 
 /* return codes of fcopy functions */
