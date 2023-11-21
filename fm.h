@@ -190,6 +190,8 @@ char * dname(const char *path) {
 #endif
 	if (s)
 		*s = 0;
+	else 
+		strcpy(d, ".");
 	return d;
 }
 
