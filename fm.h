@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 21.11.2023
+ * Last Modified Date: 23.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -207,6 +207,8 @@ enum {
 };
 
 int fcopy (const char *from, const char *to) {
+	int ret = 0;
+
   FILE *src = fopen(from, "rb");
   if (!src)
     return FCP_FROM;
@@ -222,10 +224,16 @@ int fcopy (const char *from, const char *to) {
 		fwrite(buf, sizeof(buf), 1, dst);
   
 	//check errors
-	if (feof(src) || ferror(dst)){
+	if (feof(src)){
+		ret = ferror(src);
 		fclose(src);
 		fclose(dst);
-		return FCP_ERR;
+		return ret;
+	}
+	if ((ret = ferror(dst))){
+		fclose(src);
+		fclose(dst);
+		return ret;
 	}
 
   fclose(src);
