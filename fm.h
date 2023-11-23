@@ -203,43 +203,36 @@ enum {
 	FCP_NOERR = 0,
 	FCP_FROM,
 	FCP_TO,
-	FCP_ERR
+	FCP_ERRNO
 };
 
 int fcopy (const char *from, const char *to) {
-	int ret = 0;
-
-  FILE *src = fopen(from, "rb");
-  if (!src)
-    return FCP_FROM;
-
-  FILE *dst = fopen(to, "wb");
-  if (!dst) {
-    fclose(src);
-    return FCP_TO;
-  }
-
+	int ret = FCP_NOERR;
+	FILE *src, *dst;
 	char buf[BUFSIZ];
-	while (fread(buf, sizeof(buf), 1, src) > 0)
-		fwrite(buf, sizeof(buf), 1, dst);
-  
-	//check errors
-	if (feof(src)){
-		ret = ferror(src);
+
+	// open source file
+	if ((src=fopen(from, "rb"))){
+		// open destination file
+		if ((dst = fopen(to, "wb"))){
+			// do copy
+			while (feof(src) == 0){
+				fread (buf, sizeof(buf), 1, src);
+				fwrite(buf, sizeof(buf), 1, dst);
+			}
+			// check errors - to handle error call errno()
+			if (ferror(src) || ferror(dst))
+				ret = FCP_ERRNO;
+			fclose(dst);
+		} else {
+			ret = FCP_TO;
+		}
 		fclose(src);
-		fclose(dst);
-		return ret;
-	}
-	if ((ret = ferror(dst))){
-		fclose(src);
-		fclose(dst);
-		return ret;
+	} else {
+		ret = FCP_FROM;
 	}
 
-  fclose(src);
-  fclose(dst);
-
-  return 0;
+  return ret;
 }
 
 #define DCOPY_ERR(...)\
