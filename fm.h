@@ -126,6 +126,7 @@ static int dcopy(
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
@@ -259,10 +260,10 @@ static void _dcopy_herror(
 				*error = 
 					DCOPY_ERR(
 							"can't read file: %s", dst); 
-			case FCP_ERR:
+			case FCP_ERRNO:
 				*error = 
 					DCOPY_ERR(
-							"write file error: %s", dst); 
+							"write file error: %s, %s: %d", src, dst, errno); 
 		}
 	}
 }
