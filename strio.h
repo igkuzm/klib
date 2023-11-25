@@ -22,7 +22,7 @@ extern "C"{
  */
 #define strio_read(str, src)\
 	_Generic((src), \
-			char*: _strio_read_file, \
+			const char*: _strio_read_file, \
 			int:   _strio_read_fd, \
 			FILE*: _strio_read_fp \
 	)((str), (src))
@@ -33,7 +33,7 @@ extern "C"{
  */
 #define strio_read_range(str, src, start, end)\
 	_Generic((src), \
-			char*: _strio_read_range_file, \
+			const char*: _strio_read_range_file, \
 			int:   _strio_read_range_fd, \
 			FILE*: _strio_read_range_fp \
 	)((str), (src))	
@@ -44,10 +44,10 @@ extern "C"{
  */
 #define strio_write(str, dst)\
 	_Generic((dst), \
-			char*: _strio_write_file, \
+			const char*: _strio_write_file, \
 			int:   _strio_write_fd, \
 			FILE*: _strio_write_fp \
-	)((str), (src))	
+	)((str), (dst))	
 
 /*
  * write contenst of string to file in postition
@@ -55,10 +55,10 @@ extern "C"{
  */
 #define strio_write_to(str, dst, pos)\
 	_Generic((dst), \
-			char*: _strio_write_file_to, \
+			const char*: _strio_write_file_to, \
 			int:   _strio_write_fd_to, \
 			FILE*: _strio_write_fp_to \
-	)((str), (src))	
+	)((str), (dst))	
 
 /*
  * write contenst of string to the end of file
@@ -66,10 +66,10 @@ extern "C"{
  */
 #define strio_write_append(str, dst)\
 	_Generic((dst), \
-			char*: _strio_write_append_file, \
+			const char*: _strio_write_append_file, \
 			int:   _strio_write_append_fd, \
 			FILE*: _strio_write_append_fp \
-	)((str), (src))	
+	)((str), (dst))	
 /*
  * IMP
  */
