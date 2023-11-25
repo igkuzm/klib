@@ -2,7 +2,7 @@
  * File              : strio.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 25.11.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -81,36 +81,28 @@ _strio_read_fp  (char ** str, FILE * fp)
 	if (!fp)
 		return 0;
     
-	size_t size = 0;
 	size_t len = 0;
         
 	if (fseek (fp, 0, SEEK_END))
 		return 0;
 
-    if ((size = ftell(fp)) < 0)
+  if ((len = ftell(fp)) < 0)
 		return 0;
     
 	if (fseek (fp, 0, SEEK_SET))
 		return 0;
 
-    char *buffer = malloc(size);
-	if (!buffer)
+  char *buff = (char *)malloc(len+1);
+	if (!buff)
 		return 0;
 
-	while(1){
-		char ch = fgetc(fp);
-		if (ch == EOF) { 
-			break; 
-		}
-		
-		buffer[len++] = ch;
-	}
-	buffer[len] = 0;
+	fread(buff, len, 1, fp);	
+	buff[len] = 0;
 
 	if (str)
-		*str = buffer;
+		*str = buff;
 	else
-		free(buffer);
+		free(buff);
 
 	return len;
 }
@@ -152,8 +144,8 @@ _strio_read_range_fp  (char ** str, FILE * fp, size_t start, size_t end)
     
 	size_t len = 0;
         
-    char *buffer = malloc(end - start + 1);
-	if (!buffer)
+    char *buff = (char *)malloc(end - start + 1);
+	if (!buff)
 		return 0;
 
 	if (fseek (fp, start, SEEK_SET))
@@ -165,17 +157,17 @@ _strio_read_range_fp  (char ** str, FILE * fp, size_t start, size_t end)
 			break; 
 		}
 		
-		buffer[len++] = ch;
+		buff[len++] = ch;
 
 		if (len == end - start)
 			break;
 	}
-	buffer[len] = 0;
+	buff[len] = 0;
 
 	if (str)
-		*str = buffer;
+		*str = buff;
 	else
-		free(buffer);
+		free(buff);
 
 	return len;
 }
@@ -203,7 +195,6 @@ _strio_read_range_file(char ** str, const char * filename, size_t start, size_t 
 
 	return len;
 }
-
 
 static 
 int 
