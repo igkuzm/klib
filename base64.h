@@ -2,7 +2,7 @@
  * File              : base64.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.04.2022
- * Last Modified Date: 17.11.2023
+ * Last Modified Date: 02.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -11,8 +11,8 @@
  * use base64_encode and base64_decode
  */
 
-#ifndef k_base64_h__
-#define k_base64_h__
+#ifndef BASE64_H__
+#define BASE64_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,17 +34,6 @@ base64_decode(
 		size_t input_length,
     size_t *output_length);
 
-// memory allocation helpers
-#define BASE64_MALLOC(size)	\
-({\
-void *const ___p = malloc(size);\
-if (!___p) {\
-  perror("base64 malloc");\
-  exit(EXIT_FAILURE);\
-}\
-___p;\
-})
-
 static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
                                 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
                                 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -57,9 +46,8 @@ static char *decoding_table = NULL;
 static int mod_table[] = { 0, 2, 1 };
 
 static void build_decoding_table() {
-
-  decoding_table = (char *)BASE64_MALLOC(256);
-
+  decoding_table = (char *)malloc(256);
+	if (!decoding_table) return;
   for (int i = 0; i < 64; i++)
     decoding_table[(unsigned char)encoding_table[i]] = i;
 }
@@ -71,7 +59,7 @@ char *base64_encode(const unsigned char *data, size_t input_length,
 
   *output_length = 4 * ((input_length + 2) / 3);
 
-  char *encoded_data = (char *)BASE64_MALLOC(*output_length);
+  char *encoded_data = (char *)malloc(*output_length);
   if (encoded_data == NULL)
     return NULL;
 
@@ -110,7 +98,7 @@ unsigned char *base64_decode(const char *data, size_t input_length,
   if (data[input_length - 2] == '=')
     (*output_length)--;
 
-  unsigned char *decoded_data = (unsigned char *)BASE64_MALLOC(*output_length);
+  unsigned char *decoded_data = (unsigned char *)malloc(*output_length);
   if (decoded_data == NULL)
     return NULL;
 
@@ -142,4 +130,4 @@ unsigned char *base64_decode(const char *data, size_t input_length,
 }
 #endif
 
-#endif // k_base64_h__
+#endif // K_BASE64_H__

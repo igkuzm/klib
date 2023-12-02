@@ -2,7 +2,7 @@
  * File              : bitmap.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.05.2022
- * Last Modified Date: 25.02.2023
+ * Last Modified Date: 02.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -10,8 +10,8 @@
  * library to manage bitmap images
  */
 
-#ifndef k_lib_pixel_h__
-#define k_lib_pixel_h__
+#ifndef BITMAP_H__
+#define BITMAP_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -515,4 +515,4 @@ pixel_t *filter_median(pixel_t *image, int w, int h, int filterW, int filterH) {
 }
 #endif
 
-#endif // k_lib_pixel_h__
+#endif // BITMAP_H__

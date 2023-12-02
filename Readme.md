@@ -5,12 +5,12 @@
 1. asort.h - line sort array
 1. base64.h - base64 encode/decode
 1. bitmap.h - image bitmap editing
-2. config.h - read ini config file
 5. each.h - for each(){} macros
 5. enum.h - converting C enums to strings
 6. fm.h - filemanager functions (copy file, copy directory recursive, etc.)
 7. fsize.h - get file size
 8. getbundle.h - for Windows to EXEC, for MacOS to BUNDLE/Resources, for Linux - ../share/$progname
+2. ini.h - parse ini config file
 10. list.h - list support
 11. log.h - logs in Android/iOS and other platforms
 12. openfile.h - open file for Windows/MacOS/Linux with default application
