@@ -2,124 +2,60 @@
  * File              : strsplit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.02.2022
- * Last Modified Date: 19.11.2022
+ * Last Modified Date: 02.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-/* Usage:  
- *
+/* 
+ * Split string function
  */
 
-
-#ifndef k_lib_strsplit_h__
-#define k_lib_strsplit_h__
+#ifndef STRSPLIT_H__
+#define STRSPLIT_H__
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// split string with delims, fill NULL-terminated array of tokens and return array's size
-static int strsplit (const char *str, const char *delim, char ***tokens);
-
-// split string with delims and return string at index. set index to -1 to return last
-static char * strisplit(const char *str, const char *delim, int index);
-
-// return allocated string with contents of str from position pos and lendth len 
-static char * strsubstr(const char *str, int pos, int len);
-
-/*
- *
+/* strsplit
+ * split string with delims, 
+ * do callback for each token
+ * and return number of tokens
+ * %str - string to split
+ * %delim - string with delim chars
+ * %ptr - pointer to transfer trough callback
+ * %callback - return non-null to stop function
  */
-
-int 
-strsplit (
-		const char *str, 
-		const char *delim, 
-		char ***tokens
-		)
+static int strsplit(
+		const char *str, const char *delim,
+		void *ptr,
+		int(*callback)(const char *token, void *ptr))
 {
-	// pointer to string
-	char * ptr = (char *)str;
+	int i;
+	char *s, *t;
+	// do safe strtok
+	s = strdup(str);
+	if (!s)
+		return 0;
 
-	// alloc array of strings (pointers)
-	char **arr = malloc(sizeof(ptr));
-	if (!arr)
-		return -1;			
+	// loop through the string to extract 
+	// all other tokens
+	for(t=strtok(s, delim), i=0; 
+			t; 
+			t=strtok(NULL, delim), ++i) 
+		if (callback)
+			if (callback(t, ptr))
+				goto strsplit_free;
 
-	int i = 0; //counter
-	// Extract the first token
-	char *token = strtok(ptr, delim);
-	// loop through the string to extract all other tokens
-	while( token != NULL ) {
-		arr[i++] = token;
-		token = strtok(NULL, delim);
-		//realloc array
-		arr = realloc(arr, i*sizeof(token) + sizeof(token));
-		if (!arr)
-			return -1;			
-	}
-
-	//NULL terminate array
-	arr[i] = NULL;
-
-	// set tokens pointer
-	if (tokens)
-		*tokens = arr;
-	else
-		free(arr); // free array
-
+strsplit_free:
+	free(s);
 	return i;
 }
 
-char * 
-strisplit (
-		const char *str, 
-		const char *delim, 
-		int index
-		)
-{
-	// pointer to string
-	char * ptr = (char *)str;
-
-	int i = 0; //counter
-	// Extract the first token
-	char *token = strtok(ptr, delim);
-	// loop through the string to extract all other tokens
-	while( token != NULL ) {
-		if (i == index)
-			break;
-		token = strtok(NULL, delim);
-		i++;
-	}
-
-	if (i == index || i == -1){
-		// allocate string
-		char *substr = malloc(strlen(token) + 1);
-		// copy string
-		strcpy(substr, token);
-		return substr;		
-	}
-
-	return NULL;
-}
-
-char * 
-strsubstr(const char *str, int pos, int len){
-	char *substr = malloc(len+1);
-	if (!substr)
-		return NULL;
-	
-	memcpy(substr, &str[pos], len);
-	substr[len] = '\0';
-
-	return substr;
-}
 #ifdef __cplusplus
 }
 #endif
 
-#endif //k_lib_strsplit_h__
+#endif //STRSPLIT_H__

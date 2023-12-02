@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 23.11.2023
+ * Last Modified Date: 02.12.2023
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -76,6 +76,16 @@ static int fcopy(
 static int dcopy(
 		const char *from, const char *to,
 		bool overwrite, char **error);
+
+/* newdir
+ * create new directory
+ * link to mkdir function with universal
+ * for unix/windows args
+ * %path - directory path with name
+ * %mode - access mode (not used in windows)
+ */
+static int newdir(
+		const char *path, int mode);
 
 /*
  * POSIX functions for Windows
@@ -358,6 +368,14 @@ int dcopy(const char *from, const char *to,
 	closedir(dp);
 #endif
 	return 0;
+}
+
+int newdir(const char *path, int mode)
+{
+#ifdef _WIN32
+	return mkdir(path);
+#else
+	return mkdir(path, mode);
 }
 
 /* POSIX FUNCTIONS FOR WINDOWS */
