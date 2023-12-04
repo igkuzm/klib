@@ -28,7 +28,7 @@ rtf_from_utf8(const char *s);
  * %width  - array of columns width
  */
 static char *
-rtf_table_header(int coln, char *titles[], int *width);
+rtf_table_header(int coln, const char *titles[], int *width);
 
 /* rtf_table_header
  * return string with rtf code of table row
@@ -105,7 +105,7 @@ rtf_from_utf8(const char *s)
 
 char *
 rtf_table_header(
-		int coln, char *titles[], int *width)
+		int coln, const char *titles[], int *width)
 {
 	int i;
 	struct str s;
