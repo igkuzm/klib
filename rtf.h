@@ -149,7 +149,7 @@ rtf_table_row(
 	for (i = 0; i < coln; ++i)
 		str_catf(&s, 
 				"\\intbl %s \\cell\n",
-				colv[i]);
+				rtf_from_utf8(colv[i]));
 	
 	str_cat(&s, 
 				"\\row\n");
