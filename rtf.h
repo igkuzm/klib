@@ -107,7 +107,7 @@ char *
 rtf_table_header(
 		int coln, const char *titles[], int *width)
 {
-	int i;
+	int i, w=0;
 	struct str s;
 	if (str_init(&s))
 		return NULL;
@@ -115,13 +115,14 @@ rtf_table_header(
 	str_cat(&s, 
 			  "\\pard\\par\\trowd\n");
 	for (i = 0; i < coln; ++i) {
+		w += width[i];
 		str_catf(&s, 
 				"\\clbrdrt\\brdrs"
 				"\\clbrdrl\\brdrs"
 				"\\clbrdrb\\brdrs"
 				"\\clbrdrr\\brdrs\n"
 				"\\cellx%d\n", 
-				width[i]);
+				w);
 	}
 	for (i = 0; i < coln; ++i) {
 		char *title = rtf_from_utf8(titles[i]);
