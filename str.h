@@ -91,7 +91,7 @@ static int _str_realloc(
 void str_append(
 		struct str *s, const char *str, int len)
 {
-	if (!str)
+	if (!str || len < 1)
 		return;
 
 	int new_size, i;
