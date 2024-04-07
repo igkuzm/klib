@@ -2,7 +2,7 @@
  * File              : ini.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 02.02.2023
- * Last Modified Date: 02.12.2023
+ * Last Modified Date: 08.04.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-#define CONFIG_ARG_MAX_BYTES 128     // max size of key/value string
+#define CONFIG_ARG_MAX_BYTES BUFSIZ     // max size of key/value string
 
 /*
  * ini_parse - read file and run callback for each key/value pair
@@ -175,6 +175,8 @@ int ini_parse(
 				vlen > CONFIG_ARG_MAX_BYTES) 
 			break;
 	}
+
+	fclose(fp);
 	return 0;
 }
 
