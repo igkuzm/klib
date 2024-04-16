@@ -2,7 +2,7 @@
  * File              : reachability.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 15.09.2021
- * Last Modified Date: 21.01.2023
+ * Last Modified Date: 16.04.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -150,7 +150,7 @@ struct reachability_params {
   void *user_data;
 };
 
-void *check_address_is_reachable(void *params) {
+static void *check_address_is_reachable(void *params) {
   struct reachability_params *p = (struct reachability_params *)params;
 
   while (1) {
@@ -199,7 +199,7 @@ void *check_address_is_reachable(void *params) {
   pthread_exit(0);
 }
 
-pthread_t reachability_dispatch(const char *address, bool find_ip, int port,
+static pthread_t reachability_dispatch(const char *address, bool find_ip, int port,
                                 int timeout, void *user_data,
                                 int (*callback)(void *user_data, bool reachable,
                                                 char *error)) {

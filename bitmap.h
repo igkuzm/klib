@@ -2,7 +2,7 @@
  * File              : bitmap.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.05.2022
- * Last Modified Date: 02.12.2023
+ * Last Modified Date: 16.04.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -40,8 +40,8 @@ struct hsv {
   unsigned char a; // alfa
 };
 
-static pixel_t rgb2pixel(struct rgb rgb); // convert pixel (int32) to rgb struct
-static struct rgb pixel2rgb(pixel_t pixel); // convert rgb struct to pixel
+static pixel_t rgb2pixel(struct rgb rgb); // convert rgb struct to pixel
+static struct rgb pixel2rgb(pixel_t pixel); // convert pixel (int32) to rgb struct
 static struct rgb hsv2rgb(struct hsv hsv); // convert hsv to rbg
 static struct hsv rgb2hsv(struct rgb rgb); // convert rgb to hsv
 

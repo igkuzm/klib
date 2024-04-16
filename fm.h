@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 02.12.2023
+ * Last Modified Date: 16.04.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -19,6 +19,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* fexists
  * true if file exists and writable
@@ -33,28 +34,36 @@ static bool fexists(const char *path);
  */
 static bool isdir(const char *path);
 
+/* fsize
+ * return file size
+ * %path - file path
+ */
+static off_t fsize(const char *path);
+
+/* homedir
+ * return allocated string with path to home directory
+ */
+static char * homedir(void);
+
 /* fext
  * return file extension or NULL on error 
  * %filename - name or path of file
  */
-static const char * fext(
-		const char *filename);
+static const char * fext(const char *filename);
 
 /* fname
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file
  */
-static char * fname(
-		char *path);
+static char * fname(char *path);
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
  * %path - path of file
  */
-static char * dname(
-		const char *path);
+static char * dname(const char *path);
 
 /* fcopy 
  * copy and overwrite file 
@@ -62,8 +71,7 @@ static char * dname(
  * %from - filepath source file
  * %to   - filepath dastination file 
  */ 
-static int fcopy(
-		const char *from, const char *to);
+static int fcopy(const char *from, const char *to);
 
 /* dcopy 
  * copy directory recursive
@@ -73,9 +81,8 @@ static int fcopy(
  * %overwrite - overwrite destination file if true
  * %error - pointer to allocated error message
 */ 
-static int dcopy(
-		const char *from, const char *to,
-		bool overwrite, char **error);
+static int dcopy(const char *from, const char *to,
+		             bool overwrite, char **error);
 
 /* newdir
  * create new directory
@@ -84,8 +91,7 @@ static int dcopy(
  * %path - directory path with name
  * %mode - access mode (not used in windows)
  */
-static int newdir(
-		const char *path, int mode);
+static int newdir(const char *path, int mode);
 
 /*
  * POSIX functions for Windows
@@ -96,8 +102,8 @@ static int newdir(
  * const char *basename(const char *path);
  *
  * dirname
- * returns allocated string with the path without last component 
- * or NULL on error
+ * returns allocated string with the path without last 
+ * component or NULL on error
  * %path - file path
  * char *dirname(const char *path);
  *
@@ -154,6 +160,41 @@ bool fexists(const char *path) {
   if (access(path, F_OK) == 0)
     return true;
   return false;
+}
+
+off_t fsize(const char *path) {
+#if defined _WIN32
+  WIN32_FIND_DATAA findData;
+  HANDLE hFind = INVALID_HANDLE_VALUE;
+
+  hFind = FindFirstFileA(path, &findData);
+  if (hFind != INVALID_HANDLE_VALUE) {
+    return (findData.nFileSizeHigh * (MAXDWORD + 1)) + findData.nFileSizeLow;
+  }
+#else
+  struct stat st;
+  if (stat(path, &st) == 0) {
+    return st.st_size;
+  }
+#endif
+  return 0;
+}
+
+char *homedir(void)
+{
+	char *p = (char *)malloc(BUFSIZ);
+	if (!p){
+		perror("malloc");
+		return NULL;
+	}
+#ifdef _WIN32
+	snprintf(p, BUFSIZ, "%s%s", 
+			getenv("HOMEDRIVE"), getenv("HOMEPATH"));
+#else
+	snprintf(p, BUFSIZ, "%s", 
+			getenv("HOME"));
+#endif
+	return p;																								        
 }
 
 bool isdir(const char *path) {
@@ -377,6 +418,7 @@ int newdir(const char *path, int mode)
 #else
 	return mkdir(path, mode);
 }
+#endif
 
 /* POSIX FUNCTIONS FOR WINDOWS */
 #ifdef _WIN32
