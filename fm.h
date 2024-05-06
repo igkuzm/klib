@@ -259,7 +259,7 @@ char * dname(const char *path) {
 static int lastpath(const char *path) {
 		const char *slash;
 #ifdef _WIN32
-	 	slash = strrchr(path, '\');
+	 	slash = strrchr(path, '\\');
 #else
 	 	slash = strrchr(path, '/');
 #endif
