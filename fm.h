@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 16.04.2024
+ * Last Modified Date: 07.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -57,6 +57,12 @@ static const char * fext(const char *filename);
  * %path - name or path of file
  */
 static char * fname(char *path);
+
+/* lastpath
+ * return last path component 
+ * %path - name or path of file
+ */
+static int lastpath(const char *path);
 
 /* dname
  * return allocated string with name of 
@@ -248,6 +254,18 @@ char * dname(const char *path) {
 	else 
 		strcpy(d, ".");
 	return d;
+}
+
+static int lastpath(const char *path) {
+		const char *slash;
+#ifdef _WIN32
+	 	slash = strrchr(path, '\');
+#else
+	 	slash = strrchr(path, '/');
+#endif
+		if (!slash || slash == path)
+			return 0;
+		return slash - path;
 }
 
 /* return codes of fcopy functions */
