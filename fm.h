@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 07.05.2024
+ * Last Modified Date: 09.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -27,13 +27,6 @@ extern "C" {
  */
 static bool fexists(const char *path);
 
-/* isdir
- * true if directory at path exists
- * and is accesable
- * %path - directory path
- */
-static bool isdir(const char *path);
-
 /* fsize
  * return file size
  * %path - file path
@@ -43,33 +36,37 @@ static off_t fsize(const char *path);
 /* homedir
  * return allocated string with path to home directory
  */
-static char * homedir(void);
+static char * homedir();
+
+/* isdir
+ * true if directory at path exists
+ * and is accesable
+ * %path - directory path
+ */
+static bool isdir(const char *path);
 
 /* fext
  * return file extension or NULL on error 
  * %filename - name or path of file
  */
-static const char * fext(const char *filename);
+static const char * fext(
+		const char *filename);
 
 /* fname
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file
  */
-static char * fname(char *path);
-
-/* lastpath
- * return last path component 
- * %path - name or path of file
- */
-static int lastpath(const char *path);
+static char * fname(
+		char *path);
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
  * %path - path of file
  */
-static char * dname(const char *path);
+static char * dname(
+		const char *path);
 
 /* fcopy 
  * copy and overwrite file 
@@ -77,7 +74,8 @@ static char * dname(const char *path);
  * %from - filepath source file
  * %to   - filepath dastination file 
  */ 
-static int fcopy(const char *from, const char *to);
+static int fcopy(
+		const char *from, const char *to);
 
 /* dcopy 
  * copy directory recursive
@@ -87,8 +85,9 @@ static int fcopy(const char *from, const char *to);
  * %overwrite - overwrite destination file if true
  * %error - pointer to allocated error message
 */ 
-static int dcopy(const char *from, const char *to,
-		             bool overwrite, char **error);
+static int dcopy(
+		const char *from, const char *to,
+		bool overwrite, char **error);
 
 /* newdir
  * create new directory
@@ -97,7 +96,8 @@ static int dcopy(const char *from, const char *to,
  * %path - directory path with name
  * %mode - access mode (not used in windows)
  */
-static int newdir(const char *path, int mode);
+static int newdir(
+		const char *path, int mode);
 
 /*
  * POSIX functions for Windows
@@ -108,8 +108,8 @@ static int newdir(const char *path, int mode);
  * const char *basename(const char *path);
  *
  * dirname
- * returns allocated string with the path without last 
- * component or NULL on error
+ * returns allocated string with the path without last component 
+ * or NULL on error
  * %path - file path
  * char *dirname(const char *path);
  *
@@ -188,19 +188,13 @@ off_t fsize(const char *path) {
 
 char *homedir(void)
 {
-	char *p = (char *)malloc(BUFSIZ);
-	if (!p){
-		perror("malloc");
-		return NULL;
-	}
+	char homedir[BUFSIZ];
 #ifdef _WIN32
-	snprintf(p, BUFSIZ, "%s%s", 
-			getenv("HOMEDRIVE"), getenv("HOMEPATH"));
+	snprintf(homedir, BUFSIZ, "%s%s", getenv("HOMEDRIVE"), getenv("HOMEPATH"));
 #else
-	snprintf(p, BUFSIZ, "%s", 
-			getenv("HOME"));
+	snprintf(homedir, BUFSIZ, "%s", getenv("HOME"));
 #endif
-	return p;																								        
+	return strdup(homedir);																								        
 }
 
 bool isdir(const char *path) {
@@ -254,18 +248,6 @@ char * dname(const char *path) {
 	else 
 		strcpy(d, ".");
 	return d;
-}
-
-static int lastpath(const char *path) {
-		const char *slash;
-#ifdef _WIN32
-	 	slash = strrchr(path, '\\');
-#else
-	 	slash = strrchr(path, '/');
-#endif
-		if (!slash || slash == path)
-			return 0;
-		return slash - path;
 }
 
 /* return codes of fcopy functions */
@@ -435,8 +417,8 @@ int newdir(const char *path, int mode)
 	return mkdir(path);
 #else
 	return mkdir(path, mode);
-}
 #endif
+}
 
 /* POSIX FUNCTIONS FOR WINDOWS */
 #ifdef _WIN32
@@ -488,8 +470,7 @@ basename(const char *path)
 /* returns allocated string with directory path 
  * or NULL on error */
 char *
-dirname(path)
-        const char *path;
+dirname(const char *path)
 {
 		static char *bname = NULL;
 		const char *endp;
@@ -691,8 +672,9 @@ scandir(
 	if (namelist)
 		*namelist = array;
 	else{
+		int i;
 		for (i = 0; i < len; ++i)
-			free(array[i])
+			free(array[i]);
 		free(array);
 	}
 
