@@ -521,6 +521,7 @@ basename(const char *path)
 
 /* returns allocated string with directory path 
  * or NULL on error */
+/*
 char *
 dirname(const char *path)
 {
@@ -565,6 +566,7 @@ dirname(const char *path)
 		bname[endp - path + 1] = '\0';
 		return(bname);
 }
+*/
 
 #define ISDIGIT(a) isdigit(a)
 
@@ -584,6 +586,9 @@ dirname(const char *path)
    returning less than, equal to or greater than zero if S1 is less than,
    equal to or greater than S2 (for more info, see the Glibc texinfo doc).  */
 
+int strverscmp (const char *s1, const char *s2);
+
+/*
 int
 strverscmp (const char *s1, const char *s2)
 {
@@ -653,6 +658,7 @@ strverscmp (const char *s1, const char *s2)
       return state;
     }
 }
+*/
 
 static int alphasort(
 		const struct dirent **a, const struct dirent **b)
