@@ -39,11 +39,11 @@ static off_t fsize(const char *path);
 static char * homedir();
 
 /* parentdir
- * return allocated string with removed last path component
+ * modify argument string - remove last path component
  * from path string
  * %path - name or path of file
  */
-static char * parentdir(const char *path);
+static const char * parentdir(char *path);
 
 /* isdir
  * true if directory at path exists
@@ -204,21 +204,20 @@ char *homedir(void)
 	return strdup(homedir);																								        
 }
 
-char * parentdir(const char *path) {
+const char * parentdir(char *path) {
 	const char *slash;
 #ifdef _WIN32
 	slash	= strrchr(path, '\\');
 #else
 	slash	= strrchr(path, '/');
 #endif
-	char *p = strdup(path);
 	if (slash && slash != path)
-		p[slash-path] = 0;
+		path[slash-path] = 0;
 #ifndef _WIN32
 	else
-		strcpy(p, "/");
+		strcpy(path, "/");
 #endif
-	return p;
+	return path;
 }
 
 
