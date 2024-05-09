@@ -38,6 +38,13 @@ static off_t fsize(const char *path);
  */
 static char * homedir();
 
+/* parentdir
+ * return allocated string with removed last path component
+ * from path string
+ * %path - name or path of file
+ */
+static char * parentdir(const char *path);
+
 /* isdir
  * true if directory at path exists
  * and is accesable
@@ -49,8 +56,7 @@ static bool isdir(const char *path);
  * return file extension or NULL on error 
  * %filename - name or path of file
  */
-static const char * fext(
-		const char *filename);
+static const char * fext(const char *filename);
 
 /* fname
  * return allocated string with file name without 
@@ -192,10 +198,29 @@ char *homedir(void)
 #ifdef _WIN32
 	snprintf(homedir, BUFSIZ, "%s%s", getenv("HOMEDRIVE"), getenv("HOMEPATH"));
 #else
-	snprintf(homedir, BUFSIZ, "%s", getenv("HOME"));
+	snprintf(homedir, BUFSIZ,
+		 	"%s", getenv("HOME"));
 #endif
 	return strdup(homedir);																								        
 }
+
+char * parentdir(const char *path) {
+	const char *slash;
+#ifdef _WIN32
+	slash	= strrchr(path, '\\');
+#else
+	slash	= strrchr(path, '/');
+#endif
+	char *p = strdup(path);
+	if (slash && slash != path)
+		p[slash-path] = 0;
+#ifndef _WIN32
+	else
+		strcpy(p, "/");
+#endif
+	return p;
+}
+
 
 bool isdir(const char *path) {
 #if defined _WIN32
