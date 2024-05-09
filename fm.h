@@ -43,7 +43,7 @@ static char * homedir();
  * from path string
  * %path - name or path of file
  */
-static const char * parentdir(char *path);
+static char * parentdir(char *path);
 
 /* isdir
  * true if directory at path exists
@@ -63,16 +63,14 @@ static const char * fext(const char *filename);
  * extension and path
  * %path - name or path of file
  */
-static char * fname(
-		char *path);
+static char * fname(char *path);
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
  * %path - path of file
  */
-static char * dname(
-		const char *path);
+static char * dname(const char *path);
 
 /* fcopy 
  * copy and overwrite file 
@@ -80,8 +78,7 @@ static char * dname(
  * %from - filepath source file
  * %to   - filepath dastination file 
  */ 
-static int fcopy(
-		const char *from, const char *to);
+static int fcopy(const char *from, const char *to);
 
 /* dcopy 
  * copy directory recursive
@@ -102,8 +99,7 @@ static int dcopy(
  * %path - directory path with name
  * %mode - access mode (not used in windows)
  */
-static int newdir(
-		const char *path, int mode);
+static int newdir(const char *path, int mode);
 
 /*
  * POSIX functions for Windows
@@ -114,8 +110,8 @@ static int newdir(
  * const char *basename(const char *path);
  *
  * dirname
- * returns allocated string with the path without last component 
- * or NULL on error
+ * returns allocated string with the path without last 
+ * component or NULL on error
  * %path - file path
  * char *dirname(const char *path);
  *
@@ -204,7 +200,7 @@ char *homedir(void)
 	return strdup(homedir);																								        
 }
 
-const char * parentdir(char *path) {
+char * parentdir(char *path) {
 	const char *slash;
 #ifdef _WIN32
 	slash	= strrchr(path, '\\');
