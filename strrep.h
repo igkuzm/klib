@@ -43,7 +43,7 @@ static char * strrep(const char *haystack, // string to scan
 	if (diff < 0)
 		diff = 0;
 
-	size_t len = hlen;
+	size_t len = hlen + 1;
 	char *res = (char *)malloc(len);
 	if (!res)
 		return NULL;
