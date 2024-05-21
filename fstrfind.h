@@ -37,15 +37,16 @@ extern "C" {
 
 static bool _sarray_matches(int argc, char *argv[], char *buf);
 
-/* copy %in stream to %out and callback if found one of 
- * argv string - to remove founded string in %out - just 
- * set first char of %found buffer to null (found[0] = 0) */
-static void fstrfind(FILE *in, FILE *out,
+/* fstrfind - find strings in file stream:
+ * copy %in stream to %out and, if found one of argv string, 
+ * callback buffer with it before writing to %out */
+static void fstrfind(
+		FILE *in, FILE *out,
 		int argc, char *argv[], 
 		void *userdata,
-    int (*callback)(void *userdata, const char *found)) 
+    int (*callback)(void *userdata, char *buffer)) 
 {
-  int i, maxlen = 0, cnt = 0;
+  int i, maxlen = 0;
 
   // count len
   for (i=0; i < argc; ++i) {
@@ -69,15 +70,17 @@ static void fstrfind(FILE *in, FILE *out,
 		buf[l] = 0;
 
 		// check buffer matches search strings
-    if (_sarray_matches(argc, argv, buf)) {
-			while (_sarray_matches(argc, argv, buf) && l<maxlen){
-				ch = fgetc(in);
-				if (ch == EOF)
-					break;
-				buf[l++] = ch;
-				buf[l] = 0; // null-terminate buffer
-			} 
+		int match = false;
+		while (_sarray_matches(argc, argv, buf) && l<maxlen){
+			match = true;
+			ch = fgetc(in);
+			if (ch == EOF)
+				break;
+			buf[l++] = ch;
+			buf[l] = 0; // null-terminate buffer
+		} 
 
+		if (match){
 			if (l==maxlen){
 				// callback founded string
 				if (callback)
@@ -94,10 +97,9 @@ static void fstrfind(FILE *in, FILE *out,
 			continue;
 		}
 
-		// put first char of buffer to out and move it to 1 
+		// put first char of buffer to out and move it to 1 left 
     fputc(buf[0], out);
-		memmove(&buf[i], &buf[i+1], l);
-		l--;
+		memmove(&buf[i], &buf[i+1], l--);
   }
 }
 
