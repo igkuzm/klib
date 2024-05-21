@@ -2,12 +2,32 @@
  * File              : utf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 27.07.2023
+ * Last Modified Date: 21.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef k_lib_utf_h__
-#define k_lib_utf_h__
+/**
+ * utf.h
+ * Copyright (c) 2022 Igor V. Sementsov <ig.kuzm@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* convert betwin Unicode and UTF8 */
+
+#ifndef UTF_H
+#define UTF_H
 
 #ifdef __cplusplus
 extern "C"{
@@ -223,5 +243,4 @@ static void utf32_to_utf8(
 }
 #endif
 
-#endif //k_lib_utf_h__
-
+#endif // UTF_H

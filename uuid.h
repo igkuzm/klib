@@ -2,7 +2,7 @@
  * File              : uuid.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 16.04.2024
+ * Last Modified Date: 21.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -23,7 +23,6 @@ extern "C"{
 
 //allocate new uuid string 
 static int uuid_new(char uuid[37]);
-
 
 /*
  * Implimation

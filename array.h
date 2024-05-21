@@ -2,8 +2,26 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 25.02.2023
+ * Last Modified Date: 21.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
+ */
+
+/**
+ * array.h
+ * Copyright (c) 2022 Igor V. Sementsov <ig.kuzm@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -17,67 +35,50 @@
  * void array_free(struct array_t * array) - free array
  */
 
-#ifndef k_lib_array_h__
-#define k_lib_array_h__
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef ARRAY_H
+#define ARRAY_H
 
 #include <stdlib.h>
 
 // Dynamyc array
-struct array_t {
+typedef struct array {
   void *data;
   int len;
-};
+} array_t;
 
-#define array_new(T)\
+#define array_new(T, on_error)\
 ({\
-  struct array_t *___array = malloc(sizeof(struct array_t));\
-  if (___array == NULL) {\
-    perror("array_new malloc");\
-    exit(EXIT_FAILURE);\
-  }\
-  ___array->data = malloc(sizeof(T));\
-  if (___array->data == NULL) {\
-    perror("array_new data malloc");\
-    exit(EXIT_FAILURE);\
-  };\
-  ___array->len = 0;\
-  ___array;\
+  array_t *a = malloc(sizeof(array_t));\
+  if (!a) {\
+		on_error; \
+	} else { \
+		a->data = malloc(sizeof(T));\
+		if (!a->data) {\
+			on_error; \
+		} \
+		a->len = 0;\
+	}\
+  a;\
 })
 
-#define array_append(array, T, item)\
-    ({\
-      T *___data = array->data;\
-      ___data[array->len] = item;\
-      array->len++;\
-      array->data = realloc(array->data, sizeof(T) + sizeof(T) * array->len);\
-      if (array->data == NULL) {\
-        perror("array_append_item realloc");\
-        exit(EXIT_FAILURE);\
-      }\
-    })
+#define array_append(a, T, item, on_error)\
+({\
+	T *d = a->data;\
+	d[a->len++] = item;\
+	T *p = realloc(a->data, sizeof(T) * (a->len + 1));\
+	if (!p) {\
+		on_error; \
+	} else { \
+		a->data = p; \
+	}\
+})
 
-#define array_at(array, T, i)\
-    ({\
-      T *___data = array->data;\
-      ___data[i];\
-    })
+#define array_for_each(a, T, item)\
+for (T *p = (a->data), (item) = *p; p < &(((T*)(a->data))[a->len]);\
+     p++, (item) = *p)
 
-#define array_for_each(array, T, item)\
-T *___data = array->data;\
-T *___p, item;\
-for (___p = (___data), (item) = *___p; ___p < &((___data)[array->len]);\
-     ___p++, (item) = *___p)
+#define array_free(a)\
+  free(a->data);\
+free(a);
 
-#define array_free(array)\
-  free(array->data);\
-free(array);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // k_lib_array_h__
+#endif // ARRAY_H

@@ -2,9 +2,10 @@
  * File              : str.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.12.2023
- * Last Modified Date: 26.12.2023
+ * Last Modified Date: 21.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
+
 /**
  * str.h
  * Copyright (c) 2023 Igor V. Sementsov <ig.kuzm@gmail.com>
@@ -23,6 +24,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+
 /**
  * Simple dynamic string
  * USAGE:

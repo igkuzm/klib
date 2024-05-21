@@ -7,7 +7,7 @@
  */
 
 /**
- * fstrrep.h
+ * fstrfind.h
  * Copyright (c) 2024 Igor V. Sementsov <ig.kuzm@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -24,6 +24,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+/* fstrfind - find strings in file stream */
+
 #ifndef FSTRFIND_H
 #define FSTRFIND_H
 #ifdef __cplusplus
@@ -37,8 +40,7 @@ extern "C" {
 
 static bool _sarray_matches(int argc, char *argv[], char *buf);
 
-/* fstrfind - find strings in file stream:
- * copy %in stream to %out and, if found one of argv string, 
+/* copy %in stream to %out and, if found one of argv string, 
  * callback buffer with it before writing to %out */
 static void fstrfind(
 		FILE *in, FILE *out,

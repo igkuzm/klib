@@ -6,6 +6,24 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
+/**
+ * log.h
+ * Copyright (c) 2023 Igor V. Sementsov <ig.kuzm@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
  * Debugging in Android/iOS and other platforms
  */
@@ -32,8 +50,8 @@ extern "C" {
 	#define LOG(fmt, ...) NSLog(CFSTR(fmt), ##__VA_ARGS__)
 	#define ERR(fmt, ...) LOG("E/_%s: %d: %s", __func__, __LINE__, STR(fmt, __VA_ARGS__)) 
 #else
-	#define LOG(...) fprintf(stderr, "%s: _%s: %s\n",   __FILE__, __func__, STR(__VA_ARGS__))
-	#define ERR(...) perror(STR("%s: _%s: %d: %s", __FILE__, __func__, __LINE__, STR(__VA_ARGS__))) 
+	#define LOG(...) fprintf(stderr, "%s: _%s: %s\n",   __FILE__, __func__, __VA_ARGS__)
+	#define ERR(...) perror(STR("E/%s: _%s: %d: %s", __FILE__, __func__, __LINE__, __VA_ARGS__)) 
 #endif
 
 

@@ -24,6 +24,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* find and replace string in file */
+
 #ifndef FSTRREP_H
 #define FSTRREP_H
 #ifdef __cplusplus
