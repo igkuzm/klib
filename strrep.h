@@ -2,7 +2,7 @@
  * File              : strrep.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 19.05.2024
- * Last Modified Date: 19.05.2024
+ * Last Modified Date: 21.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -23,6 +23,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#ifndef STRREP_H
+#define STRREP_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,3 +89,7 @@ static char * strrep(const char *haystack, // string to scan
 
   return res;
 }
+#ifdef __cplusplus
+}
+#endif
+#endif /* ifndef FSTRREP_H */
