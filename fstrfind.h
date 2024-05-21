@@ -33,160 +33,91 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
-static void fstrfind(FILE *file, const char *needle[], 
+static bool _sarray_matches(int argc, char *argv[], char *buf);
+
+/* copy %in stream to %out and callback if found one of 
+ * argv string - to remove founded string in %out - just 
+ * set first char of %found buffer to null (found[0] = 0) */
+static void fstrfind(FILE *in, FILE *out,
+		int argc, char *argv[], 
 		void *userdata,
-    int (*callback)(
-			void *userdata, off_t *pos, bool found, int len, char *buf)) 
+    int (*callback)(void *userdata, const char *found)) 
 {
-  char **np = (char **)needle; // pointer to needle array
-
-  int minlen = BUFSIZ;
-  int maxlen = 0;
-  int size = 0;
+  int i, maxlen = 0, cnt = 0;
 
   // count len
-  while (*np) {
-    int len = strlen(*np++);
+  for (i=0; i < argc; ++i) {
+    int len = strlen(argv[i]);
     if (len > maxlen)
       maxlen = len;
-    if (len < minlen)
-      minlen = len;
-    size++;
   }
 
-  char *buf = NULL; // main buffer
-  char *pbuf = NULL; // previous buffer
-  char *fbuf = NULL; // fix buffer - to find
-  // words splitted by main buffers
+  char buf[maxlen + 1];
+	memset(buf, 0, sizeof(buf));
 
-  off_t pos  = 0; // file position
-  off_t ppos = 0; // prev buffer file position
-  off_t fpos = 0; // fix  buffer file position
+	int l = 0; // length of buffer
+  int ch = 1;
+	while (ch != EOF) {
+    ch = fgetc(in);
+		if (ch == EOF)
+			break;
+		
+		// put char to buffer
+		buf[l++] = ch;
+		buf[l] = 0;
 
-  int buflen  = 0; // buf len
-  int fbuflen = 0; // fix buf len
-  int pbuflen = 0; // pbuf len
-  int i = 0; // iterator
+		// check buffer matches search strings
+    if (_sarray_matches(argc, argv, buf)) {
+			while (_sarray_matches(argc, argv, buf) && l<maxlen){
+				ch = fgetc(in);
+				if (ch == EOF)
+					break;
+				buf[l++] = ch;
+				buf[l] = 0; // null-terminate buffer
+			} 
 
-  bool eof = false;
-  while (1) {
-    char ch = fgetc(file);
-    if ((int)ch == EOF) {
-      eof = true;
-      goto makesearch;
-    }
+			if (l==maxlen){
+				// callback founded string
+				if (callback)
+					if (callback(userdata, buf))
+						break;
+			}
+			
+			// put buf to out and free it's content
+			char *p = (char *)buf;
+			while (*p)
+				fputc(*p++, out);
+			memset(buf, 0, sizeof(buf));
+			l=0;
+			continue;
+		}
 
-    // start new buffer
-    if (buflen == 0) {
-      pbuf = buf;
-      buf = (char *)malloc(BUFSIZ);
-      if (!buf)
-        break;
-      for (i = 0; i < BUFSIZ; i++)
-        buf[i] = 0;
-    }
-
-    // fill main buffer
-    if (buflen < BUFSIZ)
-      buf[buflen++] = ch;
-
-    if (buflen == BUFSIZ) {
-      // start new buffer
-      pbuflen = buflen;
-      ppos = pos;
-      buflen = 0;
-    }
-
-    // we need fix buffer to find matches if search string 
-		// is splitted by main buffer
-    // start fix buffer at the end of main and at start on 
-		// next buffer
-    if (buflen == BUFSIZ - maxlen) { // start fix buffer
-      // clear fbuf
-      if (fbuf)
-        free(fbuf);
-      fbuf = (char *)malloc(2 * maxlen);
-      if (!fbuf)
-        break;
-      for (i = 0; i < 2 * maxlen; i++)
-        buf[i] = 0;
-      fbuflen = 0;
-      fbuf[fbuflen++] = ch;
-    }
-
-    if (buflen < maxlen && buflen > BUFSIZ - maxlen) {
-      if (fbuf)
-        fbuf[fbuflen++] = ch;
-    }
-
-    if (buflen == maxlen) { // check if there is matches in fbuf
-    makesearch:
-      fpos = pos;
-      if (fbuf) {
-        // list of matches
-        fstrfnda_list *flist = fstrfnda_list_new();
-        // scan buffer
-        strfnda(fbuf, needle, flist, fstrfnda_cb);
-
-        if (flist->next) { // we have string matches
-          // scan and callback prev buffer - maxlen
-          if (pbuf) {
-            char *ptr = pbuf;
-            ptr[pbuflen - maxlen] = 0;
-            fstrfnda_list *list = fstrfnda_list_new();
-            strfnda(ptr, needle, list, fstrfnda_cb);
-            if (callback)
-              if (callback(userdata, ppos - maxlen, list, ptr))
-                break;
-            free(pbuf);
-          }
-
-          // callback fixbuffer
-          if (callback)
-            if (callback(userdata, fpos, flist, fbuf))
-              break;
-
-          // free fixbuffer
-          free(fbuf);
-          fbuflen = 0;
-
-          // free main buffer
-          if (!eof) {
-            if (buf)
-              free(buf);
-            buflen = 0;
-          }
-        } else {
-          // scan and callback prev buffer
-          if (pbuf) {
-            fstrfnda_list *list = fstrfnda_list_new();
-            strfnda(pbuf, needle, list, fstrfnda_cb);
-            if (callback)
-              if (callback(userdata, ppos, list, pbuf))
-                break;
-            free(pbuf);
-            pbuf = NULL;
-          }
-          // free fixbuffer
-          free(fbuf);
-          fbuflen = 0;
-        }
-      }
-      if (eof) {
-        // scan and callback main buffer
-        fstrfnda_list *list = fstrfnda_list_new();
-        strfnda(buf, needle, list, fstrfnda_cb);
-        if (callback)
-          callback(userdata, ppos - maxlen, list, buf);
-
-        free(buf);
-        break;
-      }
-    }
-
-    pos++;
+		// put first char of buffer to out and move it to 1 
+    fputc(buf[0], out);
+		memmove(&buf[i], &buf[i+1], l);
+		l--;
   }
+}
+
+static bool _string_matches(char *s1, char *s2)
+{
+	while (*s1 && *s2)
+		if (*s1++ != *s2++)
+			return false;
+	return true;
+}
+
+bool _sarray_matches(int argc, char *argv[], char *buf)
+{
+	int i;
+	for (i=0; i<argc; ++i) {
+		char *arg = argv[i];
+		if (_string_matches(arg, buf))
+			return true;
+  }
+	return false;
 }
 
 #ifdef __cplusplus
