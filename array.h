@@ -69,6 +69,7 @@ typedef struct array {
 	((T*)(a->data))[a->len++] = item; \
 	if (a->len > a->mem + 1){ \
 		a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
+		if (!a->data){ on_error;} \
   } \
 })
 
@@ -81,6 +82,7 @@ typedef struct array {
 	((T*)(a->data))[index] = item; \
 	if (a->len++ > a->mem){ \
 		a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
+		if (!a->data) {on_error;} \
 	} \
 })
 
