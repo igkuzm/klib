@@ -2,7 +2,7 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 23.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -39,11 +39,13 @@
 #define ARRAY_H
 
 #include <stdlib.h>
+#include <string.h>
 
 // Dynamyc array
 typedef struct array {
-  void *data;
-  int len;
+  void *data;    
+  int len;      // number of items in array
+	int mem;      // number of allocated items
 } array_t;
 
 #define array_new(T, on_error)\
@@ -57,20 +59,54 @@ typedef struct array {
 			on_error; \
 		} \
 		a->len = 0;\
+		a->mem = 0;\
 	}\
   a;\
 })
 
 #define array_append(a, T, item, on_error)\
 ({\
-	T *d = a->data;\
-	d[a->len++] = item;\
-	T *p = realloc(a->data, sizeof(T) * (a->len + 1));\
-	if (!p) {\
-		on_error; \
-	} else { \
-		a->data = p; \
+	((T*)(a->data))[a->len++] = item; \
+	if (a->len > a->mem + 1){ \
+		a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
+  } \
+})
+
+#define array_insert(a, T, item, index, on_error) \
+({\
+	int i; \
+	for (i=a->len; i>index; --i){\
+		((T*)(a->data))[i] = ((T*)(a->data))[i-1]; \
 	}\
+	((T*)(a->data))[index] = item; \
+	if (a->len++ > a->mem){ \
+		a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
+	} \
+})
+
+#define array_remove(a, T, index)\
+({\
+	T r;\
+	if (index >= 0 && index < a->len) {\
+		r = ((T*)(a->data))[index]; \
+		if (index != a->len - 1){ \
+			int i; \
+			for (i=index; i<a->len; i++){ \
+				((T*)(a->data))[i] = ((T*)(a->data))[i+1]; \
+			}\
+		}\
+		a->len--; \
+	}\
+	r; \
+})
+
+#define array_move(a, T, from, to, on_error)\
+({\
+	if (from >= 0 && from < a->len && to >= 0 && to < a->len) {\
+		T r = array_remove(a, T, from); \
+		a->len++; \
+		array_insert(a, T, r, to, on_error); \
+	} \
 })
 
 #define array_for_each(a, T, item)\
