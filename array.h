@@ -39,7 +39,6 @@
 #define ARRAY_H
 
 #include <stdlib.h>
-#include <string.h>
 
 // Dynamyc array
 typedef struct array {
@@ -100,15 +99,6 @@ typedef struct array {
 		a->len--; \
 	}\
 	r; \
-})
-
-#define array_move(a, T, from, to, on_error)\
-({\
-	if (from >= 0 && from < a->len && to >= 0 && to < a->len) {\
-		T r = array_remove(a, T, from); \
-		a->len++; \
-		array_insert(a, T, r, to, on_error); \
-	} \
 })
 
 #define array_for_each(a, T, item)\
