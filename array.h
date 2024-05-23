@@ -39,6 +39,7 @@
 #define ARRAY_H
 
 #include <stdlib.h>
+#include <string.h>
 
 // Dynamyc array
 typedef struct array {
@@ -74,27 +75,24 @@ typedef struct array {
 
 #define array_insert(a, T, item, index, on_error) \
 ({\
-	int i; \
-	for (i=a->len; i>index; --i){\
-		((T*)(a->data))[i] = ((T*)(a->data))[i-1]; \
-	}\
-	((T*)(a->data))[index] = item; \
-	if (a->len++ > a->mem){ \
-		a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
-		if (!a->data) {on_error;} \
+	if (index >= 0 && index < a->len) {\
+		memmove(&(((T*)(a->data))[index+1]), &(((T*)(a->data))[index]), a->len-index); \
+		((T*)(a->data))[index] = item; \
+		if (a->len++ > a->mem){ \
+			a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
+			if (!a->data) {on_error;} \
+		} \
 	} \
 })
 
 #define array_remove(a, T, index)\
 ({\
 	T r;\
+	memset(&r,0,sizeof(T)); \
 	if (index >= 0 && index < a->len) {\
 		r = ((T*)(a->data))[index]; \
 		if (index != a->len - 1){ \
-			int i; \
-			for (i=index; i<a->len; i++){ \
-				((T*)(a->data))[i] = ((T*)(a->data))[i+1]; \
-			}\
+			memmove(&(((T*)(a->data))[index]), &(((T*)(a->data))[index+1]), a->len-index); \
 		}\
 		a->len--; \
 	}\
@@ -102,8 +100,9 @@ typedef struct array {
 })
 
 #define array_for_each(a, T, item)\
-for (T *p = (a->data), (item) = *p; p < &(((T*)(a->data))[a->len]);\
-     p++, (item) = *p)
+T * _p##a; \
+for (_p##a = (a->data), item = *((T*)_p##a); _p##a < &(((T*)(a->data))[a->len]);\
+     _p##a++, item = *((T*)_p##a))
 
 #define array_free(a)\
   free(a->data);\
