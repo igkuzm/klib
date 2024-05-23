@@ -75,17 +75,17 @@ typedef struct array {
 
 #define array_insert(a, T, item, index, on_error) \
 ({\
-	int ret = 1; \
+	int r = 1; \
 	if (index >= 0 && index < a->len) { \
 		memmove(&(((T*)(a->data))[index+1]), &(((T*)(a->data))[index]), a->len-index); \
 		((T*)(a->data))[index] = item; \
-		ret=0; \
+		r=0; \
 		if (a->len++ > a->mem){ \
 			a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
-			if (!a->data) {ret=1; on_error;} \
+			if (!a->data) {r=1; on_error;} \
 		} \
 	} \
-	ret;\
+	r;\
 })
 
 #define array_remove(a, T, index)\
@@ -104,6 +104,7 @@ typedef struct array {
 
 #define array_for_each(a, T, item)\
 T * _p##a; \
+T item; \
 for (_p##a = (a->data), item = *((T*)_p##a); _p##a < &(((T*)(a->data))[a->len]);\
      _p##a++, item = *((T*)_p##a))
 
