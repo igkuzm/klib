@@ -69,8 +69,7 @@ static int memread(
 	int len = n * size;
 	if (len + mem->p > mem->size)
 		len = mem->size - mem->p;
-	unsigned char *p = &(mem->buffer[mem->p]);
-	memcpy(ptr, mem->buffer, len);
+	memcpy(ptr, &(mem->buffer[mem->p]), len);
 	mem->p += len;
 	return len;
 }
