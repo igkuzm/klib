@@ -1,13 +1,13 @@
 /**
- * File              : byteorder.h
+ * File              : byteswap.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.02.2023
  * Last Modified Date: 27.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#ifndef BYTEORDER_H_
-#define BYTEORDER_H_
+#ifndef BYTESWAP_H_
+#define BYTESWAP_H_
 
 #ifdef __cplusplus
 extern "C"{
@@ -17,7 +17,7 @@ extern "C"{
 
 //switch bite order
 //64 bit
-static uint64_t bo_64_sw (uint64_t i)
+static uint64_t bswap_64 (uint64_t i)
 {
     unsigned char c1, c2, c3, c4, c5, c6, c7, c8;
 
@@ -42,7 +42,7 @@ static uint64_t bo_64_sw (uint64_t i)
 }
 
 //32 bit
-static uint32_t bo_32_sw (uint32_t i)
+static uint32_t bswap_32 (uint32_t i)
 {
     unsigned char c1, c2, c3, c4;
 
@@ -59,7 +59,7 @@ static uint32_t bo_32_sw (uint32_t i)
 }
 
 //16 bit
-static uint16_t bo_16_sw (uint16_t i)
+static uint16_t bswap_16 (uint16_t i)
 {
     unsigned char c1, c2;
     
@@ -75,6 +75,6 @@ static uint16_t bo_16_sw (uint16_t i)
 }
 #endif
 
-#endif //BYTEORDER_H_
+#endif //BYTESWAP_H_
 
 // vim:ft=c	
