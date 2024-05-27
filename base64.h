@@ -2,7 +2,7 @@
  * File              : base64.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 05.04.2022
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 27.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -29,8 +29,8 @@
  * use base64_encode and base64_decode
  */
 
-#ifndef BASE64_H__
-#define BASE64_H__
+#ifndef BASE64_H
+#define BASE64_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -148,4 +148,4 @@ unsigned char *base64_decode(const char *data, size_t input_length,
 }
 #endif
 
-#endif // K_BASE64_H__
+#endif // BASE64_H
