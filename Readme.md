@@ -12,6 +12,7 @@
 2. ini.h - parse ini config file
 10. list.h - list support
 11. log.h - logs in Android/iOS and other platforms
+1. memread.h - FILE-like functions to read from memory
 1. mimetype - get extension from mimetype and mimetype from extension
 12. openfile.h - open file for Windows/MacOS/Linux with default application
 13. printbit.h - print bit functions
