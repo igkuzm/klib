@@ -2,7 +2,7 @@
  * File              : memread.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 28.05.2024
- * Last Modified Date: 27.05.2024
+ * Last Modified Date: 28.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -39,8 +39,8 @@ extern "C" {
 
 typedef struct MEM {
 	unsigned char *buffer; // memory buffeR 
-	int size;              // size of buffer
-	int p;                 // position of pointer buffer 
+	long size;              // size of buffer
+	long p;                 // position of pointer buffer 
 } MEM;
 
 /* create memory stream */
@@ -73,6 +73,35 @@ static int memread(
 	mem->p += len;
 	return len;
 }
+
+/* seek to position  - return -1 on error */
+static int memseek(MEM *mem, long off, int whence)
+{
+	if (!mem)
+		return -1;
+	
+	switch (whence) {
+		case SEEK_SET:
+			if (off > mem->size)
+				return -1;
+			mem->p = off;
+			return 0;
+		case SEEK_CUR:
+			if (mem->p + off > mem->size)
+				return -1;
+			mem->p += off;
+			return 0;
+		case SEEK_END:
+			if (mem->size + off > mem->size)
+				return -1;
+			mem->p += mem->size + off;
+			return 0;
+
+		default:
+			break;
+	}
+	return -1;
+};
 
 #ifdef __cplusplus
 }
