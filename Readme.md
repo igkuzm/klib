@@ -20,7 +20,6 @@
 1. rtf.h - generate RTF string
 1. str.h - dynamic string
 1. strfilter.h - filter string
-1. strjoin.h - join strings to array
 18. strptime.cc - implimation of strptime for windows
 1. strrep - find and replace string
 17. strrf.h - write file contents to allocated string
