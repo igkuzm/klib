@@ -2,7 +2,7 @@
  * File              : str.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.12.2023
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 30.05.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -55,7 +55,7 @@ static void str_append(
 		struct str *s, const char *str, int len);
 
 /* append fprint-like formated c string */
-#define str_appendf(s, ...)
+#define str_appendf(pStruct_str, ...)
 
 /* IMPLIMATION */
 #include <string.h>
@@ -111,12 +111,12 @@ void str_append(
 }
 
 #undef  str_appendf
-#define str_appendf(s, ...)\
+#define str_appendf(pStruct_str, ...)\
 	({\
-	 char str[BUFSIZ];\
-	 snprintf(str, BUFSIZ-1, __VA_ARGS__);\
-	 str[BUFSIZ-1] = 0;\
-	 str_append(s, str, strlen(str));\
+	 char __str[BUFSIZ];\
+	 snprintf(__str, BUFSIZ-1, __VA_ARGS__);\
+	 __str[BUFSIZ-1] = 0;\
+	 str_append(pStruct_str, __str, strlen(__str));\
 	 })
 
 #endif /* ifndef STR_H_ */
