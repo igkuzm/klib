@@ -2,7 +2,7 @@
  * File              : str.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.12.2023
- * Last Modified Date: 30.05.2024
+ * Last Modified Date: 04.06.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -48,7 +48,7 @@ struct str {
 };
 
 /* init string - return non-null on error */
-static int str_init(struct str *s, size_t size);
+static int str_init(struct str *s);
 
 /* append c string */
 static void str_append(
@@ -61,17 +61,20 @@ static void str_append(
 #include <string.h>
 #include <stdlib.h>
 
-int str_init(struct str *s, size_t size)
+int str_init(struct str *s)
 {
+	if (!s)
+		return -1;
+
 	// allocate data
-	s->str = (char*)malloc(size);
+	s->str = (char*)malloc(BUFSIZ);
 	if (!s->str)
 		return -1;
 
 	// set dafaults
 	s->str[0]  = 0;
 	s->len     = 0;
-	s->size    = size;
+	s->size    = BUFSIZ;
 
 	return 0;
 }
