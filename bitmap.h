@@ -2,7 +2,7 @@
  * File              : bitmap.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 20.05.2022
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 13.06.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -40,8 +40,8 @@ extern "C" {
 #include <stdint.h>
 #include <math.h>
 
-// pixel is int32 type with (AA BB GG RR) content, each with value from 0 to 255
-// (FF)
+// pixel is int32 type with (AA BB GG RR) content, 
+// each with value from 0 to 255 (FF)
 typedef uint32_t pixel_t;
 
 struct rgb {
