@@ -2,7 +2,7 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 23.05.2024
+ * Last Modified Date: 13.06.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -78,7 +78,7 @@ typedef struct array {
 	int r = 1; \
 	if (index >= 0 && index < a->len) { \
 		memmove(&(((T*)(a->data))[index+1]), &(((T*)(a->data))[index]), a->len-index); \
-		((T*)(a->data))[index] = item; \
+		((T)(a->data))[index] = item; \
 		r=0; \
 		if (a->len++ > a->mem){ \
 			a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
