@@ -2,7 +2,7 @@
  * File              : rtf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.12.2023
- * Last Modified Date: 05.12.2023
+ * Last Modified Date: 16.06.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -65,7 +65,7 @@ rtf_from_utf8(const char *s)
 		return NULL;
 	strcpy(out, "");
 
-	char *ptr = (char *)s;
+	char *ptr = (char *)s, buf[8] = "";
 	uint32_t c32;
 	while(*ptr){
 		// get char
@@ -77,7 +77,8 @@ rtf_from_utf8(const char *s)
 			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
+			sprintf(buf, "\\u%d ", c32);
+			strcat(out, buf);
 		}	
 		else if (c >= 248){/* 5-bytes */
 			c32  = (*ptr++ & 0x3)  << 24;  // 0b00000011
@@ -85,28 +86,33 @@ rtf_from_utf8(const char *s)
 			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
+			sprintf(buf, "\\u%d ", c32);
+			strcat(out, buf);
 		}
 		else if (c >= 240){/* 4-bytes */
 			c32  = (*ptr++ & 0x7)  << 18;  // 0b00000111
 			c32 |= (*ptr++ & 0x3F) << 12;  // 0b00111111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F ;        // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
+			sprintf(buf, "\\u%d ", c32);
+			strcat(out, buf);
 		}
 		else if (c >= 224){/* 3-bytes */
 			c32  = (*ptr++ & 0xF)  << 12;  // 0b00001111
 			c32 |= (*ptr++ & 0x3F) << 6;   // 0b00111111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
+			sprintf(buf, "\\u%d ", c32);
+			strcat(out, buf);
 		}
 		else if (c >= 192){/* 2-bytes */
 			c32  = (*ptr++ & 0x1F) << 6;   // 0b00011111
 			c32 |=  *ptr++ & 0x3F;         // 0b00111111
-			sprintf(out, "%s\\u%d ", out, c32);
+			sprintf(buf, "\\u%d ", c32);
+			strcat(out, buf);
 		}
 		else{/* 1-byte */
-			sprintf(out, "%s%c", out, *ptr++);
+			sprintf(buf, "%c", *ptr++);
+			strcat(out, buf);
 		}
 	}
 	strcat(out, " ");
