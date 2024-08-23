@@ -111,6 +111,25 @@ static int dcopy(
 		const char *from, const char *to,
 		bool overwrite, char **error);
 
+/* dcopyf
+ * copy directory content with comma-separated filters 
+ * applied
+ * copy directory recursive
+ * return 0 on success
+ * %from - filepath source file
+ * %to   - filepath dastination file 
+ * %overwrite - overwrite destination file if true
+ * %filters - coma-separated filters like '*' or '*.ext'
+ * %user_data - pointer to transfer through on_error func
+ * %on_error - pointer to error function - return non-null 
+ * to stop dcopyf execution
+*/ 
+static int dcopyf(
+		const char *from, const char *to, bool overwrite, 
+		char *filters, 
+		void *user_data,
+		int *(on_error)(const char *error, void *user_data));
+
 /* newdir
  * create new directory
  * link to mkdir function with universal
@@ -176,11 +195,13 @@ static int newdir(const char *path, int mode);
 #define F_OK 0
 #define access _access
 	static const char *basename(const char *path);
+#define SLASH "\\"
 #else
 #include <unistd.h>
 #include <sys/stat.h> // mkdir, stat
 #include <dirent.h>
 #include <libgen.h>   // basename, basedir
+#define SLASH "/"
 #endif
 
 bool fexists(const char *path) {
@@ -755,6 +776,136 @@ scandir(
 }
 
 #endif
+
+/* copy directory content with comma-separated filters 
+ * apply */
+int dcopyf(
+		const char *_from, const char *_to, bool overwrite, 
+		char *filters, 
+		void *user_data,
+		int *(on_error)(const char *error, void *user_data))
+{
+	if (!filters || filters[0] == 0){
+		if (on_error)
+			on_error("no filters", user_data);
+		return -1;
+	}
+
+	// safe-copy filenames
+	char from[BUFSIZ], to[BUFSIZ];
+	strncpy(from, _from, BUFSIZ - 1); 
+	from[BUFSIZ-1] = 0;
+	strncpy(to, _to, BUFSIZ - 1); 
+	to[BUFSIZ-1] = 0;
+
+	// check dirs
+	if (!isdir(from)){
+		if (on_error){
+			char *error = 
+				DCOPY_ERR("can't open directory: %s", from); 
+			on_error(error, user_data);
+			free(error);
+		}
+		return -1;
+	}
+	if (!isdir(from)){
+		if (on_error){
+			char *error = 
+				DCOPY_ERR("can't open directory: %s", to); 
+			on_error(error, user_data);
+			free(error);
+		}
+		return -1;
+	}
+
+	struct dirent **namelist;
+
+	int i;
+	int count = 
+		scandir(from, &namelist, 
+				NULL, NULL);
+	for (i = 0; i < count; ++i) {
+		struct dirent *e = namelist[i];
+		
+		// drop errors 
+		if (e->d_name[0] == 0)
+			continue;
+		
+		// drop '.' and '..'
+		if (
+				strcmp(e->d_name, ".")  == 0 ||
+				strcmp(e->d_name, "..") == 0 )
+			continue;
+
+		// cycle through filters
+		char *f = strdup(filters);
+		char *t;
+		for (t=strtok(f, ",");
+				 t; 
+				 t=strtok(NULL, ","))
+		{
+			char src[BUFSIZ], dst[BUFSIZ];
+			sprintf(src, "%s" SLASH "%s", from,  
+					e->d_name);
+			sprintf(dst, "%s" SLASH "%s", to, 
+					e->d_name);
+			// check is dir			
+			char *dn = dname(t);
+			if (dn && dn[0] != '.'){
+				char *error = NULL;
+				dcopy(src, dst, overwrite, &error);
+				if (error){
+					if (on_error)
+						if(on_error(error, user_data))
+							break;
+					free(error);
+				}
+			} else {
+				// this is file
+				// if file name is "*" - copy if extension matches
+				// oterwise copy if filename and extension matches 
+				const char *ext = fext(t);
+				char *name = fname(t);
+				if (name[0] == '*'){
+					// copy file if extension matches
+					if (strcmp(ext, 
+								fext(e->d_name)) == 0)
+					{
+						if (fcopy(src, dst)){
+							if (on_error){
+								char *error = 
+									DCOPY_ERR("can't copy file: %s to: %s", 
+											src, dst); 
+								if (on_error(error, user_data))
+									break;
+								free(error);
+							}
+						}
+					}
+				} 
+				else 
+				{
+					// copy if name and extension matches
+					if (fcopy(src, dst)){
+						if (on_error){
+							char *error = 
+								DCOPY_ERR("can't copy file: %s to: %s", 
+										src, dst); 
+							if (on_error(error, user_data))
+								break;
+							free(error);
+						}
+					}
+				}
+				free(name);
+			}
+			free(dn);
+		};
+		free(f);	
+	}
+
+	return 0;
+}
 
 #ifdef __cplusplus
 }
