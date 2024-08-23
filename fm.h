@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 23.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -38,6 +38,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <sys/types.h>
 
 /* fexists
  * true if file exists and writable
