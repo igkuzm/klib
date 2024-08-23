@@ -783,7 +783,7 @@ int dcopyf(
 		const char *_from, const char *_to, bool overwrite, 
 		char *filters, 
 		void *user_data,
-		int *(on_error)(const char *error, void *user_data))
+		int (*on_error)(const char *error, void *user_data))
 {
 	if (!filters || filters[0] == 0){
 		if (on_error)
@@ -840,9 +840,9 @@ int dcopyf(
 		// cycle through filters
 		char *f = strdup(filters);
 		char *t;
-		for (t=strtok(f, ",");
+		for (t=strtok(f, ", ");
 				 t; 
-				 t=strtok(NULL, ","))
+				 t=strtok(NULL, ", "))
 		{
 			char src[BUFSIZ], dst[BUFSIZ];
 			sprintf(src, "%s" SLASH "%s", from,  
