@@ -105,8 +105,7 @@ static int fcopy(const char *from, const char *to);
  * %from - filepath source file
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true
- * %error - pointer to allocated error message
-*/ 
+ * %error - pointer to allocated error message */ 
 static int dcopy(
 		const char *from, const char *to,
 		bool overwrite, char **error);
@@ -122,21 +121,19 @@ static int dcopy(
  * %filters - coma-separated filters like '*' or '*.ext'
  * %user_data - pointer to transfer through on_error func
  * %on_error - pointer to error function - return non-null 
- * to stop dcopyf execution
-*/ 
+ * to stop dcopyf execution */ 
 static int dcopyf(
 		const char *from, const char *to, bool overwrite, 
 		char *filters, 
 		void *user_data,
-		int *(on_error)(const char *error, void *user_data));
+		int (*on_error)(const char *error, void *user_data));
 
 /* newdir
  * create new directory
  * link to mkdir function with universal
  * for unix/windows args
  * %path - directory path with name
- * %mode - access mode (not used in windows)
- */
+ * %mode - access mode (not used in windows) */
 static int newdir(const char *path, int mode);
 
 /*
