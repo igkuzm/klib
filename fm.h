@@ -833,15 +833,15 @@ int dcopyf(
 		return -1;
 	}
 
-	struct dirent **namelist;
+	//struct dirent **namelist;
 
-	int i;
-	int count = 
-		scandir(from, &namelist, 
-				NULL, NULL);
-	for (i = 0; i < count; ++i) {
-		struct dirent *e = namelist[i];
-		
+	//int i;
+	//int count = 
+		//scandir(from, &namelist, 
+				//NULL, NULL);
+	//for (i = 0; i < count; ++i) {
+		//struct dirent *e = namelist[i];
+	dir_foreach(from, e){	
 		// drop errors 
 		if (e->d_name[0] == 0)
 			continue;
