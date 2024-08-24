@@ -2,7 +2,7 @@
  * File              : alloc.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 24.07.2024
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -35,25 +35,25 @@
 
 #define ALLOC(size, on_error) \
 ({\
-	void *p = malloc(size);\
-	if (!p) {\
+	void *_p = malloc(size);\
+	if (!_p) {\
 		on_error;\
 	} else { \
-		memset(p,0,size);\
+		memset(_p,0,size);\
 	} \
 	p;\
 })
 
 #define REALLOC(ptr, size, on_error) \
 ({\
-	void *ret = ptr; \
-	void *p = realloc(ptr, size);\
-	if (!p){\
+	void *_ret = ptr; \
+	void *_p = realloc(ptr, size);\
+	if (!_p){\
 		on_error;\
 	} else { \
-		ret = p; \
+		ret = _p; \
 	}\
-	ret;\
+	_ret;\
 })
 
 #define NEW(T, on_error)\

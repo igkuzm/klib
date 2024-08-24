@@ -2,7 +2,7 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 13.06.2024
+ * Last Modified Date: 24.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -50,18 +50,18 @@ typedef struct array {
 
 #define array_new(T, on_error)\
 ({\
-  array_t *a = malloc(sizeof(array_t));\
-  if (!a) {\
+  array_t *_a = malloc(sizeof(array_t));\
+  if (!_a) {\
 		on_error; \
 	} else { \
-		a->data = malloc(sizeof(T));\
-		if (!a->data) {\
+		_a->data = malloc(sizeof(T));\
+		if (!_a->data) {\
 			on_error; \
 		} \
-		a->len = 0;\
-		a->mem = 0;\
+		_a->len = 0;\
+		_a->mem = 0;\
 	}\
-  a;\
+  _a;\
 })
 
 #define array_append(a, T, item, on_error)\

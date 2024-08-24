@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 23.08.2024
+ * Last Modified Date: 25.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -42,61 +42,52 @@ extern "C" {
 
 /* fexists
  * true if file exists and writable
- * %path - file path
- */
+ * %path - file path */
 static bool fexists(const char *path);
 
 /* fsize
  * return file size
- * %path - file path
- */
+ * %path - file path */
 static off_t fsize(const char *path);
 
 /* homedir
- * return allocated string with path to home directory
- */
+ * return allocated string with path to home directory */
 static char * homedir();
 
 /* parentdir
  * modify argument string - remove last path component
  * from path string
- * %path - name or path of file
- */
+ * %path - name or path of file */
 static char * parentdir(char *path);
 
 /* isdir
  * true if directory at path exists
  * and is accesable
- * %path - directory path
- */
+ * %path - directory path */
 static bool isdir(const char *path);
 
 /* fext
  * return file extension or NULL on error 
- * %filename - name or path of file
- */
+ * %filename - name or path of file */
 static const char * fext(const char *filename);
 
 /* fname
  * return allocated string with file name without 
  * extension and path
- * %path - name or path of file
- */
+ * %path - name or path of file */
 static char * fname(char *path);
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
- * %path - path of file
- */
+ * %path - path of file */
 static char * dname(const char *path);
 
 /* fcopy 
  * copy and overwrite file 
  * return 0 on success
  * %from - filepath source file
- * %to   - filepath dastination file 
- */ 
+ * %to   - filepath dastination file */ 
 static int fcopy(const char *from, const char *to);
 
 /* dcopy 
@@ -136,21 +127,47 @@ static int dcopyf(
  * %mode - access mode (not used in windows) */
 static int newdir(const char *path, int mode);
 
-/*
- * POSIX functions for Windows
- * 
- * basename
+/* dir_foreach
+ * scans directory and handle each file
+ * %path - directory path with name
+ * %file - pointer to dirent entry */
+#ifdef _WIN32
+#define dir_foreach(path, file)\
+char _fullpath[BUFSIZ];\
+sprintf(_fullpath, "%s\\*", path);\
+WIN32_FIND_DATAA _findData;\
+struct dirent file[1];\
+HANDLE _hFind;\
+int _r = 1;\
+for (_hFind = FindFirstFile(_fullpath, &_findData);\
+		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(_findData, file) && _r != 0 || FindClose(_hFind) == 0;\
+		 _r = FindNextFile(_hFind, &_findData))
+
+#else
+#define dir_foreach(path, file)\
+	DIR *_dir = opendir(path);\
+	struct dirent *file = NULL;\
+	if (_dir)\
+		for(file = readdir(_dir);\
+				file || closedir(_dir);\
+				file = readdir(_dir))
+#endif
+
+/* POSIX functions for Windows */ 
+#ifdef _WIN32
+
+/* basename
  * returns the last path component or NULL on error
- * %path - file path
- * const char *basename(const char *path);
- *
- * dirname
+ * %path - file path */
+static const char *basename(const char *path);
+
+/* dirname
  * returns allocated string with the path without last 
  * component or NULL on error
- * %path - file path
- * char *dirname(const char *path);
- *
- * scandir
+ * %path - file path */
+static char *dirname(const char *path);
+
+/* scandir
  * scans the directory dirp, calling filter()
  * on each directory entry.
  * Entries for which filter() returns
@@ -168,15 +185,19 @@ static int newdir(const char *path, int mode);
  * %dirp - directory path
  * %namelist - allocated namelist array of dirents
  * %filter - filter funcion
- * %compar - sort function
- * int scandir(
- *		 const char *restrict dirp,
- *		 struct dirent ***restrict namelist,
- *		 int (*filter)(const struct dirent *),
- *		 int (*compar)(
- *					const struct dirent **, 
- *					const struct dirent **));
- */
+ * %compar - sort function */
+
+/* 
+static int scandir(
+  	 const char *restrict dirp,
+  	 struct dirent ***restrict namelist,
+  	 int (*filter)(const struct dirent *),
+  	 int (*compar)(
+  				const struct dirent **, 
+  				const struct dirent **));
+*/
+
+#endif 
 
 /********************************************/
 /*IMPLIMATION *******************************/	
@@ -212,9 +233,10 @@ off_t fsize(const char *path) {
   WIN32_FIND_DATAA findData;
   HANDLE hFind = INVALID_HANDLE_VALUE;
 
-  hFind = FindFirstFileA(path, &findData);
+  hFind = FindFirstFile(path, &findData);
   if (hFind != INVALID_HANDLE_VALUE) {
-    return (findData.nFileSizeHigh * (MAXDWORD + 1)) + findData.nFileSizeLow;
+    return (findData.nFileSizeHigh * (MAXDWORD + 1)) + 
+			findData.nFileSizeLow;
   }
 #else
   struct stat st;
@@ -229,7 +251,8 @@ char *homedir(void)
 {
 	char homedir[BUFSIZ];
 #ifdef _WIN32
-	snprintf(homedir, BUFSIZ, "%s%s", getenv("HOMEDRIVE"), getenv("HOMEPATH"));
+	snprintf(homedir, BUFSIZ, "%s%s", getenv("HOMEDRIVE"), 
+			getenv("HOMEPATH"));
 #else
 	snprintf(homedir, BUFSIZ,
 		 	"%s", getenv("HOME"));
@@ -253,7 +276,6 @@ char * parentdir(char *path) {
 	return path;
 }
 
-
 bool isdir(const char *path) {
 #if defined _WIN32
   WIN32_FIND_DATAA findData;
@@ -261,7 +283,7 @@ bool isdir(const char *path) {
   char fullpath[BUFSIZ];
   sprintf(fullpath, "%s\\*", path);
 
-  hFind = FindFirstFileA(fullpath, &findData);
+  hFind = FindFirstFile(fullpath, &findData);
   if (hFind != INVALID_HANDLE_VALUE)
     return true;
 #else
@@ -386,7 +408,7 @@ int dcopy(const char *from, const char *to,
 	char fullpath[BUFSIZ];
 	sprintf(fullpath, "%s\\*", from);
 
-	hFind = FindFirstFileA(fullpath, &findData);
+	hFind = FindFirstFile(fullpath, &findData);
 	if (hFind == INVALID_HANDLE_VALUE) {
 		if (error)
 			*error = DCOPY_ERR("can't open directory: %s", from); 
@@ -397,7 +419,7 @@ int dcopy(const char *from, const char *to,
 	mkdir(to);
 
 	// read files	
-	while(FindNextFileA(hFind, &findData) != 0) {
+	while(FindNextFile(hFind, &findData) != 0) {
 		char src[BUFSIZ], dst[BUFSIZ];
 		sprintf(src, "%s/%s", from, findData.cFileName);
 		sprintf(dst, "%s/%s", to,   findData.cFileName);
@@ -502,6 +524,8 @@ enum
 # define DT_WHT		DT_WHT
   };
 
+typedef unsigned short ino_t;
+
 struct dirent {
 	ino_t          d_ino;       /* inode number */
 	off_t          d_off;       /* offset to the next dirent */
@@ -554,7 +578,6 @@ basename(const char *path)
 
 /* returns allocated string with directory path 
  * or NULL on error */
-/*
 char *
 dirname(const char *path)
 {
@@ -599,7 +622,6 @@ dirname(const char *path)
 		bname[endp - path + 1] = '\0';
 		return(bname);
 }
-*/
 
 #define ISDIGIT(a) isdigit(a)
 
@@ -619,10 +641,7 @@ dirname(const char *path)
    returning less than, equal to or greater than zero if S1 is less than,
    equal to or greater than S2 (for more info, see the Glibc texinfo doc).  */
 
-int strverscmp (const char *s1, const char *s2);
-
-/*
-int
+static int
 strverscmp (const char *s1, const char *s2)
 {
   const unsigned char *p1 = (const unsigned char *) s1;
@@ -691,7 +710,6 @@ strverscmp (const char *s1, const char *s2)
       return state;
     }
 }
-*/
 
 static int alphasort(
 		const struct dirent **a, const struct dirent **b)
@@ -705,6 +723,23 @@ static int versionsort(
 	return strverscmp((*a)->d_name, (*b)->d_name);
 }
 
+static int win_find_data_to_dirent(
+		WIN32_FIND_DATAA findData,
+		struct dirent *entry)
+{
+	strncpy(entry->d_name, findData.cFileName, 
+			sizeof(entry->d_name) - 1);
+	entry->d_name[sizeof(entry->d_name)-1] = 0;
+
+	if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		entry->d_type = DT_DIR;
+	else 
+		entry->d_type = DT_REG;
+
+	/* TODO: date and time attr */
+	return 1;
+}
+
 static int 
 scandir(
 		 const char *restrict dirp,
@@ -714,33 +749,16 @@ scandir(
 					const void *, 
 					const void *))
 {
-	WIN32_FIND_DATAA findData;
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	DWORD dwError = 0;
-	char fullpath[BUFSIZ];
-	sprintf(fullpath, "%s\\*", dirp);
-
-	hFind = FindFirstFileA(fullpath, &findData);
-	if (hFind == INVALID_HANDLE_VALUE)
-		return -1;
-
 	struct dirent **array = NULL;
 	int len = 0;
 
-	while(FindNextFileA(hFind, &findData) != 0) {
+	dir_foreach(dirp, file){
 		struct dirent *entry = 
 			(struct dirent *)malloc(sizeof(struct dirent));
 		if (!entry)
 			return -1;
-
-		strncpy(entry->d_name, findData.cFileName, 
-				sizeof(entry->d_name) - 1);
-		entry->d_name[sizeof(entry->d_name)-1] = 0;
 		
-		if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			entry->d_type = DT_DIR;
-		else 
-			entry->d_type = DT_REG;
+		*entry = *file;
 		
 		if (filter && filter(entry) == 0){
 			free(entry);
