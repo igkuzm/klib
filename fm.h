@@ -833,14 +833,6 @@ int dcopyf(
 		return -1;
 	}
 
-	//struct dirent **namelist;
-
-	//int i;
-	//int count = 
-		//scandir(from, &namelist, 
-				//NULL, NULL);
-	//for (i = 0; i < count; ++i) {
-		//struct dirent *e = namelist[i];
 	dir_foreach(from, e){	
 		// drop errors 
 		if (e->d_name[0] == 0)
@@ -852,6 +844,13 @@ int dcopyf(
 				strcmp(e->d_name, "..") == 0 )
 			continue;
 
+		// copy names
+		char src[BUFSIZ], dst[BUFSIZ];
+		sprintf(src, "%s" SLASH "%s", from,  
+				e->d_name);
+		sprintf(dst, "%s" SLASH "%s", to, 
+				e->d_name);
+
 		// cycle through filters
 		char *f = strdup(filters);
 		char *t;
@@ -859,11 +858,6 @@ int dcopyf(
 				 t; 
 				 t=strtok(NULL, ", "))
 		{
-			char src[BUFSIZ], dst[BUFSIZ];
-			sprintf(src, "%s" SLASH "%s", from,  
-					e->d_name);
-			sprintf(dst, "%s" SLASH "%s", to, 
-					e->d_name);
 			// check is dir			
 			char *dn = dname(t);
 			if (dn && dn[0] != '.'){
