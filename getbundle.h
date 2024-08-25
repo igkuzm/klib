@@ -2,7 +2,7 @@
  * File              : getbundle.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 07.10.2022
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 25.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -42,19 +42,17 @@ extern "C" {
 #include <libgen.h> //dirname
 #if defined __APPLE__
 #elif defined _WIN32
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <unistd.h> //readlink
 #endif
 
-/*
- * getbundle
+/* getbundle
  * Get bundle of application
  * for mac os - APP/Contents/Resources,
  * for win - executable directory
  * for linux/unix - /usr/[local]/share/APP
- * %argv - arguments of main() function
- * */
+ * %argv - arguments of main() function */
 static char *getbundle(char *argv[]) {
   if (!argv || !argv[0])
     return NULL;
@@ -67,19 +65,27 @@ static char *getbundle(char *argv[]) {
 #ifdef __APPLE__
 #include <TargetConditionals.h>
 #if TARGET_OS_MAC
-  sprintf(bundle, "%s%s", dirname((char *)argv[0]), "/../Resources");
+  sprintf(bundle, "%s%s", 
+			dirname((char *)argv[0]), "/../Resources");
   return bundle;
 #else
-  free(bundle);
-  return dirname((char *)argv[0]);
+  sprintf(bundle, "%s", 
+			dirname((char *)argv[0]));
+  return bundle;
 #endif
 #else
   char selfpath[128];
-  if (readlink("/proc/self/exe", selfpath, sizeof(selfpath) - 1) < 0) {
+  if (readlink("/proc/self/exe", 
+				selfpath, 
+				sizeof(selfpath) - 1) < 0) 
+	{
     free(bundle);
     return NULL;
   }
-  sprintf(bundle, "%s/../share/%s", dirname(selfpath), basename(argv[0]));
+  sprintf(bundle,
+		 	"%s/../share/%s", 
+			dirname(selfpath), 
+			basename(argv[0]));
   return bundle;
 #endif
 #endif
