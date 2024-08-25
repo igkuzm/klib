@@ -2,7 +2,7 @@
  * File              : fstrfind.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.05.2024
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 25.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -34,7 +34,6 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -105,20 +104,12 @@ static void fstrfind(
   }
 }
 
-static bool _string_matches(char *s1, char *s2)
-{
-	while (*s1 && *s2)
-		if (*s1++ != *s2++)
-			return false;
-	return true;
-}
-
 bool _sarray_matches(int argc, char *argv[], char *buf)
 {
 	int i;
 	for (i=0; i<argc; ++i) {
 		char *arg = argv[i];
-		if (_string_matches(arg, buf))
+		if (strcmp(arg, buf) == 0)
 			return true;
   }
 	return false;
