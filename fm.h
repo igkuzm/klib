@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 25.08.2024
+ * Last Modified Date: 26.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -855,12 +855,12 @@ int dcopyf(
 		char *f = strdup(filters);
 		char *t;
 		for (t=strtok(f, ", ");
-				 t; 
+				 t || ({free(f); 0;}); 
 				 t=strtok(NULL, ", "))
 		{
 			// check is dir			
 			char *dn = dname(t);
-			if (dn && dn[0] != '.'){
+			if (dn && dn[0] != '.' && isdir(src)){
 				char *error = NULL;
 				dcopy(src, dst, overwrite, &error);
 				if (error){
@@ -910,7 +910,6 @@ int dcopyf(
 			}
 			free(dn);
 		};
-		free(f);	
 	}
 
 	return 0;
