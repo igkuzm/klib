@@ -343,7 +343,7 @@ bool islink(const char *path) {
 int slink(const char *path, const char *linkname)
 {
 #ifdef _WIN32
-	return CreateSymbolicLink(linkname, path, NULL);
+	return CreateSymbolicLink(linkname, path, 0);
 #else
 	return symlink(path, linkname);
 #endif
@@ -356,7 +356,7 @@ int slink(const char *path, const char *linkname)
 int hlink(const char *path, const char *linkname)
 {
 #ifdef _WIN32
-	return CreateHardLink(linkname, path, NULL);
+	return CreateHardLink(linkname, path, 0);
 #else
 	return link(path, linkname);
 #endif
