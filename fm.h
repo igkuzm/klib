@@ -130,10 +130,8 @@ static int newdir(const char *path, int mode);
  * %file - pointer to dirent entry 
  * dir_foreach(path, file) */
 
-/* POSIX functions for Windows */ 
-#ifdef _WIN32
 
-/* scandir
+/* scandir - implimation for Windows
  * scans the directory dirp, calling filter()
  * on each directory entry.
  * Entries for which filter() returns
@@ -161,7 +159,6 @@ static int newdir(const char *path, int mode);
   				const struct dirent **, 
   				const struct dirent **));
  */
-#endif 
 
 /********************************************/
 /*IMPLIMATION *******************************/	
@@ -222,12 +219,18 @@ for (_hFind = FindFirstFile(_fullpath, &_findData);\
 				file = readdir(_dir))
 #endif
 
+/* fexists
+ * true if file exists and writable
+ * %path - file path */
 bool fexists(const char *path) {
   if (access(path, F_OK) == 0)
     return true;
   return false;
 }
 
+/* fsize
+ * return file size
+ * %path - file path */
 off_t fsize(const char *path) {
 #if defined _WIN32
   WIN32_FIND_DATAA findData;
@@ -247,6 +250,8 @@ off_t fsize(const char *path) {
   return 0;
 }
 
+/* homedir
+ * return allocated string with path to home directory */
 char *homedir(void)
 {
 	char homedir[BUFSIZ];
@@ -260,6 +265,10 @@ char *homedir(void)
 	return strdup(homedir);																								        
 }
 
+/* parentdir
+ * modify argument string - remove last path component
+ * from path string
+ * %path - name or path of file */
 char * parentdir(char *path) {
 	const char *slash = strrchr(path, _SLASH_[0]);
 	if (slash && slash != path)
@@ -271,6 +280,10 @@ char * parentdir(char *path) {
 	return path;
 }
 
+/* isdir
+ * true if directory at path exists
+ * and is accesable
+ * %path - directory path */
 bool isdir(const char *path) {
 #if defined _WIN32
   WIN32_FIND_DATAA findData;
@@ -292,6 +305,9 @@ bool isdir(const char *path) {
   return false;
 }
 
+/* islink
+ * true if file or directory is link
+ * %path - file/directory path */
 bool islink(const char *path) {
 #ifdef _WIN32
 	DWORD attr = GetFileAttributes(path);
@@ -308,6 +324,9 @@ bool islink(const char *path) {
 	return false;
 }
 
+/* fext
+ * return file extension or NULL on error 
+ * %filename - name or path of file */
 const char * fext(const char *filename) {
 	const char *dot = strrchr(filename, '.');
 	if (!dot || dot == filename)
@@ -315,6 +334,10 @@ const char * fext(const char *filename) {
 	return dot + 1;
 }
 
+/* fname
+ * return allocated string with file name without 
+ * extension and path
+ * %path - name or path of file */
 char * fname(char *filename)
 {
 	char *p = strdup(basename(filename));
@@ -324,6 +347,10 @@ char * fname(char *filename)
 	return p;
 }
 
+/* dname
+ * return allocated string with name of 
+ * directory path (like POSIX dirname())
+ * %path - path of file */
 char * dname(const char *path) {
 	char *p = strdup(path);
 	char *s = strrchr(p, _SLASH_[0]);
@@ -334,16 +361,21 @@ char * dname(const char *path) {
 	return p;
 }
 
+/* fcopy 
+ * copy and overwrite file 
+ * return 0 on success
+ * %from - filepath source file
+ * %to   - filepath dastination file */
 int fcopy (const char *from, const char *to) {
 	FILE *src, *dst;
 	char buf[BUFSIZ];
 
 	// open source file
-	if ((src=fopen(from, "rb")) == NULL)
+	if ((src = fopen(from, "rb")) == NULL)
 		return -1;
 
 	// open destination file
-	if ((dst = fopen(to, "wb")) == NULL){
+	if ((dst = fopen(to, "wb"))   == NULL){
 		fclose(src);
 		return -1;
 	}
@@ -353,7 +385,7 @@ int fcopy (const char *from, const char *to) {
 		fread (buf, sizeof(buf), 1, src);
 		fwrite(buf, sizeof(buf), 1, dst);
 	}
-	
+
 	// check errors - to handle error call errno()
 	int err = 0;
 	if ((err = ferror(src)) || 
@@ -363,14 +395,20 @@ int fcopy (const char *from, const char *to) {
 	fclose(src);
 	fclose(dst);
 
-  return err;
+	return err;
 }
 
+/* dcopy 
+ * copy directory recursive
+ * return 0 on success
+ * %from - filepath source file
+ * %to   - filepath dastination file 
+ * %overwrite - overwrite destination file if true */
 int dcopy(const char *from, const char *to, bool overwrite)
 {
 	// create `to` directory
 	if (!fexists(to))
-		newdir(to, 744);
+		newdir(to, 755);
 
 	dir_foreach(from, file){
 		// skip error
@@ -407,6 +445,12 @@ int dcopy(const char *from, const char *to, bool overwrite)
 	return 0;
 }
 
+/* newdir
+ * create new directory
+ * link to mkdir function with universal
+ * for unix/windows args
+ * %path - directory path with name
+ * %mode - access mode (not used in windows) */
 int newdir(const char *path, int mode)
 {
 #ifdef _WIN32
@@ -416,8 +460,14 @@ int newdir(const char *path, int mode)
 #endif
 }
 
-/* copy directory content with comma-separated filters 
- * apply */
+/* dcopyf
+ * copy directory content with comma-separated filters 
+ * applied
+ * return 0 on success
+ * %from - filepath source file
+ * %to   - filepath dastination file 
+ * %overwrite - overwrite destination file if true
+ * %filters - coma-separated filters like '*' or '*.ext' */
 int dcopyf(
 		const char *from, const char *to, bool overwrite, 
 		char *filters) 
@@ -482,7 +532,6 @@ int dcopyf(
 	return 0;
 }
 
-/* POSIX FUNCTIONS FOR WINDOWS */
 #ifdef _WIN32
 
 #define ISDIGIT(a) isdigit(a)
