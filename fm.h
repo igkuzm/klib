@@ -219,7 +219,7 @@ struct dirent file[1];\
 HANDLE _hFind;\
 int _r = 1;\
 for (_hFind = FindFirstFile(_fullpath, &_findData);\
-		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(_findData, file) && _r != 0 || FindClose(_hFind) == 0;\
+		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(_findData, file) && _r != 0 || ({FindClose(_hFind); 0;});\
 		 _r = FindNextFile(_hFind, &_findData))
 
 #else
@@ -228,7 +228,7 @@ for (_hFind = FindFirstFile(_fullpath, &_findData);\
 	struct dirent *file = NULL;\
 	if (_dir)\
 		for(file = readdir(_dir);\
-				file || closedir(_dir);\
+				file || ({if(_dir) closedir(_dir); 0;});\
 				file = readdir(_dir))
 #endif
 
@@ -310,11 +310,12 @@ bool islink(const char *path) {
 		return true;
 #else
   struct stat buf;
-	if (lstat(path, &buf) == 0)
-		if((buf.st_mode & S_IFMT) == S_IFLNK)
-			return true;
+	if (lstat(path, &buf) == 0 &&
+			(buf.st_mode & S_IFMT) == S_IFLNK)
+		return true;
 #endif
-  return false;
+  
+	return false;
 }
 
 const char * fext(const char *filename) {
@@ -367,6 +368,10 @@ int fcopy (const char *from, const char *to) {
 	int err = 0;
 	if ((err = ferror(src)) || 
 			(err = ferror(dst))){}
+
+	// close
+	fclose(src);
+	fclose(dst);
 
   return err;
 }
