@@ -2,7 +2,7 @@
  * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 26.08.2024
+ * Last Modified Date: 27.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -107,7 +107,6 @@ static int dcopy(
 /* dcopyf
  * copy directory content with comma-separated filters 
  * applied
- * copy directory recursive
  * return 0 on success
  * %from - filepath source file
  * %to   - filepath dastination file 
@@ -128,21 +127,11 @@ static int newdir(const char *path, int mode);
 /* dir_foreach
  * scans directory and handle each file
  * %path - directory path with name
- * %file - pointer to dirent entry */
+ * %file - pointer to dirent entry 
+ * dir_foreach(path, file) */
 
 /* POSIX functions for Windows */ 
 #ifdef _WIN32
-
-/* basename
- * returns the last path component or NULL on error
- * %path - file path */
-static const char *basename(const char *path);
-
-/* dirname
- * returns allocated string with the path without last 
- * component or NULL on error
- * %path - file path */
-static char *dirname(const char *path);
 
 /* scandir
  * scans the directory dirp, calling filter()
@@ -183,19 +172,20 @@ static char *dirname(const char *path);
 #include <string.h>
 #include <errno.h>
 #include <dirent.h>
+#include <libgen.h>   // basename, basedir
+
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
 #include <fileapi.h>
 #define F_OK 0
 #define access _access
-	static const char *basename(const char *path);
 #define _SLASH_ "\\"
+
 #else
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/stat.h> // mkdir, stat
-#include <libgen.h>   // basename, basedir
 #define _SLASH_ "/"
 #endif
 
@@ -426,67 +416,74 @@ int newdir(const char *path, int mode)
 #endif
 }
 
+/* copy directory content with comma-separated filters 
+ * apply */
+int dcopyf(
+		const char *from, const char *to, bool overwrite, 
+		char *filters) 
+{
+	int err = 0;
+
+	if (!filters || filters[0] == 0)
+		return -1;
+	
+	dir_foreach(from, e){	
+		// drop errors 
+		if (e->d_name[0] == 0)
+			continue;
+		
+		// drop '.' and '..'
+		if (strcmp(e->d_name, ".")  == 0 ||
+				strcmp(e->d_name, "..") == 0 )
+			continue;
+
+		// copy names
+		char src[BUFSIZ], dst[BUFSIZ];
+		sprintf(src, "%s" _SLASH_ "%s", from, e->d_name);
+		sprintf(dst, "%s" _SLASH_ "%s", to, e->d_name);
+
+		// cycle through filters
+		char *f = strdup(filters);
+		char *t;
+		for (t=strtok(f, ", ");
+				 t || ({free(f); 0;}); 
+				 t=strtok(NULL, ", "))
+		{
+			// check is dir			
+			char *dn = dname(t);
+			if (dn && dn[0] != '.' && isdir(src)){
+				char *error = NULL;
+				if ((err = dcopy(src, dst, overwrite)))
+					return err;
+			} else {
+				// this is file
+				// if file name is "*" - copy if extension matches
+				// oterwise copy if filename and extension matches 
+				const char *ext = fext(t);
+				char *name = fname(t);
+				if (name[0] == '*'){
+					// copy file if extension matches
+					if (strcmp(ext, 
+								fext(e->d_name)) == 0)
+						if ((err = fcopy(src, dst)))
+							return err;
+				} else {
+					// copy if name and extension matches
+					if (strcmp(t, e->d_name) == 0)
+						if ((err = fcopy(src, dst)))
+							return err;
+				}
+				free(name);
+			}
+			free(dn);
+		}
+	}
+
+	return 0;
+}
+
 /* POSIX FUNCTIONS FOR WINDOWS */
 #ifdef _WIN32
-
-/* basename
- * returns pointer to path string without 
- * last path component*/
-const char *
-basename(const char *path)
-{
-	const char *dash = strrchr(path, '\\');
-	if (!dash || dash == path)
-		return path;
-	return dash + 1;
-}
-
-/* returns allocated string with directory path 
- * or NULL on error */
-char *
-dirname(const char *path)
-{
-		static char *bname = NULL;
-		const char *endp;
-
-		if (bname == NULL) {
-						bname = (char *)malloc(MAX_PATH);
-						if (bname == NULL)
-										return(NULL);
-		}
-
-		/* Empty or NULL string gets treated as "." */
-		if (path == NULL || *path == '\0') {
-						(void)strcpy(bname, ".");
-						return(bname);
-		}
-
-		/* Strip trailing slashes */
-		endp = path + strlen(path) - 1;
-		while (endp > path && *endp == '\\')
-						endp--;
-
-		/* Find the start of the dir */
-		while (endp > path && *endp != '\\')
-						endp--;
-
-		/* Either the dir is "/" or there are no slashes */
-		if (endp == path) {
-						(void)strcpy(bname, *endp == '\\' ? "\\" : ".");
-						return(bname);
-		} else {
-						do {
-										endp--;
-						} while (endp > path && *endp == '\\');
-		}
-
-		if (endp - path + 2 > MAX_PATH) {
-						return(NULL);
-		}
-		(void)strncpy(bname, path, endp - path + 1);
-		bname[endp - path + 1] = '\0';
-		return(bname);
-}
 
 #define ISDIGIT(a) isdigit(a)
 
@@ -639,72 +636,6 @@ scandir(
 }
 
 #endif
-
-/* copy directory content with comma-separated filters 
- * apply */
-int dcopyf(
-		const char *from, const char *to, bool overwrite, 
-		char *filters) 
-{
-	int err = 0;
-
-	if (!filters || filters[0] == 0)
-		return -1;
-	
-	dir_foreach(from, e){	
-		// drop errors 
-		if (e->d_name[0] == 0)
-			continue;
-		
-		// drop '.' and '..'
-		if (strcmp(e->d_name, ".")  == 0 ||
-				strcmp(e->d_name, "..") == 0 )
-			continue;
-
-		// copy names
-		char src[BUFSIZ], dst[BUFSIZ];
-		sprintf(src, "%s" _SLASH_ "%s", from, e->d_name);
-		sprintf(dst, "%s" _SLASH_ "%s", to, e->d_name);
-
-		// cycle through filters
-		char *f = strdup(filters);
-		char *t;
-		for (t=strtok(f, ", ");
-				 t || ({free(f); 0;}); 
-				 t=strtok(NULL, ", "))
-		{
-			// check is dir			
-			char *dn = dname(t);
-			if (dn && dn[0] != '.' && isdir(src)){
-				char *error = NULL;
-				if ((err = dcopy(src, dst, overwrite)))
-					return err;
-			} else {
-				// this is file
-				// if file name is "*" - copy if extension matches
-				// oterwise copy if filename and extension matches 
-				const char *ext = fext(t);
-				char *name = fname(t);
-				if (name[0] == '*'){
-					// copy file if extension matches
-					if (strcmp(ext, 
-								fext(e->d_name)) == 0)
-						if ((err = fcopy(src, dst)))
-							return err;
-				} else {
-					// copy if name and extension matches
-					if (strcmp(t, e->d_name) == 0)
-						if ((err = fcopy(src, dst)))
-							return err;
-				}
-				free(name);
-			}
-			free(dn);
-		}
-	}
-
-	return 0;
-}
 
 #ifdef __cplusplus
 }
