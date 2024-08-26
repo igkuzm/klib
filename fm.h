@@ -66,6 +66,11 @@ static char * parentdir(char *path);
  * %path - directory path */
 static bool isdir(const char *path);
 
+/* islink
+ * true if file or directory is link
+ * %path - file/directory path */
+static bool islink(const char *path);
+
 /* fext
  * return file extension or NULL on error 
  * %filename - name or path of file */
@@ -95,11 +100,9 @@ static int fcopy(const char *from, const char *to);
  * return 0 on success
  * %from - filepath source file
  * %to   - filepath dastination file 
- * %overwrite - overwrite destination file if true
- * %error - pointer to allocated error message */ 
+ * %overwrite - overwrite destination file if true */ 
 static int dcopy(
-		const char *from, const char *to,
-		bool overwrite, char **error);
+		const char *from, const char *to, bool overwrite);
 
 /* dcopyf
  * copy directory content with comma-separated filters 
@@ -109,15 +112,10 @@ static int dcopy(
  * %from - filepath source file
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true
- * %filters - coma-separated filters like '*' or '*.ext'
- * %user_data - pointer to transfer through on_error func
- * %on_error - pointer to error function - return non-null 
- * to stop dcopyf execution */ 
+ * %filters - coma-separated filters like '*' or '*.ext' */
 static int dcopyf(
 		const char *from, const char *to, bool overwrite, 
-		char *filters, 
-		void *user_data,
-		int (*on_error)(const char *error, void *user_data));
+		char *filters); 
 
 /* newdir
  * create new directory
@@ -131,27 +129,6 @@ static int newdir(const char *path, int mode);
  * scans directory and handle each file
  * %path - directory path with name
  * %file - pointer to dirent entry */
-#ifdef _WIN32
-#define dir_foreach(path, file)\
-char _fullpath[BUFSIZ];\
-sprintf(_fullpath, "%s\\*", path);\
-WIN32_FIND_DATAA _findData;\
-struct dirent file[1];\
-HANDLE _hFind;\
-int _r = 1;\
-for (_hFind = FindFirstFile(_fullpath, &_findData);\
-		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(_findData, file) && _r != 0 || FindClose(_hFind) == 0;\
-		 _r = FindNextFile(_hFind, &_findData))
-
-#else
-#define dir_foreach(path, file)\
-	DIR *_dir = opendir(path);\
-	struct dirent *file = NULL;\
-	if (_dir)\
-		for(file = readdir(_dir);\
-				file || closedir(_dir);\
-				file = readdir(_dir))
-#endif
 
 /* POSIX functions for Windows */ 
 #ifdef _WIN32
@@ -185,18 +162,16 @@ static char *dirname(const char *path);
  * %dirp - directory path
  * %namelist - allocated namelist array of dirents
  * %filter - filter funcion
- * %compar - sort function */
+ * %compar - sort function
 
-/* 
-static int scandir(
+	static int scandir(
   	 const char *restrict dirp,
   	 struct dirent ***restrict namelist,
   	 int (*filter)(const struct dirent *),
   	 int (*compar)(
   				const struct dirent **, 
   				const struct dirent **));
-*/
-
+ */
 #endif 
 
 /********************************************/
@@ -207,19 +182,53 @@ static int scandir(
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
 #define F_OK 0
 #define access _access
 	static const char *basename(const char *path);
-#define SLASH "\\"
+#define _SLASH_ "\\"
 #else
+#include <sys/stat.h>
 #include <unistd.h>
 #include <sys/stat.h> // mkdir, stat
-#include <dirent.h>
 #include <libgen.h>   // basename, basedir
-#define SLASH "/"
+#define _SLASH_ "/"
+#endif
+
+#ifdef _WIN32
+static int win_find_data_to_dirent(
+		WIN32_FIND_DATAA findData,
+		struct dirent *entry)
+{
+	strncpy(entry->d_name, findData.cFileName, 
+			sizeof(entry->d_name) - 1);
+	entry->d_name[sizeof(entry->d_name)-1] = 0;
+
+	return 1;
+}
+
+#define dir_foreach(path, file)\
+char _fullpath[BUFSIZ];\
+sprintf(_fullpath, "%s\\*", path);\
+WIN32_FIND_DATAA _findData;\
+struct dirent file[1];\
+HANDLE _hFind;\
+int _r = 1;\
+for (_hFind = FindFirstFile(_fullpath, &_findData);\
+		 _hFind != INVALID_HANDLE_VALUE && win_find_data_to_dirent(_findData, file) && _r != 0 || FindClose(_hFind) == 0;\
+		 _r = FindNextFile(_hFind, &_findData))
+
+#else
+#define dir_foreach(path, file)\
+	DIR *_dir = opendir(path);\
+	struct dirent *file = NULL;\
+	if (_dir)\
+		for(file = readdir(_dir);\
+				file || closedir(_dir);\
+				file = readdir(_dir))
 #endif
 
 bool fexists(const char *path) {
@@ -234,15 +243,15 @@ off_t fsize(const char *path) {
   HANDLE hFind = INVALID_HANDLE_VALUE;
 
   hFind = FindFirstFile(path, &findData);
-  if (hFind != INVALID_HANDLE_VALUE) {
+  if (hFind != INVALID_HANDLE_VALUE) 
     return (findData.nFileSizeHigh * (MAXDWORD + 1)) + 
 			findData.nFileSizeLow;
-  }
+  
 #else
   struct stat st;
-  if (stat(path, &st) == 0) {
+  if (stat(path, &st) == 0)
     return st.st_size;
-  }
+  
 #endif
   return 0;
 }
@@ -261,12 +270,7 @@ char *homedir(void)
 }
 
 char * parentdir(char *path) {
-	const char *slash;
-#ifdef _WIN32
-	slash	= strrchr(path, '\\');
-#else
-	slash	= strrchr(path, '/');
-#endif
+	const char *slash = strrchr(path, _SLASH_[0]);
 	if (slash && slash != path)
 		path[slash-path] = 0;
 #ifndef _WIN32
@@ -297,6 +301,16 @@ bool isdir(const char *path) {
   return false;
 }
 
+bool islink(const char *path) {
+#ifndef _WIN32
+  struct stat buf;
+	if (lstat(path, &buf))
+		if((buf.st_mode & S_IFMT) == S_IFLNK)
+			return true;
+#endif
+  return false;
+}
+
 const char * fext(const char *filename) {
 	const char *dot = strrchr(filename, '.');
 	if (!dot || dot == filename)
@@ -304,11 +318,9 @@ const char * fext(const char *filename) {
 	return dot + 1;
 }
 
-char *
-fname(char *filename)
+char * fname(char *filename)
 {
-	char *b = basename(filename);
-	char *p = strdup(b);
+	char *p = strdup(basename(filename));
 	char *s = strrchr(p, '.');
 	if (s)
 		*s = 0;
@@ -316,177 +328,81 @@ fname(char *filename)
 }
 
 char * dname(const char *path) {
-	char *d = strdup(path);
-#if defined _WIN32
-	char *s = strrchr(d, '\\');
-#else
-	char *s = strrchr(d, '/');
-#endif
+	char *p = strdup(path);
+	char *s = strrchr(p, _SLASH_[0]);
 	if (s)
 		*s = 0;
 	else 
-		strcpy(d, ".");
-	return d;
+		strcpy(p, ".");
+	return p;
 }
 
-/* return codes of fcopy functions */
-enum {
-	FCP_NOERR = 0,
-	FCP_FROM,
-	FCP_TO,
-	FCP_ERRNO
-};
-
 int fcopy (const char *from, const char *to) {
-	int ret = FCP_NOERR;
 	FILE *src, *dst;
 	char buf[BUFSIZ];
 
 	// open source file
-	if ((src=fopen(from, "rb"))){
-		// open destination file
-		if ((dst = fopen(to, "wb"))){
-			// do copy
-			while (feof(src) == 0){
-				fread (buf, sizeof(buf), 1, src);
-				fwrite(buf, sizeof(buf), 1, dst);
-			}
-			// check errors - to handle error call errno()
-			if (ferror(src) || ferror(dst))
-				ret = FCP_ERRNO;
-			fclose(dst);
-		} else {
-			ret = FCP_TO;
-		}
+	if ((src=fopen(from, "rb")) == NULL)
+		return -1;
+
+	// open destination file
+	if ((dst = fopen(to, "wb")) == NULL){
 		fclose(src);
-	} else {
-		ret = FCP_FROM;
+		return -1;
 	}
+			
+	// do copy
+	while (feof(src) == 0){
+		fread (buf, sizeof(buf), 1, src);
+		fwrite(buf, sizeof(buf), 1, dst);
+	}
+	
+	// check errors - to handle error call errno()
+	int err = 0;
+	if ((err = ferror(src)) || 
+			(err = ferror(dst))){}
 
-  return ret;
+  return err;
 }
 
-#define DCOPY_ERR(...)\
-	({\
-		char *e = (char *)malloc(BUFSIZ);\
-		if (e){\
-			sprintf(e, __VA_ARGS__);\
-		} else\
-			perror("malloc");\
-	  e;\
-	})
-
-static void _dcopy_herror(
-		int res, const char *src, const char *dst, 
-		char **error)
+int dcopy(const char *from, const char *to, bool overwrite)
 {
-	if (error){
-		switch (res) {
-			case FCP_FROM:
-				*error = 
-					DCOPY_ERR(
-							"can't read file: %s", src); 
-			case FCP_TO:
-				*error = 
-					DCOPY_ERR(
-							"can't read file: %s", dst); 
-			case FCP_ERRNO:
-				*error = 
-					DCOPY_ERR(
-							"write file error: %s, %s: %d", src, dst, errno); 
-		}
-	}
-}
+	// create `to` directory
+	if (!fexists(to))
+		newdir(to, 744);
 
-int dcopy(const char *from, const char *to,
-		bool overwrite, char **error)
-{
-#if defined _WIN32
-	WIN32_FIND_DATAA findData;
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	DWORD dwError = 0;
-	char fullpath[BUFSIZ];
-	sprintf(fullpath, "%s\\*", from);
+	dir_foreach(from, file){
+		// skip error
+		if (strcmp(file->d_name, "") == 0)
+			continue;
 
-	hFind = FindFirstFile(fullpath, &findData);
-	if (hFind == INVALID_HANDLE_VALUE) {
-		if (error)
-			*error = DCOPY_ERR("can't open directory: %s", from); 
-		return -1;
-	}
-
-	// create new directory
-	mkdir(to);
-
-	// read files	
-	while(FindNextFile(hFind, &findData) != 0) {
-		char src[BUFSIZ], dst[BUFSIZ];
-		sprintf(src, "%s/%s", from, findData.cFileName);
-		sprintf(dst, "%s/%s", to,   findData.cFileName);
-		
-		// check if directory
-		if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-		{
-			dcopy(src, dst, overwrite, error);
-		}
-		else {
-			// check if not exists or overwrite 
-			if (!fexists(dst) || overwrite){
-				int res = fcopy(src, dst);
-				if (res)
-					_dcopy_herror(res, src, dst, error);
-			}
-		}
-	}
-	dwError = GetLastError();
-	FindClose(hFind);
-	if (dwError != ERROR_NO_MORE_FILES) {
-		return dwError;
-	}
-#else	
-	struct dirent *entry;
-	DIR *dp = opendir(from);
-	if (dp == NULL){
-		if (error)
-			*error = DCOPY_ERR("can't open directory: %s", from); 
-		return -1;
-	}	
-	
-	// create new directory
-	struct stat dstat;
-	if (stat(from, &dstat) < 0){
-		if (error)
-			*error = DCOPY_ERR("can't read directory: %s", from); 
-		closedir(dp);
-		return -1;
-	};
-	mkdir(to, dstat.st_mode);
-	
-	// read files
-	while((entry = readdir(dp))){
 		// skip system dir names
-		if (strcmp(entry->d_name, ".") == 0 ||
-				strcmp(entry->d_name, "..") == 0)
+		if (strcmp(file->d_name, ".") == 0 ||
+				strcmp(file->d_name, "..") == 0)
 			continue;
 		
 		char src[BUFSIZ], dst[BUFSIZ];
-		sprintf(src, "%s/%s", from, entry->d_name);
-		sprintf(dst, "%s/%s", to,   entry->d_name);
+		sprintf(src, "%s" _SLASH_ "%s", from, file->d_name);
+		sprintf(dst, "%s" _SLASH_ "%s", to,   file->d_name);
 
-		// check if directory
-		if (entry->d_type == DT_DIR){
-			dcopy(src, dst, overwrite, error);
-		} else {
-			// check if not exists or overwrite 
-			if (!fexists(dst) || overwrite){
-				int res = fcopy(src, dst);
-				if (res)
-					_dcopy_herror(res, src, dst, error);
-			}
+		// handle links
+		if (islink(src)){
+			if (!fexists(dst) || overwrite)
+				fcopy(src, dst);
+			continue;
 		}
+
+		// parse directory
+		if (isdir(src)){
+			dcopy(src, dst, overwrite);
+			continue;
+		}
+			
+		// copy file
+		if (!fexists(dst) || overwrite)
+			fcopy(src, dst);
 	}
-	closedir(dp);
-#endif
+
 	return 0;
 }
 
@@ -502,70 +418,8 @@ int newdir(const char *path, int mode)
 /* POSIX FUNCTIONS FOR WINDOWS */
 #ifdef _WIN32
 
-enum
-  {
-    DT_UNKNOWN = 0,
-# define DT_UNKNOWN	DT_UNKNOWN
-    DT_FIFO = 1,
-# define DT_FIFO	DT_FIFO
-    DT_CHR = 2,
-# define DT_CHR		DT_CHR
-    DT_DIR = 4,
-# define DT_DIR		DT_DIR
-    DT_BLK = 6,
-# define DT_BLK		DT_BLK
-    DT_REG = 8,
-# define DT_REG		DT_REG
-    DT_LNK = 10,
-# define DT_LNK		DT_LNK
-    DT_SOCK = 12,
-# define DT_SOCK	DT_SOCK
-    DT_WHT = 14
-# define DT_WHT		DT_WHT
-  };
-
-typedef unsigned short ino_t;
-
-struct dirent {
-	ino_t          d_ino;       /* inode number */
-	off_t          d_off;       /* offset to the next dirent */
-	unsigned short d_reclen;    /* length of this record */
-	unsigned char  d_type;      /* type of file; not supported
-														     by all file system types */
-	char           d_name[256]; /* filename */
-};
-
-/*
- * This is an internal data structure. Good programmers will not use it
- * except as an argument to one of the functions below.
- * dd_stat field is now int (was short in older versions).
- */
-typedef struct
-{
-	/* disk transfer area for this dir */
-	struct _finddata_t	dd_dta;
-
-	/* dirent struct to return from dir (NOTE: this makes this thread
-	 * safe as long as only one thread uses a particular DIR struct at
-	 * a time) */
-	struct dirent		dd_dir;
-
-	/* _findnext handle */
-	intptr_t		dd_handle;
-
-	/*
-	 * Status of search:
-	 *   0 = not started yet (next entry to read is first entry)
-	 *  -1 = off the end
-	 *   positive = 0 based index of next entry
-	 */
-	int			dd_stat;
-
-	/* given path for dir with search pattern (struct is extended) */
-	char			dd_name[1];
-} DIR;
-
-/* returns pointer to path string without 
+/* basename
+ * returns pointer to path string without 
  * last path component*/
 const char *
 basename(const char *path)
@@ -723,24 +577,7 @@ static int versionsort(
 	return strverscmp((*a)->d_name, (*b)->d_name);
 }
 
-static int win_find_data_to_dirent(
-		WIN32_FIND_DATAA findData,
-		struct dirent *entry)
-{
-	strncpy(entry->d_name, findData.cFileName, 
-			sizeof(entry->d_name) - 1);
-	entry->d_name[sizeof(entry->d_name)-1] = 0;
-
-	if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-		entry->d_type = DT_DIR;
-	else 
-		entry->d_type = DT_REG;
-
-	/* TODO: date and time attr */
-	return 1;
-}
-
-static int 
+int 
 scandir(
 		 const char *restrict dirp,
 		 struct dirent ***restrict namelist,
@@ -795,61 +632,28 @@ scandir(
 /* copy directory content with comma-separated filters 
  * apply */
 int dcopyf(
-		const char *_from, const char *_to, bool overwrite, 
-		char *filters, 
-		void *user_data,
-		int (*on_error)(const char *error, void *user_data))
+		const char *from, const char *to, bool overwrite, 
+		char *filters) 
 {
-	if (!filters || filters[0] == 0){
-		if (on_error)
-			on_error("no filters", user_data);
-		return -1;
-	}
+	int err = 0;
 
-	// safe-copy filenames
-	char from[BUFSIZ], to[BUFSIZ];
-	strncpy(from, _from, BUFSIZ - 1); 
-	from[BUFSIZ-1] = 0;
-	strncpy(to, _to, BUFSIZ - 1); 
-	to[BUFSIZ-1] = 0;
-
-	// check dirs
-	if (!isdir(from)){
-		if (on_error){
-			char *error = 
-				DCOPY_ERR("can't open directory: %s", from); 
-			on_error(error, user_data);
-			free(error);
-		}
+	if (!filters || filters[0] == 0)
 		return -1;
-	}
-	if (!isdir(from)){
-		if (on_error){
-			char *error = 
-				DCOPY_ERR("can't open directory: %s", to); 
-			on_error(error, user_data);
-			free(error);
-		}
-		return -1;
-	}
-
+	
 	dir_foreach(from, e){	
 		// drop errors 
 		if (e->d_name[0] == 0)
 			continue;
 		
 		// drop '.' and '..'
-		if (
-				strcmp(e->d_name, ".")  == 0 ||
+		if (strcmp(e->d_name, ".")  == 0 ||
 				strcmp(e->d_name, "..") == 0 )
 			continue;
 
 		// copy names
 		char src[BUFSIZ], dst[BUFSIZ];
-		sprintf(src, "%s" SLASH "%s", from,  
-				e->d_name);
-		sprintf(dst, "%s" SLASH "%s", to, 
-				e->d_name);
+		sprintf(src, "%s" _SLASH_ "%s", from, e->d_name);
+		sprintf(dst, "%s" _SLASH_ "%s", to, e->d_name);
 
 		// cycle through filters
 		char *f = strdup(filters);
@@ -862,13 +666,8 @@ int dcopyf(
 			char *dn = dname(t);
 			if (dn && dn[0] != '.' && isdir(src)){
 				char *error = NULL;
-				dcopy(src, dst, overwrite, &error);
-				if (error){
-					if (on_error)
-						if(on_error(error, user_data))
-							break;
-					free(error);
-				}
+				if ((err = dcopy(src, dst, overwrite)))
+					return err;
 			} else {
 				// this is file
 				// if file name is "*" - copy if extension matches
@@ -879,37 +678,18 @@ int dcopyf(
 					// copy file if extension matches
 					if (strcmp(ext, 
 								fext(e->d_name)) == 0)
-					{
-						if (fcopy(src, dst)){
-							if (on_error){
-								char *error = 
-									DCOPY_ERR("can't copy file: %s to: %s", 
-											src, dst); 
-								if (on_error(error, user_data))
-									break;
-								free(error);
-							}
-						}
-					}
-				} 
-				else 
-				{
+						if ((err = fcopy(src, dst)))
+							return err;
+				} else {
 					// copy if name and extension matches
-					if (fcopy(src, dst)){
-						if (on_error){
-							char *error = 
-								DCOPY_ERR("can't copy file: %s to: %s", 
-										src, dst); 
-							if (on_error(error, user_data))
-								break;
-							free(error);
-						}
-					}
+					if (strcmp(t, e->d_name) == 0)
+						if ((err = fcopy(src, dst)))
+							return err;
 				}
 				free(name);
 			}
 			free(dn);
-		};
+		}
 	}
 
 	return 0;
