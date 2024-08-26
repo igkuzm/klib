@@ -67,7 +67,7 @@ static char * parentdir(char *path);
 static bool isdir(const char *path);
 
 /* islink
- * true if file or directory is symbolic link
+ * true if file or directory is link
  * %path - file/directory path */
 static bool islink(const char *path);
 
@@ -318,7 +318,7 @@ bool isdir(const char *path) {
 }
 
 /* islink
- * true if file or directory is symbolic link
+ * true if file or directory is link
  * %path - file/directory path */
 bool islink(const char *path) {
 #ifdef _WIN32
