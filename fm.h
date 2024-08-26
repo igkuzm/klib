@@ -186,6 +186,7 @@ static char *dirname(const char *path);
 #ifdef _WIN32
 #include <io.h>
 #include <windows.h>
+#include <fileapi.h>
 #define F_OK 0
 #define access _access
 	static const char *basename(const char *path);
@@ -302,9 +303,14 @@ bool isdir(const char *path) {
 }
 
 bool islink(const char *path) {
-#ifndef _WIN32
+#ifdef _WIN32
+	DWORD attr = GetFileAttributes(path);
+	if (attr != INVALID_FILE_ATTRIBUTES && 
+			(attr & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT)
+		return true;
+#else
   struct stat buf;
-	if (lstat(path, &buf))
+	if (lstat(path, &buf) == 0)
 		if((buf.st_mode & S_IFMT) == S_IFLNK)
 			return true;
 #endif
