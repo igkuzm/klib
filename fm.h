@@ -38,17 +38,24 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
+#include <dirent.h>
+#include <string.h>
+#include <libgen.h>   // basename, basedir
+#include <errno.h>
 
 /* fexists
  * true if file exists and writable
  * %path - file path */
-static bool fexists(const char *path);
+static bool fexists(const char *path)
+__attribute__((nonnull(1)));
 
 /* fsize
  * return file size
  * %path - file path */
-static off_t fsize(const char *path);
+static off_t fsize(const char *path)
+__attribute__((nonnull(1)));
 
 /* homedir
  * return allocated string with path to home directory */
@@ -58,54 +65,63 @@ static char * homedir();
  * modify argument string - remove last path component
  * from path string
  * %path - name or path of file */
-static char * parentdir(char *path);
+static char * parentdir(char *path)
+__attribute__((nonnull(1)));
 
 /* isdir
  * true if directory at path exists
  * and is accesable
  * %path - directory path */
-static bool isdir(const char *path);
+static bool isdir(const char *path)
+__attribute__((nonnull(1)));
 
 /* islink
  * true if file or directory is link
  * %path - file/directory path */
-static bool islink(const char *path);
+static bool islink(const char *path)
+__attribute__((nonnull(1)));
 
 /* slink
  * create symbolic link
  * %path - file/directory path
  * %linkname */
-static int slink(const char *path, const char *linkname);
+static int slink(const char *path, const char *linkname)
+__attribute__((nonnull(1,2)));
 
 /* hlink
  * create hard link
  * %path - file/directory path
  * %linkname */
-static int hlink(const char *path, const char *linkname);
+static int hlink(const char *path, const char *linkname)
+__attribute__((nonnull(1,2)));
 
 /* fext
  * return file extension or NULL on error 
  * %filename - name or path of file */
-static const char * fext(const char *filename);
+static const char * fext(const char *filename)
+__attribute__((nonnull(1)));
 
 /* fname
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file */
-static char * fname(char *path);
+static char * fname(char *path)
+__attribute__((nonnull(1)));
 
 /* dname
  * return allocated string with name of 
  * directory path (like POSIX dirname())
  * %path - path of file */
-static char * dname(const char *path);
+static char * dname(const char *path)
+__attribute__((nonnull(1)));
 
 /* fcopy 
  * copy and overwrite file 
  * return 0 on success
  * %from - filepath source file
  * %to   - filepath dastination file */ 
-static int fcopy(const char *from, const char *to);
+static int fcopy(const char *from, const char *to)
+__attribute__((nonnull(1,2)));
 
 /* dcopy 
  * copy directory recursive
@@ -114,7 +130,8 @@ static int fcopy(const char *from, const char *to);
  * %to   - filepath dastination file 
  * %overwrite - overwrite destination file if true */ 
 static int dcopy(
-		const char *from, const char *to, bool overwrite);
+		const char *from, const char *to, bool overwrite)
+__attribute__((nonnull(1,2)));
 
 /* dcopyf
  * copy directory content with comma-separated filters 
@@ -126,7 +143,8 @@ static int dcopy(
  * %filters - coma-separated filters like '*' or '*.ext' */
 static int dcopyf(
 		const char *from, const char *to, bool overwrite, 
-		char *filters); 
+		char *filters) 
+__attribute__((nonnull(1,2,4)));
 
 /* newdir
  * create new directory
@@ -134,7 +152,8 @@ static int dcopyf(
  * for unix/windows args
  * %path - directory path with name
  * %mode - access mode (not used in windows) */
-static int newdir(const char *path, int mode);
+static int newdir(const char *path, int mode)
+__attribute__((nonnull(1)));
 
 /* dir_foreach
  * scans directory and handle each file
@@ -161,27 +180,23 @@ static int newdir(const char *path, int mode);
  * %dirp - directory path
  * %namelist - allocated namelist array of dirents
  * %filter - filter funcion
- * %compar - sort function
-
-	static int scandir(
-  	 const char *restrict dirp,
-  	 struct dirent ***restrict namelist,
-  	 int (*filter)(const struct dirent *),
-  	 int (*compar)(
-  				const struct dirent **, 
-  				const struct dirent **));
+ * %compar - sort function 
+ * int (*compar)(const struct dirent**, const struct dirent**)
  */
+
+#ifdef _WIN32
+static int 
+scandir(
+		 const char *restrict dirp,
+		 struct dirent ***restrict namelist,
+		 int (*filter)(const struct dirent *),
+		 int (*compar)(const void *, const void *))
+__attribute__((nonnull(1)));
+#endif
 
 /********************************************/
 /*IMPLIMATION *******************************/	
 /********************************************/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <dirent.h>
-#include <libgen.h>   // basename, basedir
 
 #ifdef _WIN32
 #include <io.h>
@@ -538,9 +553,6 @@ int dcopyf(
 {
 	int err = 0;
 
-	if (!filters || filters[0] == 0)
-		return -1;
-	
 	dir_foreach(from, e){	
 		// drop errors 
 		if (e->d_name[0] == 0)
