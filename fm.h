@@ -564,11 +564,15 @@ int dcopyf(
 				 t=strtok(NULL, ", "))
 		{
 			// check is dir			
-			char *dn = dname(t);
-			if (dn && dn[0] != '.' && isdir(src)){
-				char *error = NULL;
-				if ((err = dcopy(src, dst, overwrite)))
-					return err;
+			if (isdir(src)){
+				char *dn = dname(t);
+				// copy if directory name matches
+				if (dn && strcmp(e->d_name, dn) == 0){
+					char *error = NULL;
+					if ((err = dcopy(src, dst, overwrite)))
+						return err;
+				}
+				free(dn);
 			} else {
 				// this is file
 				// if file name is "*" - copy if extension matches
@@ -589,7 +593,6 @@ int dcopyf(
 				}
 				free(name);
 			}
-			free(dn);
 		}
 	}
 
