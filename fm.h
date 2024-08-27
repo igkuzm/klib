@@ -162,6 +162,7 @@ __attribute__((nonnull(1)));
  * dir_foreach(path, file) */
 
 
+#ifdef _WIN32
 /* scandir - implimation for Windows
  * scans the directory dirp, calling filter()
  * on each directory entry.
@@ -181,10 +182,7 @@ __attribute__((nonnull(1)));
  * %namelist - allocated namelist array of dirents
  * %filter - filter funcion
  * %compar - sort function 
- * int (*compar)(const struct dirent**, const struct dirent**)
- */
-
-#ifdef _WIN32
+ * int (*compar)(const struct dirent**, const struct dirent**) */
 static int 
 scandir(
 		 const char *restrict dirp,
