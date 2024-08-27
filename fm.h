@@ -560,7 +560,7 @@ int dcopyf(
 		char *f = strdup(filters);
 		char *t;
 		for (t=strtok(f, ", ");
-				 t || ({free(f); 0;}); 
+				 t || ({if(f) free(f); 0;}); 
 				 t=strtok(NULL, ", "))
 		{
 			// check is dir			

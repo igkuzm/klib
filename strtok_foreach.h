@@ -35,7 +35,7 @@
 #define strtok_foreach(str, delim, token)\
 	char *_s = strdup(str), *token, *_p;\
 	for (token=strtok_r(_s, delim, &_p);\
-			 token || ({free(_s); 0;});\
+			 token || ({if(_s) free(_s); 0;});\
 			 token=strtok_r(NULL, delim, &_p))
 
 #endif /* ifndef STRTOK_FOREACH_H */
