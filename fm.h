@@ -67,9 +67,21 @@ static char * parentdir(char *path);
 static bool isdir(const char *path);
 
 /* islink
- * true if file or directory is link
+ * true if file or directory is symbolic link
  * %path - file/directory path */
 static bool islink(const char *path);
+
+/* slink
+ * create symbolic link
+ * %path - file/directory path
+ * %linkname */
+static int slink(const char *path, const char *linkname);
+
+/* hlink
+ * create hard link
+ * %path - file/directory path
+ * %linkname */
+static int hlink(const char *path, const char *linkname);
 
 /* fext
  * return file extension or NULL on error 
@@ -306,7 +318,7 @@ bool isdir(const char *path) {
 }
 
 /* islink
- * true if file or directory is link
+ * true if file or directory is symbolic link
  * %path - file/directory path */
 bool islink(const char *path) {
 #ifdef _WIN32
@@ -322,6 +334,32 @@ bool islink(const char *path) {
 #endif
   
 	return false;
+}
+
+/* slink
+ * create symbolic link
+ * %path - file/directory path
+ * %linkname */
+int slink(const char *path, const char *linkname)
+{
+#ifdef _WIN32
+	return CreateSymbolicLink(linkname, path, NULL);
+#else
+	return symlink(path, linkname);
+#endif
+}
+
+/* hlink
+ * create hard link
+ * %path - file/directory path
+ * %linkname */
+int hlink(const char *path, const char *linkname)
+{
+#ifdef _WIN32
+	return CreateHardLink(linkname, path, NULL);
+#else
+	return link(path, linkname);
+#endif
 }
 
 /* fext
