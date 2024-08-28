@@ -2,7 +2,7 @@
  * File              : strrf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 28.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 

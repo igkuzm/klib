@@ -2,7 +2,7 @@
  * File              : rtf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.12.2023
- * Last Modified Date: 16.06.2024
+ * Last Modified Date: 28.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -13,8 +13,7 @@
 
 /* rtf_from_utf8
  * return string with rtf code from utf8 multibite 
- * sting or NULL on error
- */
+ * sting or NULL on error */
 static char *
 rtf_from_utf8(const char *s);
 
@@ -23,8 +22,7 @@ rtf_from_utf8(const char *s);
  * or NULL on error
  * %coln   - number of columns
  * %titles - array of columns titles
- * %width  - array of columns width
- */
+ * %width  - array of columns width */
 static char *
 rtf_table_header(int coln, const char *titles[], int *width);
 
@@ -32,8 +30,7 @@ rtf_table_header(int coln, const char *titles[], int *width);
  * return string with rtf code of table row
  * or NULL on error
  * %coln  - number of columns
- * %colv  - columns values
- */
+ * %colv  - columns values */
 static char *
 rtf_table_row(int coln, char *colv[]);
 
@@ -41,8 +38,7 @@ rtf_table_row(int coln, char *colv[]);
  * return string with rtf code of table row
  * or NULL on error
  * %colv  - string with columns values separeted by delim
- * %delim - string with delim chars
- */
+ * %delim - string with delim chars */
 static char *
 rtf_table_row_from_string(
 		const char *colv, const char *delim);

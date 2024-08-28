@@ -2,7 +2,7 @@
  * File              : ini.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 02.02.2023
- * Last Modified Date: 21.05.2024
+ * Last Modified Date: 28.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -35,13 +35,11 @@ extern "C" {
 
 #define CONFIG_ARG_MAX_BYTES BUFSIZ     // max size of key/value string
 
-/*
- * ini_parse - read file and run callback for each key/value pair
+/* ini_parse - read file and run callback for each key/value pair
  * return non-null on error to open file
  * @path - config file path
  * @user_data - pointer to data transfered through callback function
- * @callback - callback function - return non-null to stop function execution
- */
+ * @callback - callback function - return non-null to stop function execution */
 static int ini_parse(
 		const char *path, void *user_data, 
 		int (*callback)(
@@ -50,12 +48,10 @@ static int ini_parse(
 			const char *key, 
 			const char *value));
 
-/*
- * ini_get - read file and return value for key or NULL on error
+/* ini_get - read file and return value for key or NULL on error
  * @path - config file path
  * @section - set NULL to search in all sections
- * @key
- */
+ * @key */
 static char *ini_get(
 		const char *path, 
 		const char *section, const char *key); 

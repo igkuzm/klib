@@ -23,7 +23,7 @@
 18. strptime.cc - implimation of strptime for windows
 1. strrep - find and replace string
 17. strrf.h - write file contents to allocated string
-19. strsplit.h - split string with delim
+19. strtok_foreach.h - split string with delim
 19. strsubstr.h - substring
 20. translit.h - convert KYRILIC utf8 string to transliteral LATIN ANSI string
 21. utf.h - utf8 to utf32 converter

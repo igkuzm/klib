@@ -2,7 +2,7 @@
  * File              : memread.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 28.05.2024
- * Last Modified Date: 28.05.2024
+ * Last Modified Date: 28.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -38,7 +38,7 @@ extern "C" {
 #include <string.h>
 
 typedef struct MEM {
-	unsigned char *buffer; // memory buffeR 
+	unsigned char *buffer; // memory buffer 
 	long size;              // size of buffer
 	long p;                 // position of pointer buffer 
 } MEM;
@@ -52,7 +52,7 @@ static MEM *memopen(void *buffer, int size){
 	mem->p = 0;
 	mem->buffer = (unsigned char *)buffer;
 	return mem;
-};
+}
 
 static void memclose(MEM *mem){
 	free(mem);

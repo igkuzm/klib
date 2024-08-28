@@ -2,7 +2,7 @@
  * File              : getbundle.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 07.10.2022
- * Last Modified Date: 25.08.2024
+ * Last Modified Date: 28.08.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -41,6 +41,7 @@ extern "C" {
 #include <stdlib.h>
 #include <libgen.h> //dirname
 #if defined __APPLE__
+#include <TargetConditionals.h>
 #elif defined _WIN32
 #include <windows.h>
 #else
@@ -63,7 +64,6 @@ static char *getbundle(char *argv[]) {
   if (!bundle)
     return NULL;
 #ifdef __APPLE__
-#include <TargetConditionals.h>
 #if TARGET_OS_MAC
   sprintf(bundle, "%s%s", 
 			dirname((char *)argv[0]), "/../Resources");
