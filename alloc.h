@@ -51,7 +51,7 @@
 	if (!_p){\
 		on_error;\
 	} else { \
-		ret = _p; \
+		_ret = _p; \
 	}\
 	_ret;\
 })
