@@ -2,7 +2,7 @@
  * File              : alloc.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 10.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ALLOC(size, on_error) \
+#define MALLOC(size, on_error) \
 ({\
 	void *_p = malloc(size);\
 	if (!_p) {\
@@ -41,7 +41,7 @@
 	} else { \
 		memset(_p,0,size);\
 	} \
-	p;\
+	_p;\
 })
 
 #define REALLOC(ptr, size, on_error) \
@@ -57,6 +57,6 @@
 })
 
 #define NEW(T, on_error)\
-	((T *)ALLOC(sizeof(T), on_error))
+	((T *)MALLOC(sizeof(T), on_error))
 
 #endif /* ifndef ALLOC_H */
