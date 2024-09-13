@@ -2,7 +2,7 @@
  * File              : log.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 19.03.2023
- * Last Modified Date: 10.09.2024
+ * Last Modified Date: 13.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -40,6 +40,8 @@ extern "C" {
 
 #define STR(...) \
 	({char _s[BUFSIZ]; snprintf(_s, BUFSIZ-1, __VA_ARGS__); _s[BUFSIZ-1]=0; _s;})
+#define STR_ERR(...) STR("E/_%s: %s: %s", __FILE__, __func__, STR(__VA_ARGS__))
+#define STR_LOG(...) STR("I/_%s: %s: %s", __FILE__, __func__, STR(__VA_ARGS__))
 
 #ifdef __ANDROID__
 	#include <android/log.h>
