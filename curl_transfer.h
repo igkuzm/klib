@@ -27,6 +27,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CURL_TRANSFER_H
+#define CURL_TRANSFER_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 		
 /* CURL functions to download/upload files */
 
@@ -273,3 +279,8 @@ size_t curl_transfer_upload_data(
 	
 	return 0;
 }
+#ifdef __cplusplus
+}
+#endif
+
+#endif // CURL_TRANSFER_H
