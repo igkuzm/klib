@@ -101,7 +101,7 @@ static size_t curl_transfer_upload_data(
 
 struct _curl_transfer_data {
 	char *data;
-	int size;
+	size_t size;
 };
 
 static size_t _curl_transfer_data_writefunc(
@@ -112,7 +112,7 @@ static size_t _curl_transfer_data_writefunc(
 		return 0;
 
 	size_t size = s * n;
-  char *ptr = 
+  void *ptr = 
 		realloc(d->data, d->size + size + 1);
   if(!ptr)
     return 0;  /* out of memory! */
@@ -263,7 +263,7 @@ size_t curl_transfer_download_data(
 		return 0;
 	}
 	struct _curl_transfer_data d = {NULL, 0};
-	d.data = malloc(1);
+	d.data = (char *)malloc(1);
 	if (!d.data){
 		if (error)
 			*error = strdup("can't allocate memory");
@@ -315,7 +315,7 @@ size_t curl_transfer_upload_data(
 			*error = strdup("\%data argument is NULL");
 		return 0;
 	}
-	struct _curl_transfer_data d = {data, size};
+	struct _curl_transfer_data d = {(char *)data, size};
 	CURL *curl = 
 		_curl_transfer_init(
 				0, NULL, &d, size, 
