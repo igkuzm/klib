@@ -2,7 +2,7 @@
  * File              : curl_transfer.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.09.2024
- * Last Modified Date: 21.09.2024
+ * Last Modified Date: 22.09.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /**
@@ -43,7 +43,12 @@ extern "C" {
 
 #define CURL_TRANSFER_VERIFY_SSL 1L
 
-/* function to handle download/upload progress */
+/* function to handle download/upload progress 
+ * %ptr - pointer to data for progress function
+ * %dltotal - total downloaded size
+ * %dlnow - current downloaded size
+ * %ultotal - total uploaded size
+ * %ulnow - current uploaded size */
 typedef int 
 curl_transfer_progress(void *ptr, 
 		double dltotal, double dlnow, 
@@ -94,32 +99,35 @@ static size_t curl_transfer_upload_data(
  * IMPLIMATION
  */
 
-struct curl_transfer_data {
-	unsigned char *data;
+struct _curl_transfer_data {
+	char *data;
 	int size;
 };
 
 static size_t _curl_transfer_data_writefunc(
 		unsigned char  *data, size_t s, size_t n, 
-		struct curl_transfer_data *d)
+		struct _curl_transfer_data *d)
 {
-	if (!d || !d->data)
-		return 0;
-	size_t size = s * n;
-	d->data = 
-		(unsigned char *)realloc(d->data, d->size + size);
-	if (!d->data)
+	if (!d)
 		return 0;
 
-	memcpy(&(d->data)[d->size], data, size);
-	d->size += size;
-	
-	return size;
+	size_t size = s * n;
+  char *ptr = 
+		realloc(d->data, d->size + size + 1);
+  if(!ptr)
+    return 0;  /* out of memory! */
+
+  d->data = (char *)ptr;
+  memcpy(&(d->data[d->size]), data, size);
+  d->size += size;
+  d->data[d->size] = 0;
+
+  return size;
 }
 
 static size_t _curl_transfer_upload_data_readfunc(
 		unsigned char *data, size_t s, size_t n, 
-		struct curl_transfer_data *d)
+		struct _curl_transfer_data *d)
 {
 	size_t size = s * n;
 	
@@ -143,7 +151,7 @@ static size_t _curl_transfer_upload_file_readfunc(
 
 static CURL * _curl_transfer_init(
 		char fDownload,
-		FILE *fp, struct curl_transfer_data *data, size_t size, 
+		FILE *fp, struct _curl_transfer_data *d, size_t size, 
 		const char * url, char **error, 
 		void *ptr, 
 		curl_transfer_progress *progress)
@@ -153,8 +161,8 @@ static CURL * _curl_transfer_init(
 		curl_easy_setopt(curl, CURLOPT_URL, url);
 		if (fp && fDownload)
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);		
-		if (data && fDownload) {
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);		
+		if (d && fDownload) {
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, d);		
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, 
 					_curl_transfer_data_writefunc);
 		}
@@ -174,8 +182,8 @@ static CURL * _curl_transfer_init(
 					_curl_transfer_upload_file_readfunc);
 		}
 
-		if (data && !fDownload){
-			curl_easy_setopt(curl, CURLOPT_READDATA, data);
+		if (d && !fDownload){
+			curl_easy_setopt(curl, CURLOPT_READDATA, d);
 			curl_easy_setopt(curl, CURLOPT_READFUNCTION, 
 					_curl_transfer_upload_data_readfunc);
 			curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
@@ -223,6 +231,11 @@ size_t curl_transfer_download_file(
 		void *ptr, 
 		curl_transfer_progress *progress)
 {
+	if (!fp){
+		if (error)
+			*error = strdup("\%fp argument is NULL");
+		return 0;
+	}
 	CURL *curl = 
 		_curl_transfer_init(
 				1, fp, NULL, 0, 
@@ -238,13 +251,26 @@ size_t curl_transfer_download_data(
 		void *ptr, 
 		curl_transfer_progress *progress)
 {
-	struct curl_transfer_data d = {NULL, 0};
+	if (!data){
+		if (error)
+			*error = strdup("\%data argument is NULL");
+		return 0;
+	}
+	struct _curl_transfer_data d = {NULL, 0};
+	d.data = malloc(1);
+	if (!d.data){
+		if (error)
+			*error = strdup("can't allocate memory");
+		return 0;
+	}
+	*data = d.data;
 	CURL *curl = 
 		_curl_transfer_init(
 				1, NULL, &d, 0, 
 				url, error, ptr, progress);
 	if (curl)	
-		return _curl_transfer_perfom(1, curl, error);	
+		if (_curl_transfer_perfom(1, curl, error))
+			return d.size;	
 	
 	return 0;
 }
@@ -254,6 +280,11 @@ size_t curl_transfer_upload_file(
 		void *ptr, 
 		curl_transfer_progress *progress)
 {
+	if (!fp){
+		if (error)
+			*error = strdup("\%fp argument is NULL");
+		return 0;
+	}
 	CURL *curl = 
 		_curl_transfer_init(
 				0, fp, NULL, 0, 
@@ -269,7 +300,12 @@ size_t curl_transfer_upload_data(
 		void *ptr, 
 		curl_transfer_progress *progress)
 {
-	struct curl_transfer_data d = {NULL, 0};
+	if (!data){
+		if (error)
+			*error = strdup("\%data argument is NULL");
+		return 0;
+	}
+	struct _curl_transfer_data d = {data, size};
 	CURL *curl = 
 		_curl_transfer_init(
 				0, NULL, &d, size, 
