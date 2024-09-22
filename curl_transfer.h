@@ -194,9 +194,15 @@ static CURL * _curl_transfer_init(
 				CURL_TRANSFER_VERIFY_SSL);		
 		
 		if (progress) {
+#if LIBCURL_VERSION_NUM < 0x072000
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, ptr);
 			curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, 
 					progress);
+#else
+			curl_easy_setopt(curl, CURLOPT_XFERINFODATA, ptr);
+			curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, 
+					progress);
+#endif
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		}
 	}
