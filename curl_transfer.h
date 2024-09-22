@@ -272,6 +272,9 @@ size_t curl_transfer_download_data(
 		if (_curl_transfer_perfom(1, curl, error))
 			return d.size;	
 	
+	// free data on error
+	free(d.data);
+	*data = NULL;
 	return 0;
 }
 
