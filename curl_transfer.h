@@ -269,18 +269,19 @@ size_t curl_transfer_download_data(
 			*error = strdup("can't allocate memory");
 		return 0;
 	}
-	*data = d.data;
 	CURL *curl = 
 		_curl_transfer_init(
 				1, NULL, &d, 0, 
 				url, error, ptr, progress);
-	if (curl)	
-		if (_curl_transfer_perfom(1, curl, error) == 0)
+	if (curl){
+		if (_curl_transfer_perfom(1, curl, error)){
+			*data = d.data;
 			return d.size;	
+		}
+	}	
 	
 	// free data on error
 	free(d.data);
-	*data = NULL;
 	return 0;
 }
 
