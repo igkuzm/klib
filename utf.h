@@ -95,9 +95,11 @@ static int c32tomb(char *s, const uint32_t *c32, int len)
 }
 
 /* convert %len UTF-8 %s multybite array to UTF-32 %s32 
- * null-terminated string and return it's len 
+ * null-terminated string, return it's len and if %ptr is 
+ * not NULL set it to next %s character.
  * set len to -1 to handle %s as null-terminated string */ 
-static size_t mbtoc32(uint32_t *s32, const char *s, int len)
+static size_t mbtoc32(
+		uint32_t *s32, const char *s, int len, char **ptr)
 {
 	int i, l=0;
 	for (i = 0; i < len || (len == -1 && s[i]);)
@@ -144,6 +146,8 @@ static size_t mbtoc32(uint32_t *s32, const char *s, int len)
 
 	// null-terminate string
 	s32[l] = 0;
+	if (ptr)
+		*ptr = &((char *)s)[i];
 	return l;
 }	
 
