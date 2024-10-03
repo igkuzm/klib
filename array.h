@@ -2,7 +2,7 @@
  * File              : array.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 22.02.2022
- * Last Modified Date: 24.08.2024
+ * Last Modified Date: 04.10.2024
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -26,12 +26,19 @@
 
 /*
  * C library for dynamic arrays
- * struct array_t * array_new(T) - allocate and return new array of types T
- * void array_append(struct array_t * array, T, T item) - add item to array with
- * type T
- * T item * array_at(struct array_t * array, T, int i) - return item from array
- * at position i
- * array_for_each(struct array_t * array, T, T item){} - iterate the array
+ * 
+ * array_t * array_new(T, on_error) - allocate and return 
+ * new array of types T
+ * 
+ * void array_append(array_t * array, T, T item, on_error)
+ * - add item to array with type T
+ * 
+ * T item * array_at(struct array_t * array, T, int i) - 
+ * return item from arrayat position i
+ * 
+ * array_for_each(struct array_t * array, T, T item){} - 
+ * iterate the array
+ * 
  * void array_free(struct array_t * array) - free array
  */
 
@@ -71,6 +78,12 @@ typedef struct array {
 		a->data = realloc(a->data, sizeof(T) * (++a->mem + 1));\
 		if (!a->data){ on_error;} \
   } \
+})
+
+#define array_at(a, T, index)\
+({\
+ if(index >= a->len) return NULL;\
+ return (T*)(a->data[index]);\
 })
 
 #define array_insert(a, T, item, index, on_error) \
