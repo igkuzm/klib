@@ -7,7 +7,7 @@
  */
 
 /**
- * strrep.h
+ * getstr.h
  * Copyright (c) 2024 Igor V. Sementsov <ig.kuzm@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,8 @@ extern "C" {
 
 #include <stdio.h>
 
+/* read string from stdin, fill the %buffer with maximum 
+ * %len capacity and return pointer to it */
 static char *getstr(char *buffer, int len)
 {
 	int i = 0;
