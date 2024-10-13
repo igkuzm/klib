@@ -55,14 +55,20 @@ typedef struct array {
 	int mem;      // number of allocated items
 } array_t;
 
-#define array_init(a, T, on_error)\
+#define array_new(T, on_error)\
 ({\
-	a->data = malloc(sizeof(T));\
-	if (!a->data) {\
+  array_t *_a = malloc(sizeof(array_t));\
+  if (!_a) {\
 		on_error; \
-	} \
-	a->len = 0;\
-	a->mem = 1;\
+	} else { \
+		_a->data = malloc(sizeof(T));\
+		if (!_a->data) {\
+			on_error; \
+		} \
+		_a->len = 0;\
+		_a->mem = 1;\
+	}\
+  _a;\
 })
 
 #define array_append(a, T, item, on_error)\
