@@ -5,6 +5,8 @@
 1. base64.h - base64 encode/decode
 1. bitmap.h - image bitmap editing
 5. enum.h - converting C enums to strings
+5. errcodes.h - describe errors in header and get it's value 
+   in code with function ``const char *errcode(int code)``
 6. fm.h - filemanager functions (copy file, copy directory recursive, etc.)
 1. fstrfind - find strings in file stream
 1. fstrrep - find and replace string in file stream
