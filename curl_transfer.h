@@ -2,7 +2,7 @@
  * File              : curl_transfer.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.09.2024
- * Last Modified Date: 22.09.2024
+ * Last Modified Date: 31.05.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /**
@@ -54,7 +54,7 @@ curl_transfer_progress(void *ptr,
 		double dltotal, double dlnow, 
 		double ultotal, double ulnow); 
 
-/* download url to FILE stream
+/* download url to FILE stream and return downloaded size
  * %fp - pointer to FILE stream
  * %url - null-terminated string with url address
  * %error - pointer to allocated error string or NULL;
@@ -64,7 +64,7 @@ static size_t curl_transfer_download_file(
 		FILE *fp, const char *url, char **error, 
 		void *ptr, curl_transfer_progress *progress);
 
-/* download url to memory
+/* download url to memory and return downloaded size
  * %data - pointer to allocated memory with downloaded data
  * %url - null-terminated string with url address
  * %error - pointer to allocated error string or NULL;
@@ -74,7 +74,7 @@ static size_t curl_transfer_download_data(
 		void **data, const char *url, char **error, 
 		void *ptr, curl_transfer_progress *progress);
 
-/* upload FILE stream to url
+/* upload FILE stream to url and return uploaded size
  * %fp - pointer to FILE stream
  * %url - null-terminated string with url address
  * %error - pointer to allocated error string or NULL;
@@ -84,7 +84,7 @@ static size_t curl_transfer_upload_file(
 		FILE *fp, const char *url, char **error, 
 		void *ptr, curl_transfer_progress *progress);
 
-/* upload data to memory
+/* upload data to memory and return uploaded size
  * %data - data to upload
  * %size - data size
  * %url - null-terminated string with url address

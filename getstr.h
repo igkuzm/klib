@@ -2,7 +2,7 @@
  * File              : getstr.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.10.2024
- * Last Modified Date: 04.10.2024
+ * Last Modified Date: 31.05.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -31,11 +31,21 @@ extern "C" {
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* read string from stdin, fill the %buffer with maximum 
- * %len capacity and return pointer to it */
+ * %len capacity and return pointer to it 
+ * allocate buffer if it is NULL */
 static char *getstr(char *buffer, int len)
 {
+	if (buffer == NULL){
+		if (len < 1)
+			return NULL;
+		// allocate buffer
+		buffer = (char *)malloc(len);
+		if (buffer == NULL)
+			return NULL;
+	}
 	int i = 0;
 	for (i = 0; i < len-1; ++i) {
 		scanf("%c", &buffer[i]);
