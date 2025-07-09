@@ -2,7 +2,7 @@
  * File              : strrf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 28.08.2024
+ * Last Modified Date: 04.07.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -43,14 +43,10 @@ strrf(FILE * fp)
 {
 	size_t len = 0;
         
-	if (fseek (fp, 0, SEEK_END))
-		return NULL;
-
-  if ((len = ftell(fp)) < 0)
-		return NULL;
-    
-	if (fseek (fp, 0, SEEK_SET))
-		return NULL;
+	if (fseek (fp, 0, SEEK_END) ||
+		 (len = ftell(fp)) < 0 ||
+		 (fseek (fp, 0, SEEK_SET)))
+	return NULL;
 
   char *buff = (char *)malloc(len+1);
 	if (!buff)
