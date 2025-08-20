@@ -485,7 +485,7 @@ int dcopy(const char *from, const char *to, bool overwrite)
 {
 	// create `to` directory
 	if (!fexists(to))
-		newdir(to, 755);
+		newdir(to, 0755);
 
 	dir_foreach(from, file){
 		// skip error
@@ -533,6 +533,7 @@ int newdir(const char *path, int mode)
 #ifdef _WIN32
 	return mkdir(path);
 #else
+	umask(0);
 	return mkdir(path, mode);
 #endif
 }
