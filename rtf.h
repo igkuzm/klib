@@ -195,19 +195,23 @@ rtf_table_row(
 				"\\trowd\n");
 	
 	for (i = 0; i < coln; ++i)
+	{
 		w += width[i];
 		_rtf_str_appendf(&s, 
 				"\\clbrdrt\\brdrs"
 				"\\clbrdrl\\brdrs"
 				"\\clbrdrb\\brdrs"
 				"\\clbrdrr\\brdrs\n"
+				"\\clwWidth%d\\clftsWidth3"
 				"\\cellx%d\n", 
-				w);		
+				width[i], w);		
+
 		_rtf_str_appendf(&s, 
 				"\\intbl %s \\cell\n",
 				rtf_from_utf8(colv[i]));
+	}
 	
-	_rtf_str_appendf(&s, 
+	 _rtf_str_appendf(&s, 
 				"\\row\n");
 	
 	return s.str;
