@@ -142,37 +142,6 @@ _rtf_str_append(struct _rtf_str *s, const char *str)
 	({char str[BUFSIZ];sprintf(str, __VA_ARGS__);\
 			_rtf_str_append(s, str);});
 
-char *
-rtf_table_header(
-		int coln, const char *titles[], int *width)
-{
-	int i, w=0;
-	struct _rtf_str s;
-	_rtf_str_init(&s);
-	
-	_rtf_str_append(&s, 
-			  "\\pard\\par\\trowd\n");
-	for (i = 0; i < coln; ++i) {
-		w += width[i];
-		_rtf_str_appendf(&s, 
-				"\\clbrdrt\\brdrs"
-				"\\clbrdrl\\brdrs"
-				"\\clbrdrb\\brdrs"
-				"\\clbrdrr\\brdrs\n"
-				"\\cellx%d\n", 
-				w);
-	}
-	for (i = 0; i < coln; ++i) {
-		char *title = rtf_from_utf8(titles[i]);
-		_rtf_str_appendf(&s, 
-				"\\intbl %s \\cell\n", 
-				title);
-		free(title);
-	}
-
-	return s.str;
-}
-
 void _rtf_table_add_row_column(
 		struct _rtf_str *s,
 		int width_current,
