@@ -27,15 +27,6 @@ rtf_from_utf8(const char *s);
 static char *
 rtf_table_row(int colc, const char *colv[], int *width);
 
-/* rtf_table_row_from_string
- * return string with rtf code of table row
- * or NULL on error
- * %colv  - string with columns values separeted by delim
- * %delim - string with delim chars */
-static char *
-rtf_table_row_from_string(
-		const char *colv, const char *delim);
-
 /* convert image to RTF string 
  * valid formats: emf, png, jpeg
  * with and height are in twips (inches * 20) - 
