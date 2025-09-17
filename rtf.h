@@ -182,6 +182,26 @@ rtf_table_header(
 	return s.str;
 }
 
+void _rtf_table_add_row_column(
+		struct _rtf_str *s,
+		int width_current,
+		int width_total,
+		const char *value)
+{
+		_rtf_str_appendf(&s, 
+				"\\clbrdrt\\brdrs"
+				"\\clbrdrl\\brdrs"
+				"\\clbrdrb\\brdrs"
+				"\\clbrdrr\\brdrs\n"
+				"\\clwWidth%d\\clftsWidth3"
+				"\\cellx%d\n", 
+				width_current, width_total);		
+
+		_rtf_str_appendf(&s, 
+				"\\intbl %s \\cell\n",
+				rtf_from_utf8(value));	
+}
+
 char *
 rtf_table_row(
 		int coln, char *colv[], int *width)
