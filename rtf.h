@@ -179,7 +179,7 @@ void _rtf_table_add_row_column(
 		int width_total,
 		const char *value)
 {
-		_rtf_str_appendf(&s, 
+		_rtf_str_appendf(s, 
 				"\\clbrdrt\\brdrs"
 				"\\clbrdrl\\brdrs"
 				"\\clbrdrb\\brdrs"
@@ -188,7 +188,7 @@ void _rtf_table_add_row_column(
 				"\\cellx%d\n", 
 				width_current, width_total);		
 
-		_rtf_str_appendf(&s, 
+		_rtf_str_appendf(s, 
 				"\\intbl %s \\cell\n",
 				rtf_from_utf8(value));	
 }
