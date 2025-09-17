@@ -218,42 +218,6 @@ rtf_table_row(
 	return s.str;
 }
 
-char *
-rtf_table_row_from_string(
-		const char *colv, const char *delim)
-{
-	int i, w=0;
-	struct _rtf_str s;
-	if (_rtf_str_init(&s))
-		return NULL;
-
-	_rtf_str_append(&s, 
-				"\\trowd\n");
-	
-	// do safe strtok
-	char *str = strdup(colv);
-	if (str == NULL)
-		return NULL;
-
-	// loop through the string to extract 
-	// tokens
-	char *t;
-	for(t=strtok(str, delim), i=0; 
-			t; 
-			t=strtok(NULL, delim), ++i) 
-	{
-		w += width[i];
-		_rtf_table_add_row_column(
-				&s, width[i], w, colv[i]);
-	}
-	
-	_rtf_str_appendf(&s, 
-				"\\row\n");
-	
-	free(str);
-	return s.str;
-}
-
 static unsigned char * _rtf_image_bin_to_strhex(
 		const unsigned char *bin,
 		unsigned int binsz,
