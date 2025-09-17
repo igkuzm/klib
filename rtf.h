@@ -18,22 +18,14 @@
 static char *
 rtf_from_utf8(const char *s);
 
-/* rtf_table_header
- * return string with rtf code of table header
- * or NULL on error
- * %coln   - number of columns
- * %titles - array of columns titles
- * %width  - array of columns width */
-static char *
-rtf_table_header(int coln, const char *titles[], int *width);
-
 /* rtf_table_row
  * return string with rtf code of table row
  * or NULL on error
- * %coln  - number of columns
- * %colv  - columns values */
+ * %coln   - number of columns
+ * %colv - columns values
+ * %width  - array of columns width in twips*/
 static char *
-rtf_table_row(int coln, char *colv[]);
+rtf_table_row(int coln, const char *titles[], int *width);
 
 /* rtf_table_row_from_string
  * return string with rtf code of table row
@@ -192,9 +184,9 @@ rtf_table_header(
 
 char *
 rtf_table_row(
-		int coln, char *colv[])
+		int coln, char *colv[], int *width)
 {
-	int i;
+	int i, w=0;
 	struct _rtf_str s;
 	if (_rtf_str_init(&s))
 		return NULL;
@@ -203,6 +195,14 @@ rtf_table_row(
 				"\\trowd\n");
 	
 	for (i = 0; i < coln; ++i)
+		w += width[i];
+		_rtf_str_appendf(&s, 
+				"\\clbrdrt\\brdrs"
+				"\\clbrdrl\\brdrs"
+				"\\clbrdrb\\brdrs"
+				"\\clbrdrr\\brdrs\n"
+				"\\cellx%d\n", 
+				w);		
 		_rtf_str_appendf(&s, 
 				"\\intbl %s \\cell\n",
 				rtf_from_utf8(colv[i]));
