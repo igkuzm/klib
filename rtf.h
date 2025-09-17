@@ -195,7 +195,7 @@ void _rtf_table_add_row_column(
 
 char *
 rtf_table_row(
-		int colc, char *colv[], int *width)
+		int colc, const char *colv[], int *width)
 {
 	int i, w=0;
 	struct _rtf_str s;
