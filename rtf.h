@@ -142,7 +142,7 @@ _rtf_str_append(struct _rtf_str *s, const char *str)
 	({char str[BUFSIZ];sprintf(str, __VA_ARGS__);\
 			_rtf_str_append(s, str);});
 
-void _rtf_table_add_row_column(
+static void _rtf_table_add_row_column(
 		struct _rtf_str *s,
 		int width_current,
 		int width_total,
