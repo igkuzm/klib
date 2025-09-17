@@ -21,11 +21,11 @@ rtf_from_utf8(const char *s);
 /* rtf_table_row
  * return string with rtf code of table row
  * or NULL on error
- * %coln   - number of columns
+ * %colc   - number of columns
  * %colv - columns values
  * %width  - array of columns width in twips*/
 static char *
-rtf_table_row(int coln, const char *titles[], int *width);
+rtf_table_row(int colc, const char *colv[], int *width);
 
 /* rtf_table_row_from_string
  * return string with rtf code of table row
@@ -204,7 +204,7 @@ void _rtf_table_add_row_column(
 
 char *
 rtf_table_row(
-		int coln, char *colv[], int *width)
+		int colc, char *colv[], int *width)
 {
 	int i, w=0;
 	struct _rtf_str s;
@@ -214,7 +214,7 @@ rtf_table_row(
 	_rtf_str_append(&s, 
 				"\\trowd\n");
 	
-	for (i = 0; i < coln; ++i)
+	for (i = 0; i < colc; ++i)
 	{
 		w += width[i];
 		_rtf_table_add_row_column(
