@@ -231,7 +231,7 @@ char *
 rtf_table_row_from_string(
 		const char *colv, const char *delim)
 {
-	int i;
+	int i, w=0;
 	struct _rtf_str s;
 	if (_rtf_str_init(&s))
 		return NULL;
@@ -250,9 +250,11 @@ rtf_table_row_from_string(
 	for(t=strtok(str, delim), i=0; 
 			t; 
 			t=strtok(NULL, delim), ++i) 
-		_rtf_str_appendf(&s, 
-				"\\intbl %s \\cell\n",
-				rtf_from_utf8(t));
+	{
+		w += width[i];
+		_rtf_table_add_row_column(
+				&s, width[i], w, colv[i]);
+	}
 	
 	_rtf_str_appendf(&s, 
 				"\\row\n");
