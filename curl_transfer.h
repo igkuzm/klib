@@ -194,7 +194,7 @@ static CURL * _curl_transfer_init(
 				CURL_TRANSFER_VERIFY_SSL);		
 		
 		if (progress) {
-#if LIBCURL_VERSION_NUM < 0x072000
+#if LIBCURL_VERSION_NUM < 0x073200
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, ptr);
 			curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, 
 					progress);
