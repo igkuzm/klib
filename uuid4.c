@@ -43,18 +43,22 @@ int uuid4_init(void) {
   }
 
 #elif defined(_WIN32)
-  int res;
-  HCRYPTPROV hCryptProv;
-  res = CryptAcquireContext(
-    &hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-  if (!res) {
-    return UUID4_EFAILURE;
-  }
-  res = CryptGenRandom(hCryptProv, (DWORD) sizeof(seed), (PBYTE) seed);
-  CryptReleaseContext(hCryptProv, 0);
-  if (!res) {
-    return UUID4_EFAILURE;
-  }
+  //int res;
+  //HCRYPTPROV hCryptProv;
+  //res = CryptAcquireContext(
+    //&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
+  //if (!res) {
+    //return UUID4_EFAILURE;
+  //}
+  //res = CryptGenRandom(hCryptProv, (DWORD) sizeof(seed), (PBYTE) seed);
+  //CryptReleaseContext(hCryptProv, 0);
+  //if (!res) {
+    //return UUID4_EFAILURE;
+  //}
+	seed[0] = rand();
+	seed[1] = rand();
+	seed[2] = rand();
+	seed[3] = rand();
 
 #else
   #error "unsupported platform"
