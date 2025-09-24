@@ -37,11 +37,37 @@ extern "C" {
 
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
-#define STR(...) \
-	({char _s[BUFSIZ]; snprintf(_s, BUFSIZ-1, __VA_ARGS__); _s[BUFSIZ-1]=0; _s;})
-#define STR_ERR(...) STR("E/_%s: %s: %s", __FILE__, __func__, STR(__VA_ARGS__))
-#define STR_LOG(...) STR("I/_%s: %s: %s", __FILE__, __func__, STR(__VA_ARGS__))
+static char __buf[BUFSIZ];
+
+static char *STR(const char *fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(__buf, fmt, args);
+	va_end(args);
+	return __buf;
+}
+
+static char * STR_ERR(const char *fmt, ...) {
+	char str[BUFSIZ];
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(str, fmt, args);
+	va_end(args);
+	sprintf(__buf, "E/%s: %d: %s", __FILE__, __LINE__, str);
+	return __buf;
+}
+
+static char * STR_LOG(const char *fmt, ...) {
+	char str[BUFSIZ];
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(str, fmt, args);
+	va_end(args);
+	sprintf(__buf, "E/%s: %d: %s", __FILE__, __LINE__, str);
+	return __buf;
+}
 
 #ifdef __ANDROID__
 	#include <android/log.h>
@@ -53,22 +79,26 @@ extern "C" {
 	#define LOG(fmt, ...) NSLog(CFSTR(fmt), ##__VA_ARGS__)
 	#define ERR(fmt, ...) LOG("E/_%s: %d: %s", __func__, __LINE__, STR(fmt, __VA_ARGS__)) 
 #else
-	#define LOG(fmt, ...) \
-	({ \
-		char _s[BUFSIZ]; snprintf(_s, BUFSIZ-1, fmt, __VA_ARGS__); _s[BUFSIZ-1]=0; \
-		fprintf(stderr, "%s: _%s: %s\n",   __FILE__, __func__, _s); \
-	 })
 
-	#define ERR(fmt, ...) \
-	({\
-		char _s[BUFSIZ]; snprintf(_s, BUFSIZ-1, fmt, __VA_ARGS__); _s[BUFSIZ-1]=0; \
-		char _e[BUFSIZ]; snprintf(_e, BUFSIZ-1, "E/%s: _%s: %d: %s", __FILE__, __func__, __LINE__, _s); _e[BUFSIZ-1]=0; \
-	  perror(_e); \
-	})
-	
+static void LOG(const char *fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(__buf, fmt, args);
+	va_end(args);
+	fprintf(stderr, "%s: %d: %s\n",   __FILE__, __LINE__, __buf);
+}
+
+static void ERR(const char *fmt, ...) {
+	char str[BUFSIZ];
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(__buf, fmt, args);
+	va_end(args);
+	sprintf(str, "E/%s: %d: %s", __FILE__, __LINE__, __buf);
+	perror(str);
+}
+
 #endif
-
-
 
 #ifdef __cplusplus
 }
