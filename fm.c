@@ -6,7 +6,7 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#include "/fm.h"
+#include "../include/fm.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -502,13 +502,13 @@ strverscmp (const char *s1, const char *s2)
     }
 }
 
-static int alphasort(
+int alphasort(
 		const struct dirent **a, const struct dirent **b)
 {
 	return strcoll((*a)->d_name, (*b)->d_name);
 }
 
-static int versionsort(
+int versionsort(
 	const struct dirent **a, const struct dirent **b)
 {
 	return strverscmp((*a)->d_name, (*b)->d_name);
