@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-#if defined _WIN32_
+#if defined _WIN32
 #include <windows.h>
 #elif defined __APPLE__
 #include <TargetConditionals.h>
@@ -28,13 +28,13 @@ extern "C" {
 #endif // ifndef TARGET_OS_MAC
 #else
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #endif
 
 #include <stdio.h>
 
 static int openfile(const char *path) {
-#if defined _WIN32_
+#if defined _WIN32
   ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT);
 
 #elif defined __APPLE__
