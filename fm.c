@@ -6,7 +6,7 @@
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#include "fm.h"
+#include "../include/fm.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -577,33 +577,21 @@ scandir(
 #endif 
 
 /* get bundle */
-char *getbundle(char *argv[]) {
-  if (!argv || !argv[0])
+char *execdir(const char *path) {
+  if (!path)
     return NULL;
 #ifdef _WIN32
-  return dirname((char *)argv[0]);
-#else
-  char *bundle = (char *)malloc(BUFSIZ);
-  if (!bundle)
-    return NULL;
+  return dirname((char *)path);
+#else /* _WIN32 */
 #ifdef __APPLE__
-#include <TargetConditionals.h>
-#if TARGET_OS_MAC
-  sprintf(bundle, "%s%s", dirname((char *)argv[0]), "/../Resources");
-  return bundle;
-#else
-  free(bundle);
-  return dirname((char *)argv[0]);
-#endif
-#else
+  return dirname((char *)path);
+#else /* __APPLE__ */
   char selfpath[128];
   if (readlink("/proc/self/exe", selfpath, sizeof(selfpath) - 1) < 0) {
-    free(bundle);
     return NULL;
   }
-  sprintf(bundle, "%s/../share/%s", dirname(selfpath), basename(argv[0]));
-  return bundle;
-#endif
-#endif
+  return dirname(selfpath);
+#endif /* __APPLE__ */
+#endif /* _WIN32 */
   return NULL;
 }

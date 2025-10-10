@@ -155,14 +155,9 @@ int dcopyf(
  * %mode - access mode (not used in windows) */
 int newdir(const char *path, int mode);
 
-/* getbundle
- * Get bundle of application
- * for mac os - APP/Contents/Resources,
- * for win - executable directory
- * for linux/unix - /usr/[local]/share/APP
- * %argv - arguments of main() function
- * */
-char *getbundle(char *argv[]);
+/* execdir
+ * get executable directory */
+char *execdir(const char *path);
 
 /* dir_foreach
  * scans directory and handle each file
