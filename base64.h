@@ -73,15 +73,18 @@ static void build_decoding_table() {
 static void base64_cleanup() { free(decoding_table); }
 
 char *base64_encode(const unsigned char *data, size_t input_length,
-                    size_t *output_length) {
+                    size_t *output_length) 
+{
+	int i, j;
+	char *encoded_data;
 
   *output_length = 4 * ((input_length + 2) / 3);
 
-  char *encoded_data = (char *)malloc(*output_length);
+  encoded_data = (char *)malloc(*output_length);
   if (encoded_data == NULL)
     return NULL;
 
-  for (int i = 0, j = 0; i < input_length;) {
+  for (i = 0, j = 0; i < input_length;) {
 
     uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;
     uint32_t octet_b = i < input_length ? (unsigned char)data[i++] : 0;
@@ -102,7 +105,10 @@ char *base64_encode(const unsigned char *data, size_t input_length,
 }
 
 unsigned char *base64_decode(const char *data, size_t input_length,
-                             size_t *output_length) {
+                             size_t *output_length) 
+{
+	int i, j;
+	unsigned char *decoded_data;
 
   if (decoding_table == NULL)
     build_decoding_table();
@@ -116,11 +122,11 @@ unsigned char *base64_decode(const char *data, size_t input_length,
   if (data[input_length - 2] == '=')
     (*output_length)--;
 
-  unsigned char *decoded_data = (unsigned char *)malloc(*output_length);
+  decoded_data = (unsigned char *)malloc(*output_length);
   if (decoded_data == NULL)
     return NULL;
 
-  for (int i = 0, j = 0; i < input_length;) {
+  for (i = 0, j = 0; i < input_length;) {
 
     uint32_t sextet_a = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
     uint32_t sextet_b = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
