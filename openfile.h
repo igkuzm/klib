@@ -2,7 +2,7 @@
  * File              : openfile.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 18.09.2021
- * Last Modified Date: 23.08.2024
+ * Last Modified Date: 07.11.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -35,7 +35,7 @@ extern "C" {
 
 static int openfile(const char *path) {
 #if defined _WIN32
-  ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT);
+  ShellExecute(NULL, NULL, path, NULL, NULL, SW_SHOWDEFAULT);
 
 #elif defined __APPLE__
 #ifdef TARGET_OS_MAC
