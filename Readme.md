@@ -28,5 +28,6 @@
 19. strtok_foreach.h - split string with delim
 19. strsubstr.h - substring
 20. translit.h - convert KYRILIC utf8 string to transliteral LATIN ANSI string
+20. therad.h - run function in thread
 21. utf.h - utf8 to utf32 converter
 22. uuid.h - generate uuid4

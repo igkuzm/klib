@@ -8,7 +8,7 @@ extern "C"{
 #include <pthread.h>
 
 /* run function on thread */
-static pthread_t run_on_thread(void *data, 
+static pthread_t run_in_thread(void *data, 
                                void (*function)(void *data));
 	
 /* IMPLIMATION */
@@ -50,7 +50,7 @@ _thread_create(struct thr *thr)
 }
 
 pthread_t 
-run_on_thread(void *data,
+run_in_thread(void *data,
               void (*function)(void *data))
 {
 	pthread_t tid = 0;
