@@ -2,7 +2,7 @@
  * File              : strrf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.05.2022
- * Last Modified Date: 04.07.2025
+ * Last Modified Date: 11.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -33,6 +33,7 @@ extern "C"{
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 // read file to string
 
@@ -42,6 +43,8 @@ static char *
 strrf(FILE * fp)
 {
 	size_t len = 0;
+
+	assert(fp);
         
 	if (fseek (fp, 0, SEEK_END) ||
 		 (len = ftell(fp)) < 0 ||
