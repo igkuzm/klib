@@ -14,34 +14,37 @@ static pthread_t run_on_thread(void *data,
 /* IMPLIMATION */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdlib.h>
 
 struct thr{
 	void *data;
 	void (*function)(void *data);
 };
 
-static void * _routine(void * data)
+static void * 
+_thread_routine(void * data)
 {
 	struct thr *thr = (struct thr *)data;
+	// run callback
 	if (thr->function)
 		thr->function(thr->data);
-	pthread_exit(NULL);
+	// return value for pthread_join
+	void *retval = thr->data;
+	// no need struct thr - free
+	free(data);
+	pthread_exit(retval);
 }
 
-static pthread_t _thread_create(struct thr *thr)
+static pthread_t 
+_thread_create(struct thr *thr)
 {
-	int err;
-	pthread_t tid;
+	pthread_t tid = 0;
 	//create new thread
-	err = pthread_create(
+	pthread_create(
 			&tid, 
 			NULL, 
-			_routine, 
+			_thread_routine, 
 			thr);
-	if (err) 
-		return err;
-
-	pthread_detach(tid);
 
 	return tid;
 }
@@ -51,6 +54,7 @@ run_on_thread(void *data,
               void (*function)(void *data))
 {
 	pthread_t tid = 0;
+	// allocate struct thr - to run in thread
 	struct thr *thr = 
 		(struct thr *)malloc(sizeof(struct thr));
 	if (thr == NULL)
@@ -67,4 +71,5 @@ run_on_thread(void *data,
 #endif
 
 #endif /* ifndef KLIB_THREAD_H */
+
 // vim:ft=c
