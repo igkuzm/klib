@@ -73,7 +73,7 @@ bool ip_address_is_reachable(const char *address, int port)
   WSADATA wsaData;
   int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (iResult != NO_ERROR) {
-    sprintf(e, "reachability: WSAStartup function failed with error: %d\n", iResult);
+    fprintf(stderr, "reachability: WSAStartup function failed with error: %d\n", iResult);
     return false;
   }
   //----------------------
@@ -81,7 +81,7 @@ bool ip_address_is_reachable(const char *address, int port)
   SOCKET ConnectSocket;
   ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (ConnectSocket == INVALID_SOCKET) {
-    sprintf(e, 
+    fprintf(stderr, 
 				"reachability: socket function failed with error: %ld\n",
         WSAGetLastError());
     WSACleanup();
@@ -103,16 +103,14 @@ bool ip_address_is_reachable(const char *address, int port)
 			sizeof(clientService));
   if (iResult == SOCKET_ERROR) 
 	{
-    sprintf(e, 
+    fprintf(stderr, 
 				"reachability: connect function failed with error: %ld\n",
         WSAGetLastError());
-    perror(e);
     iResult = closesocket(ConnectSocket);
 		if (iResult == SOCKET_ERROR){
-      sprintf(e,
+      fprintf(stderr,
               "reachability: closesocket function failed with error: %ld\n",
               WSAGetLastError());
-			perror(e);
 		}
     WSACleanup();
     return false;
@@ -120,11 +118,9 @@ bool ip_address_is_reachable(const char *address, int port)
 
   iResult = closesocket(ConnectSocket);
   if (iResult == SOCKET_ERROR) {
-    sprintf(e,
+    fprintf(stderr,
             "reachability: closesocket function failed with error: %ld\n",
             WSAGetLastError());
-    WSACleanup();
-    return true;
   }
 
   WSACleanup();
@@ -157,7 +153,7 @@ bool ip_address_is_reachable(const char *address, int port)
 				sizeof(sin)) == -1) 
 	{
 		sprintf(e, 
-				"reachability: error connecting %s:%d\n", 
+				"reachability: error connecting %s:%d", 
 				address, port);
 		perror(e);
     return false;
