@@ -2,7 +2,7 @@
  * File              : rtf.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.12.2023
- * Last Modified Date: 03.10.2024
+ * Last Modified Date: 11.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -45,20 +45,23 @@ rtf_from_image(
 char *
 rtf_from_utf8(const char *s)
 {
+	size_t len;
+	char *out, *ptr, buf[8] = "";
+	unsigned int c32;
+
 	if (!s)
 		return NULL;
 	
-	size_t len = strlen(s);
-	char *out = (char *)malloc(len * 6 + 1);
+	len = strlen(s);
+	out = (char *)malloc(len * 6 + 1);
 	if (!out)
 		return NULL;
 	strcpy(out, "\\uc0 ");
 
-	char *ptr = (char *)s, buf[8] = "";
-	uint32_t c32;
+	ptr = (char *)s;
 	while(*ptr){
 		// get char
-		uint8_t c = *ptr;
+		unsigned char c = *ptr;
 		if (c >= 252){/* 6-bytes */
 			c32  = (*ptr++ & 0x1)  << 30;  // 0b00000001
 			c32 |= (*ptr++ & 0x3F) << 24;  // 0b00111111
@@ -123,10 +126,8 @@ static void _rtf_table_add_row_column(
 				"\\clwWidth%d\\clftsWidth3"
 				"\\cellx%d\n", 
 				width_current, width_total);		
-
-		str_appendf(s, 
-				"\\intbl %s \\cell\n",
-				rtf_from_utf8(value));	
+		str_append(s, value, strlen(value));
+		str_appendf(s, " \\cell\n");
 }
 
 char *
@@ -181,10 +182,13 @@ static unsigned char * _rtf_image_bin_to_strhex(
 }
 
 /* convert image to RTF string */
-static char *rtf_from_image(
+ char *rtf_from_image(
 		const char *format, void *data, size_t len,
 		int width, int height)
 {
+	struct str s;
+	unsigned char *str;
+	
 	if (!format || !data || !len)
 		return NULL;
 	
@@ -194,8 +198,6 @@ static char *rtf_from_image(
 			strcmp(format, "emf"))
 		return NULL;
 	
-	int i;
-	struct str s;
 	if (str_init(&s))
 		return NULL;
 
@@ -205,11 +207,10 @@ static char *rtf_from_image(
 			"\\pichgoal%d\\%sblip\n", width, height, format);
 	
 	// append image data to rtf
-	unsigned char *str;
 	_rtf_image_bin_to_strhex(
 			(unsigned char *)data,
 		len, &str);
-	str_append(&s, (char*)str, strlen(str));
+	str_append(&s, (char*)str, strlen((char *)str));
 	free(str);
 	
 	// append image close to rtf
@@ -217,5 +218,4 @@ static char *rtf_from_image(
 
 	return s.str;
 }
-
 #endif /* ifndef RTF_H_ */
