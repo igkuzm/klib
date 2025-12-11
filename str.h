@@ -2,7 +2,7 @@
  * File              : str.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 06.12.2023
- * Last Modified Date: 04.06.2024
+ * Last Modified Date: 11.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -30,7 +30,7 @@
  * USAGE:
  * struct str s;
  * str_init(&s);
- * str_append(&s, "Hello");
+ * str_append(&s, "Hello", strlen("Hello"));
  * str_appendf(&s, " %s!", "world");
  * printf("%s\n", s.str);
  * free(s.str;
@@ -40,6 +40,7 @@
 #define STR_H_
 #include <stdio.h>
 #include <stdarg.h>
+#include <assert.h>
 
 /* dynamic string structure */
 struct str {
@@ -117,6 +118,7 @@ void str_append(
 void str_appendf(struct str *s, const char *fmt, ...)
 {
 	char str[BUFSIZ];
+	assert(strlen(fmt) > BUFSIZ);
 	va_list args;
 	va_start(args, fmt);
 	vsprintf(str, fmt, args);
