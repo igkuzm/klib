@@ -2,7 +2,7 @@
  * File              : reachability.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 15.09.2021
- * Last Modified Date: 29.08.2024
+ * Last Modified Date: 11.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -23,9 +23,8 @@ extern "C" {
 #include <sys/types.h>
 
 #include <errno.h>
+#include <assert.h>
 #include <string.h>
-#include <unistd.h> //for sleep
-#include <netdb.h>  //gethostbyname
 #include <ctype.h>  //for isalpha
 
 #if defined _WIN32
@@ -36,14 +35,18 @@ extern "C" {
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h> //for sleep
+#include <netdb.h>  //gethostbyname
 #endif
+
+#define TIMEOUT_SECONDS 2
 
 #include <pthread.h>
 
 /* function returns true if address and port is reachable, 
  * otherwise - false */
 static bool ip_address_is_reachable(
-		const char *address, int port, char **error);
+		const char *address, int port);
 
 /* function starts in additional THREAD, checks reachability
  * of adress (hostname or ip4 address) and port every
@@ -54,15 +57,13 @@ static pthread_t
 reachability(
 		const char *address, int port, int timeout, 
 		void *user_data,
-		int (*callback)(void *user_data, bool reachable, 
-			const char *error));
+		int (*callback)(void *user_data, bool reachable));
 
 /**
  * Implimation
  */
 
-bool ip_address_is_reachable(const char *address, int port, 
-		char **error) 
+bool ip_address_is_reachable(const char *address, int port) 
 {
 	char e[BUFSIZ];
 
@@ -72,10 +73,7 @@ bool ip_address_is_reachable(const char *address, int port,
   WSADATA wsaData;
   int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (iResult != NO_ERROR) {
-    sprintf(e, "reachability: WSAStartup function failed 
-				with error: %d\n", iResult);
-		if (error)
-			*error = strdup(e);
+    sprintf(e, "reachability: WSAStartup function failed with error: %d\n", iResult);
     return false;
   }
   //----------------------
@@ -86,8 +84,6 @@ bool ip_address_is_reachable(const char *address, int port,
     sprintf(e, 
 				"reachability: socket function failed with error: %ld\n",
         WSAGetLastError());
-		if (error)
-			*error = strdup(e);
     WSACleanup();
     return false;
   }
@@ -110,14 +106,14 @@ bool ip_address_is_reachable(const char *address, int port,
     sprintf(e, 
 				"reachability: connect function failed with error: %ld\n",
         WSAGetLastError());
-    perror(error);
+    perror(e);
     iResult = closesocket(ConnectSocket);
-    if (iResult == SOCKET_ERROR)
-      sprintf(error,
+		if (iResult == SOCKET_ERROR){
+      sprintf(e,
               "reachability: closesocket function failed with error: %ld\n",
               WSAGetLastError());
-		if (error)
-			*error = strdup(e);
+			perror(e);
+		}
     WSACleanup();
     return false;
   }
@@ -127,8 +123,6 @@ bool ip_address_is_reachable(const char *address, int port,
     sprintf(e,
             "reachability: closesocket function failed with error: %ld\n",
             WSAGetLastError());
-		if (error)
-			*error = strdup(e);
     WSACleanup();
     return true;
   }
@@ -136,10 +130,23 @@ bool ip_address_is_reachable(const char *address, int port,
   WSACleanup();
 
 #else
-  int sockfd = 
-		socket(AF_INET, SOCK_STREAM, 0);
-
+  int sockfd; 
+	struct timeval tv;
   struct sockaddr_in sin;
+  
+	sockfd = 
+		socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd == -1)
+		return false;
+
+	tv.tv_sec  = TIMEOUT_SECONDS;
+	tv.tv_usec = 0;
+
+	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, 
+			&tv, sizeof(tv));
+	setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, 
+			&tv, sizeof(tv));
+
   sin.sin_family = AF_INET;
   sin.sin_port = htons(port); // Could be anything
   inet_pton(AF_INET, address, &sin.sin_addr);
@@ -149,13 +156,12 @@ bool ip_address_is_reachable(const char *address, int port,
 			 	(struct sockaddr *)&sin, 
 				sizeof(sin)) == -1) 
 	{
-    sprintf(e, 
-				"reachability: error connecting %s:%d - %d (%s)\n", 
-				address, port, errno, strerror(errno));
-		if (error)
-			*error = strdup(e);
+		sprintf(e, 
+				"reachability: error connecting %s:%d\n", 
+				address, port);
+		perror(e);
     return false;
-  }
+	}
 #endif
 
   return true;
@@ -167,8 +173,7 @@ struct reachability_params {
   bool find_ip;
   int port;
   int timeout;
-  int (*callback)(
-			void *user_data, bool reachable, const char *error);
+  int (*callback)(void *user_data, bool reachable);
   void *user_data;
 };
 
@@ -189,30 +194,21 @@ static void *_check_address_is_reachable(void *params)
 						 	ip_address, INET_ADDRSTRLEN);
           address = ip_address;
         } else {
-          sprintf(
-							e, 
-							"reachability: host %s has no ipv4 address",
-              p->address);
           if (p->callback)
-            p->callback(p->user_data, false, e);
+            p->callback(p->user_data, false);
         }
       } else {
-        sprintf(
-						e, 
-						"reachability: cant get host data for hostname: %s",
-            p->address);
         if (p->callback)
-          p->callback(p->user_data, false, e);
+          p->callback(p->user_data, false);
       }
     }
     if (address && *address != 0) 
 		{
 			char *error = NULL;
 			bool fR = 
-				ip_address_is_reachable(
-						address, p->port, &error);
+				ip_address_is_reachable(address, p->port);
       if (p->callback) {
-        if (p->callback(p->user_data, fR, error)) 
+        if (p->callback(p->user_data, fR)) 
 				{
 					if (error)
 						free(error);
@@ -222,10 +218,12 @@ static void *_check_address_is_reachable(void *params)
 			if (error)
 				free(error);
     } else if (p->callback)
-			p->callback(p->user_data, false,
-					(char *)"reachability: cant't read address");
-
+			p->callback(p->user_data, false);
+#ifdef _WIN32
+    Sleep(p->timeout * 1000);
+#else
     sleep(p->timeout);
+#endif
   }
 
   free(p);
@@ -243,40 +241,27 @@ _reachability_dispatch(
 		void *user_data,
 		int (*callback)(
 			void *user_data, 
-			bool reachable,
-			const char *error)) 
+			bool reachable)) 
 {
-  if (!address || *address == 0) {
-    if (callback)
-      callback(user_data, false, 
-					(char *)"reachability: cant't read address");
-    return 0;
-  }
-
   int err;
 
   pthread_t tid;       //идентификатор потока
   pthread_attr_t attr; //атрибуты потока
-
-  //получаем дефолтные значения атрибутов
+	
+	assert(address);
+  
+	//получаем дефолтные значения атрибутов
   err = pthread_attr_init(&attr);
-  if (err) {
-    if (callback)
-      callback(user_data, false,
-        (char *)"reachability: can't set THREAD attributes");
+  if (err) 
     return 0;
-  }
 
   // allocate Reachability_params
   struct reachability_params *p =
       (struct reachability_params *)malloc(
 					sizeof(struct reachability_params));
-  if (p == NULL) {
-    if (callback)
-      callback(user_data, false, 
-					(char *)"reachability: can't allocate memory");
+  if (p == NULL) 
     return 0;
-  }
+
   p->address = address;
   p->port = port;
   p->timeout = timeout;
@@ -292,9 +277,6 @@ _reachability_dispatch(
 				_check_address_is_reachable, 
 				p);
   if (err) {
-    if (callback)
-      callback(user_data, false, 
-					(char *)"reachability: can't create THREAD");
     return 0;
   }
 
@@ -309,8 +291,7 @@ reachability(
 		void *user_data,
     int (*callback)(
 			void *user_data, 
-			bool reachable, 
-			const char *error)) 
+			bool reachable)) 
 {
   if (isalpha(address[0])) {
     return _reachability_dispatch(
