@@ -2,9 +2,8 @@
 #define ZIP_ENTRY_READ_H
 
 #include <stdio.h>
-#include <zip.h>
 #include <stdlib.h>
-#include "alloc.h"
+#include <zip.h>
 
 static int 
 zip_entry_read(zip_t *zip, const char *name, 
@@ -19,10 +18,12 @@ zip_entry_read(zip_t *zip, const char *name,
 	
 	struct zip_stat st;
 	zip_stat(zip, name, 0, &st);
-	void *buf = MALLOC(st.size, 
-			perror("malloc");
-			zip_fclose(f);
-			return -1);
+	void *buf = malloc(st.size);
+	if (buf == NULL){
+		perror("malloc");
+		zip_fclose(f);
+		return -1;
+	}	
 		
 #ifdef DEBUG
 	fprintf(stderr, "reading %d bites to buffer", st.size);
