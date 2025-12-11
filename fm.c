@@ -1,12 +1,13 @@
 /**
- * File              : fm.h
+ * File              : fm.c
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 09.10.2025
+ * Last Modified Date: 11.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#include "../include/fm.h"
+#include "fm.h"
+#include <assert.h>
 
 #ifdef _WIN32
 #include <io.h>
@@ -25,7 +26,9 @@
 
 #ifdef _MSC_VER
 const char * basename(const char *path) {
-	const char *slash = strrchr(path, '\\');
+	const char *slash;
+	assert(path);
+	slash = strrchr(path, '\\');
 	if (!slash || slash == path)
 		return path;
 	slash += 1;
@@ -37,6 +40,7 @@ const char * basename(const char *path) {
  * true if file exists and writable
  * %path - file path */
 bool fexists(const char *path) {
+	assert(path);
   if (access(path, F_OK) == 0)
     return true;
   return false;
@@ -51,6 +55,8 @@ off_t fsize(const char *path) {
   HANDLE hFind = INVALID_HANDLE_VALUE;
 	off_t size = 0;
 
+	assert(path);
+
   hFind = FindFirstFile(path, &findData);
   if (hFind != INVALID_HANDLE_VALUE) 
     size = (findData.nFileSizeHigh * MAXDWORD) + 
@@ -59,6 +65,7 @@ off_t fsize(const char *path) {
   
 #else
   struct stat st;
+	assert(path);
   if (stat(path, &st) == 0)
     return st.st_size;
   
@@ -86,7 +93,9 @@ char *homedir(void)
  * from path string
  * %path - name or path of file */
 char * parentdir(char *path) {
-	const char *slash = strrchr(path, _SLASH_[0]);
+	const char *slash;
+	assert(path);
+	slash = strrchr(path, _SLASH_[0]);
 	if (slash && slash != path)
 		path[slash-path] = 0;
 #ifndef _WIN32
@@ -105,14 +114,17 @@ bool isdir(const char *path) {
   WIN32_FIND_DATA findData;
   HANDLE hFind = INVALID_HANDLE_VALUE;
   char fullpath[MAX_PATH];
-  sprintf(fullpath, "%s\\*", path);
+	assert(path);
+	sprintf(fullpath, "%s\\*", path);
 
   hFind = FindFirstFile(fullpath, &findData);
   if (hFind != INVALID_HANDLE_VALUE)
     return true;
 #else
   struct dirent *entry;
-  DIR *dp = opendir(path);
+  DIR *dp = NULL;
+	assert(path);
+  dp = opendir(path);
   if (dp != NULL) {
     closedir(dp);
     return true;
@@ -126,12 +138,15 @@ bool isdir(const char *path) {
  * %path - file/directory path */
 bool islink(const char *path) {
 #ifdef _WIN32
-	DWORD attr = GetFileAttributes(path);
+	DWORD attr;
+	assert(path);
+	attr = GetFileAttributes(path);
 	if (attr != INVALID_FILE_ATTRIBUTES && 
 			(attr & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT)
 		return true;
 #else
   struct stat buf;
+	assert(path);
 	if (lstat(path, &buf) == 0 &&
 			(buf.st_mode & S_IFMT) == S_IFLNK)
 		return true;
@@ -149,7 +164,10 @@ int slink(const char *path, const char *linkname)
 #ifdef _WIN32
 	// change path components
 	int ret;
-	char *s = strdup(path);
+	char *s;
+	assert(path);
+	assert(linkname);
+	s = strdup(path);
 	if (s){
 		char *p = strrchr(s, '/');
 		while(p){
@@ -163,6 +181,8 @@ int slink(const char *path, const char *linkname)
 	}
 	return -1;
 #else
+	assert(path);
+	assert(linkname);
 	return symlink(path, linkname);
 #endif
 }
@@ -176,7 +196,10 @@ int hlink(const char *path, const char *linkname)
 #ifdef _WIN32
 	// change path components
 	int ret;
-	char *s = strdup(path);
+	char *s;
+	assert(path);
+	assert(linkname);
+	s = strdup(path);
 	if (s){
 		char *p = strrchr(s, '/');
 		while(p){
@@ -190,6 +213,8 @@ int hlink(const char *path, const char *linkname)
 	}
 	return -1;
 #else
+	assert(path);
+	assert(linkname);
 	return link(path, linkname);
 #endif
 }
@@ -198,7 +223,9 @@ int hlink(const char *path, const char *linkname)
  * return file extension or NULL on error 
  * %filename - name or path of file */
 const char * fext(const char *filename) {
-	const char *dot = strrchr(filename, '.');
+	const char *dot;
+	assert(filename);
+	dot = strrchr(filename, '.');
 	if (!dot || dot == filename)
 		return "";
 	dot += 1;
@@ -209,10 +236,12 @@ const char * fext(const char *filename) {
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file */
-char * fname(char *filename)
+char * fname(char *path)
 {
-	char *p = strdup(basename(filename));
-	char *s = strrchr(p, '.');
+	char *p, *s;
+	assert(path);
+	p = strdup(basename(path));
+	s = strrchr(p, '.');
 	if (s)
 		*s = 0;
 	return p;
@@ -223,8 +252,10 @@ char * fname(char *filename)
  * directory path (like POSIX dirname())
  * %path - path of file */
 char * dname(const char *path) {
-	char *p = strdup(path);
-	char *s = strrchr(p, _SLASH_[0]);
+	char *p, *s;
+	assert(path);
+	p = strdup(path);
+	s = strrchr(p, _SLASH_[0]);
 	if (s)
 		*s = 0;
 	else 
@@ -238,9 +269,13 @@ char * dname(const char *path) {
  * %from - filepath source file
  * %to   - filepath dastination file */
 int fcopy (const char *from, const char *to) {
+
 	FILE *src, *dst;
 	char buf[BUFSIZ];
 	int err = 0;
+	
+	assert(from);
+	assert(to);
 
 	/* open source file */
 	if ((src = fopen(from, "rb")) == NULL)
@@ -259,8 +294,15 @@ int fcopy (const char *from, const char *to) {
 	}
 
 	/*check errors - to handle error call errno()*/
-	if ((err = ferror(src)) || 
-			(err = ferror(dst))){}
+	if ((err = ferror(src))) 
+	{
+		perror(from);
+	}
+
+	if ((err = ferror(dst))) 
+	{
+		perror(to);
+	}
 
 	/*close*/
 	fclose(src);
@@ -277,6 +319,9 @@ int fcopy (const char *from, const char *to) {
  * %overwrite - overwrite destination file if true */
 int dcopy(const char *from, const char *to, bool overwrite)
 {
+	assert(from);
+	assert(to);
+	
 	/*create `to` directory*/
 	if (!fexists(to))
 		newdir(to, 0755);
@@ -327,6 +372,7 @@ int dcopy(const char *from, const char *to, bool overwrite)
  * %mode - access mode (not used in windows) */
 int newdir(const char *path, int mode)
 {
+	assert(path);
 #ifdef _WIN32
 	return CreateDirectory(path, NULL);
 #else
@@ -348,6 +394,8 @@ int dcopyf(
 		char *filters) 
 {
 	int err = 0;
+	assert(from);
+	assert(to);
 
 	do {
 		dir_foreach(from, e)
@@ -578,15 +626,14 @@ scandir(
 
 /* get bundle */
 char *execdir(const char *path) {
-  if (!path)
-    return NULL;
+  char selfpath[128];
+	assert(path);
 #ifdef _WIN32
   return dirname((char *)path);
 #else /* _WIN32 */
 #ifdef __APPLE__
   return dirname((char *)path);
 #else /* __APPLE__ */
-  char selfpath[128];
   if (readlink("/proc/self/exe", selfpath, sizeof(selfpath) - 1) < 0) {
     return NULL;
   }
