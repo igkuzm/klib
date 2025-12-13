@@ -2,7 +2,7 @@
  * File              : translit.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 07.03.2022
- * Last Modified Date: 11.12.2025
+ * Last Modified Date: 13.12.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -62,12 +62,12 @@ static cprecode_t cprecode_table[] = {
    { 0x0401, "Ё", "YO", 0xB3, 0xA8}, // 2
    { 0x0410, "А", "A",  0xC1, 0xC0}, // 3
    { 0x0411, "Б", "B",  0xC2, 0xC1}, // 4
-   { 0x0412, "В", "B",  0xC3, 0xC2}, // 5
-   { 0x0412, "Г", "G",  0xC4, 0xC3}, // 6
-   { 0x0413, "Д", "D",  0xC5, 0xC4}, // 7
-   { 0x0414, "Е", "E",  0xC6, 0xC5}, // 8
-   { 0x0415, "Ж", "ZH", 0xC7, 0xC6}, // 9
-  { 0x0416, "З", "Z",  0xC8, 0xC7}, // 10
+   { 0x0412, "В", "V",  0xC3, 0xC2}, // 5
+   { 0x0413, "Г", "G",  0xC4, 0xC3}, // 6
+   { 0x0414, "Д", "D",  0xC5, 0xC4}, // 7
+   { 0x0415, "Е", "E",  0xC6, 0xC5}, // 8
+   { 0x0416, "Ж", "ZH", 0xC7, 0xC6}, // 9
+  { 0x0417, "З", "Z",  0xC8, 0xC7}, // 10
   { 0x0418, "И", "I",  0xC9, 0xC8}, // 11
   { 0x0419, "Й", "Y",  0xCA, 0xC9}, // 12
   { 0x041A, "К", "K",  0xCB, 0xCA}, // 13
