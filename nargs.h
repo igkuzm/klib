@@ -25,5 +25,6 @@
 
 #ifndef NARGS
 #include <stdio.h>
-#define NARGS(...) sizeof((int[]){__VA_ARGS__})/sizeof(int)
+#define NARGS(...) NARGS_(,##__VA_ARGS__, 2, 1, 0)
+#define NARGS_(a, b, c, cnt, ...) cnt
 #endif /* ifndef NARGS */
