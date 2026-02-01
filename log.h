@@ -2,7 +2,7 @@
  * File              : log.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 19.03.2023
- * Last Modified Date: 25.01.2026
+ * Last Modified Date: 02.02.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -53,15 +53,16 @@ static char *STR(const char *fmt, ...) {
 #include <android/log.h>
 #define ERR(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, __FILE__, ": %d: %s" __LINE__, STR(fmt, __VA_ARGS__)) 
 #elif defined _MSC_VER
-static void ERR(const char *fmt, ...) {
+static void ERR_(const char *fmt, ...) {
 	char str[BUFSIZ];
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(__buf, BUFSIZ-1,fmt, args);
 	va_end(args);
-	snprintf(str, BUFSIZ-1,"E/: %s", __buf);
+	snprintf(str, BUFSIZ-1,"%s", __buf);
 	perror(str);
 }
+#define ERR fprintf(stderr, "E/: %s: %d: ", __FILE__, __LINE__); ERR_
 #else
 #define ERR(fmt, ...) fprintf(stderr, "E/: %s: %d: %s\n", __FILE__, __LINE__, STR(fmt, __VA_ARGS__));
 #endif
@@ -73,14 +74,15 @@ static void LOG(const char *fmt, ...){} // no log
 #include <android/log.h>
 #define LOG(fmt, ...) __android_log_print(ANDROID_LOG_INFO,  __FILE__, ": %d: %s", __LINE__, STR(fmt, __VA_ARGS__))
 #elif defined _MSC_VER
-static void LOG(const char *fmt, ...) 
+static void LOG_(const char *fmt, ...) 
 {
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(__buf, BUFSIZ-1,fmt, args);
 	va_end(args);
-	fprintf(stderr, "I/: %s\n", __buf);
+	fprintf(stderr, "%s\n", __buf);
 }
+#define LOG fprintf(stderr, "I/: %s: %d: ", __FILE__, __LINE__); LOG_
 #else
 #define LOG(fmt, ...) fprintf(stderr, "I/: %s: %d: %s\n", __FILE__, __LINE__, STR(fmt, __VA_ARGS__));
 #endif
