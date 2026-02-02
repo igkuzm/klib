@@ -2,7 +2,7 @@
  * File              : reachability.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 15.09.2021
- * Last Modified Date: 11.12.2025
+ * Last Modified Date: 02.02.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -179,42 +179,41 @@ static void *_check_address_is_reachable(void *params)
 		(struct reachability_params *)params;
 
   while (1) {
-    char e[BUFSIZ];
-    const char *address = p->address;
-    if (p->find_ip) {
+		char e[BUFSIZ];
+		bool fR = false;
+    char ip_address[INET_ADDRSTRLEN];
+    const char *address = NULL;
+		
+		memset(ip_address, 0, sizeof(ip_address));
+    
+		if (p->find_ip) {
+			// every loop try to get ip by hostname, because DNS
+			// server may be changed
       struct hostent *hp = gethostbyname(p->address);
       if (hp) {
         if (hp->h_addrtype == AF_INET) {
-          char ip_address[INET_ADDRSTRLEN];
           inet_ntop(AF_INET, hp->h_addr_list[0],
 						 	ip_address, INET_ADDRSTRLEN);
           address = ip_address;
-        } else {
-          if (p->callback)
-            p->callback(p->user_data, false);
-        }
-      } else {
-        if (p->callback)
-          p->callback(p->user_data, false);
+				} 
       }
-    }
-    if (address && *address != 0) 
-		{
-			char *error = NULL;
-			bool fR = 
-				ip_address_is_reachable(address, p->port);
-      if (p->callback) {
-        if (p->callback(p->user_data, fR)) 
-				{
-					if (error)
-						free(error);
-          break;
-        }
-      }
-			if (error)
-				free(error);
-    } else if (p->callback)
-			p->callback(p->user_data, false);
+		} else {
+			address = p->address;
+		}
+
+		if (address && *address != 0){
+			fR = ip_address_is_reachable(address, p->port);
+		} else {
+			fprintf(stderr, 
+					"reachability: error connecting %s: "
+					"can't get host by name\n", 
+				p->address);
+		} 
+
+		if (p->callback)
+			if (p->callback(p->user_data, fR))
+				break;
+
 #ifdef _WIN32
     Sleep(p->timeout * 1000);
 #else
@@ -223,8 +222,6 @@ static void *_check_address_is_reachable(void *params)
   }
 
   free(p);
-  p = NULL;
-
   pthread_exit(0);
 }
 
