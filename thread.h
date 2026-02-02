@@ -66,6 +66,7 @@ run_in_thread(void *data,
 	return _thread_create(thr);
 }
 
+
 #ifdef __cplusplus
 }
 #endif

@@ -2,7 +2,7 @@
  * File              : curl_transfer.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 21.09.2024
- * Last Modified Date: 22.09.2024
+ * Last Modified Date: 02.02.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 /**
@@ -81,7 +81,7 @@ size_t curl_transfer_upload_file(
 		FILE *fp, const char *url, char **error, 
 		void *ptr, curl_transfer_progress *progress);
 
-/* upload data to memory
+/* upload data to url
  * %data - data to upload
  * %size - data size
  * %url - null-terminated string with url address

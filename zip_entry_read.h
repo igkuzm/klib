@@ -10,7 +10,7 @@ zip_entry_read(zip_t *zip, const char *name,
 		void **buffer, size_t *size)
 {
 #ifdef DEBUG
-	fprintf(stderr, "open entry: %s", name);
+	fprintf(stderr, "%s: open entry: %s", __FILE__, name);
 #endif
 	zip_file_t *f = zip_fopen(zip, name, ZIP_FL_UNCHANGED);
 	if (!f)
@@ -26,7 +26,7 @@ zip_entry_read(zip_t *zip, const char *name,
 	}	
 		
 #ifdef DEBUG
-	fprintf(stderr, "reading %d bites to buffer", st.size);
+	fprintf(stderr, "%s: reading %d bites to buffer", __FILE__, st.size);
 #endif
 	zip_fread(f, buf, st.size);
 
