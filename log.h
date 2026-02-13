@@ -2,7 +2,7 @@
  * File              : log.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 19.03.2023
- * Last Modified Date: 02.02.2026
+ * Last Modified Date: 13.02.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -38,6 +38,11 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#ifndef _MSC_VER
+#ifndef __APPLE__
+#include <err.h>
+#endif
+#endif
 
 static char __buf[BUFSIZ];
 
@@ -54,6 +59,25 @@ static char *STR(const char *fmt, ...) {
 #define ERR(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, __FILE__, ": %d: %s" __LINE__, STR(fmt, __VA_ARGS__)) 
 #elif defined _MSC_VER
 static void ERR_(const char *fmt, ...) {
+	char str[BUFSIZ];
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(__buf, BUFSIZ-1,fmt, args);
+	va_end(args);
+	snprintf(str, BUFSIZ-1,"%s", __buf);
+	perror(str);
+}
+static void err(int eval, const char *fmt, ...) {
+	char str[BUFSIZ];
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(__buf, BUFSIZ-1,fmt, args);
+	va_end(args);
+	snprintf(str, BUFSIZ-1,"%s", __buf);
+	perror(str);
+	exit(eval);
+}
+static void warn(const char *fmt, ...) {
 	char str[BUFSIZ];
 	va_list args;
 	va_start(args, fmt);
