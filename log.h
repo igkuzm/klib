@@ -58,33 +58,58 @@ static char *STR(const char *fmt, ...) {
 #include <android/log.h>
 #define ERR(fmt, ...) __android_log_print(ANDROID_LOG_ERROR, __FILE__, ": %d: %s" __LINE__, STR(fmt, __VA_ARGS__)) 
 #elif defined _MSC_VER
-static void ERR_(const char *fmt, ...) {
-	char str[BUFSIZ];
+static void _vsprintbuf(const char *fmt, va_list args) {
+	vsnprintf(__buf, BUFSIZ-1,fmt, args);
+}
+static void _sprintbuf(const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(__buf, BUFSIZ-1,fmt, args);
 	va_end(args);
-	snprintf(str, BUFSIZ-1,"%s", __buf);
-	perror(str);
+}
+static void ERR_(const char *fmt, ...) {
+	_sprintbuf(fmt, ...);
+	perror(__buf);
 }
 static void err(int eval, const char *fmt, ...) {
-	char str[BUFSIZ];
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(__buf, BUFSIZ-1,fmt, args);
-	va_end(args);
-	snprintf(str, BUFSIZ-1,"%s", __buf);
-	perror(str);
+	_sprintbuf(fmt, ...);
+	perror(__buf);
+	exit(eval);
+}
+static void errx(int eval, const char *fmt, ...) {
+	_sprintbuf(fmt, ...);
+	fprintf(stderr, __buf);
+	fprintf(stderr, '\n');
+	exit(eval);
+}
+static void verr(int eval, const char *fmt, va_list args) {
+	_vsprintbuf(fmt, args);
+	perror(__buf);
+	exit(eval);
+}
+static void verrx(int eval, const char *fmt, va_list args) {
+	_vsprintbuf(fmt, args);
+	fprintf(stderr, __buf);
+	fprintf(stderr, '\n');
 	exit(eval);
 }
 static void warn(const char *fmt, ...) {
-	char str[BUFSIZ];
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(__buf, BUFSIZ-1,fmt, args);
-	va_end(args);
-	snprintf(str, BUFSIZ-1,"%s", __buf);
-	perror(str);
+	_sprintbuf(fmt, ...);
+	perror(__buf);
+}
+static void warnx(const char *fmt, ...) {
+	_sprintbuf(fmt, ...);
+	fprintf(stderr, __buf);
+	fprintf(stderr, '\n');
+}
+static void vwarn(const char *fmt, va_list args) {
+	_vsprintbuf(fmt, args);
+	perror(__buf);
+}
+static void vwarnx(const char *fmt, va_list args) {
+	_vsprintbuf(fmt, args);
+	fprintf(stderr, __buf);
+	fprintf(stderr, '\n');
 }
 #define ERR fprintf(stderr, "E/: %s: %d: ", __FILE__, __LINE__); ERR_
 #else
