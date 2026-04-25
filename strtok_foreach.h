@@ -40,7 +40,7 @@ static int strtok_free(void *ptr)
 }
 
 #define strtok_foreach(str, delim, token)\
-	char *_s = strdup(str), *token, *_p;\
+	char *_s = strdup(str), *_p;\
 	for (token=strtok_r(_s, delim, &_p);\
 			 token || strtok_free(_s);\
 			 token=strtok_r(NULL, delim, &_p))
