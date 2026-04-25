@@ -2,7 +2,7 @@
  * File              : strtok_foreach.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 27.08.2024
- * Last Modified Date: 27.08.2024
+ * Last Modified Date: 25.04.2026
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
@@ -34,14 +34,15 @@
 
 static int strtok_free(void *ptr)
 {
+	if (ptr)
     free(ptr);
-    return 0;
+  return 0;
 }
 
 #define strtok_foreach(str, delim, token)\
 	char *_s = strdup(str), *token, *_p;\
 	for (token=strtok_r(_s, delim, &_p);\
-			 token || (_s && free(_s));\
+			 token || strtok_free(_s);\
 			 token=strtok_r(NULL, delim, &_p))
 
 #endif /* ifndef STRTOK_FOREACH_H */
