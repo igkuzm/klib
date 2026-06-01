@@ -1,13 +1,12 @@
 /**
- * File              : fm.c
+ * File              : fm.h
  * Author            : Igor V. Sementsov <ig.kuzm@gmail.com>
  * Date              : 04.09.2021
- * Last Modified Date: 11.12.2025
+ * Last Modified Date: 09.10.2025
  * Last Modified By  : Igor V. Sementsov <ig.kuzm@gmail.com>
  */
 
-#include "fm.h"
-#include <assert.h>
+#include "../include/fm.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -26,9 +25,7 @@
 
 #ifdef _MSC_VER
 const char * basename(const char *path) {
-	const char *slash;
-	assert(path);
-	slash = strrchr(path, '\\');
+	const char *slash = strrchr(path, '\\');
 	if (!slash || slash == path)
 		return path;
 	slash += 1;
@@ -40,7 +37,6 @@ const char * basename(const char *path) {
  * true if file exists and writable
  * %path - file path */
 bool fexists(const char *path) {
-	assert(path);
   if (access(path, F_OK) == 0)
     return true;
   return false;
@@ -55,8 +51,6 @@ off_t fsize(const char *path) {
   HANDLE hFind = INVALID_HANDLE_VALUE;
 	off_t size = 0;
 
-	assert(path);
-
   hFind = FindFirstFile(path, &findData);
   if (hFind != INVALID_HANDLE_VALUE) 
     size = (findData.nFileSizeHigh * MAXDWORD) + 
@@ -65,7 +59,6 @@ off_t fsize(const char *path) {
   
 #else
   struct stat st;
-	assert(path);
   if (stat(path, &st) == 0)
     return st.st_size;
   
@@ -93,9 +86,7 @@ char *homedir(void)
  * from path string
  * %path - name or path of file */
 char * parentdir(char *path) {
-	const char *slash;
-	assert(path);
-	slash = strrchr(path, _SLASH_[0]);
+	const char *slash = strrchr(path, _SLASH_[0]);
 	if (slash && slash != path)
 		path[slash-path] = 0;
 #ifndef _WIN32
@@ -114,17 +105,14 @@ bool isdir(const char *path) {
   WIN32_FIND_DATA findData;
   HANDLE hFind = INVALID_HANDLE_VALUE;
   char fullpath[MAX_PATH];
-	assert(path);
-	sprintf(fullpath, "%s\\*", path);
+  sprintf(fullpath, "%s\\*", path);
 
   hFind = FindFirstFile(fullpath, &findData);
   if (hFind != INVALID_HANDLE_VALUE)
     return true;
 #else
   struct dirent *entry;
-  DIR *dp = NULL;
-	assert(path);
-  dp = opendir(path);
+  DIR *dp = opendir(path);
   if (dp != NULL) {
     closedir(dp);
     return true;
@@ -138,15 +126,12 @@ bool isdir(const char *path) {
  * %path - file/directory path */
 bool islink(const char *path) {
 #ifdef _WIN32
-	DWORD attr;
-	assert(path);
-	attr = GetFileAttributes(path);
+	DWORD attr = GetFileAttributes(path);
 	if (attr != INVALID_FILE_ATTRIBUTES && 
 			(attr & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT)
 		return true;
 #else
   struct stat buf;
-	assert(path);
 	if (lstat(path, &buf) == 0 &&
 			(buf.st_mode & S_IFMT) == S_IFLNK)
 		return true;
@@ -164,25 +149,20 @@ int slink(const char *path, const char *linkname)
 #ifdef _WIN32
 	// change path components
 	int ret;
-	char *s;
-	assert(path);
-	assert(linkname);
-	s = strdup(path);
+	char *s = strdup(path);
 	if (s){
 		char *p = strrchr(s, '/');
 		while(p){
 			s[p-s] = '\\';
 			p = strrchr(s, '/');
 		}
-		ret = CreateSymbolicLink(linkname, s, 0);
+		//	ret = CreateSymbolicLink(linkname, s, 0);
 		free(s);
 		if (ret == 1)
 			return 0;
 	}
 	return -1;
 #else
-	assert(path);
-	assert(linkname);
 	return symlink(path, linkname);
 #endif
 }
@@ -196,25 +176,20 @@ int hlink(const char *path, const char *linkname)
 #ifdef _WIN32
 	// change path components
 	int ret;
-	char *s;
-	assert(path);
-	assert(linkname);
-	s = strdup(path);
+	char *s = strdup(path);
 	if (s){
 		char *p = strrchr(s, '/');
 		while(p){
 			s[p-s] = '\\';
 			p = strrchr(s, '/');
 		}
-		ret = CreateHardLink(linkname, s, NULL);
+		// ret = CreateHardLink(linkname, s, NULL);
 		free(s);
 		if (ret == 1)
 			return 0;
 	}
 	return -1;
 #else
-	assert(path);
-	assert(linkname);
 	return link(path, linkname);
 #endif
 }
@@ -223,9 +198,7 @@ int hlink(const char *path, const char *linkname)
  * return file extension or NULL on error 
  * %filename - name or path of file */
 const char * fext(const char *filename) {
-	const char *dot;
-	assert(filename);
-	dot = strrchr(filename, '.');
+	const char *dot = strrchr(filename, '.');
 	if (!dot || dot == filename)
 		return "";
 	dot += 1;
@@ -236,12 +209,10 @@ const char * fext(const char *filename) {
  * return allocated string with file name without 
  * extension and path
  * %path - name or path of file */
-char * fname(char *path)
+char * fname(char *filename)
 {
-	char *p, *s;
-	assert(path);
-	p = strdup(basename(path));
-	s = strrchr(p, '.');
+	char *p = strdup(basename(filename));
+	char *s = strrchr(p, '.');
 	if (s)
 		*s = 0;
 	return p;
@@ -252,10 +223,8 @@ char * fname(char *path)
  * directory path (like POSIX dirname())
  * %path - path of file */
 char * dname(const char *path) {
-	char *p, *s;
-	assert(path);
-	p = strdup(path);
-	s = strrchr(p, _SLASH_[0]);
+	char *p = strdup(path);
+	char *s = strrchr(p, _SLASH_[0]);
 	if (s)
 		*s = 0;
 	else 
@@ -269,13 +238,9 @@ char * dname(const char *path) {
  * %from - filepath source file
  * %to   - filepath dastination file */
 int fcopy (const char *from, const char *to) {
-
 	FILE *src, *dst;
 	char buf[BUFSIZ];
 	int err = 0;
-	
-	assert(from);
-	assert(to);
 
 	/* open source file */
 	if ((src = fopen(from, "rb")) == NULL)
@@ -294,15 +259,8 @@ int fcopy (const char *from, const char *to) {
 	}
 
 	/*check errors - to handle error call errno()*/
-	if ((err = ferror(src))) 
-	{
-		perror(from);
-	}
-
-	if ((err = ferror(dst))) 
-	{
-		perror(to);
-	}
+	if ((err = ferror(src)) || 
+			(err = ferror(dst))){}
 
 	/*close*/
 	fclose(src);
@@ -319,9 +277,6 @@ int fcopy (const char *from, const char *to) {
  * %overwrite - overwrite destination file if true */
 int dcopy(const char *from, const char *to, bool overwrite)
 {
-	assert(from);
-	assert(to);
-	
 	/*create `to` directory*/
 	if (!fexists(to))
 		newdir(to, 0755);
@@ -372,7 +327,6 @@ int dcopy(const char *from, const char *to, bool overwrite)
  * %mode - access mode (not used in windows) */
 int newdir(const char *path, int mode)
 {
-	assert(path);
 #ifdef _WIN32
 	return CreateDirectory(path, NULL);
 #else
@@ -394,8 +348,6 @@ int dcopyf(
 		char *filters) 
 {
 	int err = 0;
-	assert(from);
-	assert(to);
 
 	do {
 		dir_foreach(from, e)
@@ -471,103 +423,10 @@ int win_find_data_to_dirent(
 	return 1;
 }
 
-#define ISDIGIT(a) isdigit(a)
-
-/* states: S_N: normal, S_I: comparing integral part, S_F: comparing
-           fractional parts, S_Z: idem but with leading Zeroes only */
-#define  S_N    0x0
-#define  S_I    0x4
-#define  S_F    0x8
-#define  S_Z    0xC
-
-/* result_type: CMP: return diff; LEN: compare using len_diff/diff */
-#define  CMP    2
-#define  LEN    3
-
-/* Compare S1 and S2 as strings holding indices/version numbers,
-   returning less than, equal to or greater than zero if S1 is less than,
-   equal to or greater than S2 (for more info, see the Glibc texinfo doc).  */
-
-static int
-strverscmp (const char *s1, const char *s2)
-{
-  const unsigned char *p1 = (const unsigned char *) s1;
-  const unsigned char *p2 = (const unsigned char *) s2;
-  unsigned char c1, c2;
-  int state;
-  int diff;
-
-  /* Symbol(s)    0       [1-9]   others  (padding)
-     Transition   (10) 0  (01) d  (00) x  (11) -   */
-  static const unsigned int next_state[] =
-    {
-      /* state    x    d    0    - */
-      /* S_N */  S_N, S_I, S_Z, S_N,
-      /* S_I */  S_N, S_I, S_I, S_I,
-      /* S_F */  S_N, S_F, S_F, S_F,
-      /* S_Z */  S_N, S_F, S_Z, S_Z
-    };
-
-  static const int result_type[] =
-    {
-      /* state   x/x  x/d  x/0  x/-  d/x  d/d  d/0  d/-
-                 0/x  0/d  0/0  0/-  -/x  -/d  -/0  -/- */
-
-      /* S_N */  CMP, CMP, CMP, CMP, CMP, LEN, CMP, CMP,
-                 CMP, CMP, CMP, CMP, CMP, CMP, CMP, CMP,
-      /* S_I */  CMP, -1,  -1,  CMP, +1,  LEN, LEN, CMP,
-                 +1,  LEN, LEN, CMP, CMP, CMP, CMP, CMP,
-      /* S_F */  CMP, CMP, CMP, CMP, CMP, LEN, CMP, CMP,
-                 CMP, CMP, CMP, CMP, CMP, CMP, CMP, CMP,
-      /* S_Z */  CMP, +1,  +1,  CMP, -1,  CMP, CMP, CMP,
-                 -1,  CMP, CMP, CMP
-    };
-
-  if (p1 == p2)
-    return 0;
-
-  c1 = *p1++;
-  c2 = *p2++;
-  /* Hint: '0' is a digit too.  */
-  state = S_N | ((c1 == '0') + (ISDIGIT (c1) != 0));
-
-  while ((diff = c1 - c2) == 0 && c1 != '\0')
-    {
-      state = next_state[state];
-      c1 = *p1++;
-      c2 = *p2++;
-      state |= (c1 == '0') + (ISDIGIT (c1) != 0);
-    }
-
-  state = result_type[state << 2 | (((c2 == '0') + (ISDIGIT (c2) != 0)))];
-
-  switch (state)
-    {
-    case CMP:
-      return diff;
-
-    case LEN:
-      while (ISDIGIT (*p1++))
-        if (!ISDIGIT (*p2++))
-          return 1;
-
-      return ISDIGIT (*p2) ? -1 : diff;
-
-    default:
-      return state;
-    }
-}
-
 int alphasort(
 		const struct dirent **a, const struct dirent **b)
 {
 	return strcoll((*a)->d_name, (*b)->d_name);
-}
-
-int versionsort(
-	const struct dirent **a, const struct dirent **b)
-{
-	return strverscmp((*a)->d_name, (*b)->d_name);
 }
 
 int 
@@ -626,15 +485,16 @@ scandir(
 
 /* get bundle */
 char *execdir(const char *path) {
-  char selfpath[128];
-	assert(path);
+  if (!path)
+    return NULL;
 #ifdef _WIN32
-  return dirname((char *)path);
+  return dname((char *)path);
 #else /* _WIN32 */
 #ifdef __APPLE__
   return dirname((char *)path);
 #else /* __APPLE__ */
-  if (readlink("/proc/self/exe", selfpath, sizeof(selfpath) - 1) < 0) {
+  char *selfpath = malloc(128);
+  if (readlink("/proc/self/exe", selfpath, 127) < 0) {
     return NULL;
   }
   return dirname(selfpath);
